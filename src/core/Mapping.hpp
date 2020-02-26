@@ -11,6 +11,7 @@
 //std
 #include <cstdlib>
 //internal
+#include "Policy.hpp"
 #include "Driver.hpp"
 
 /********************  NAMESPACE  *******************/
@@ -30,7 +31,7 @@ struct SegmentStatus
 class Mapping
 {
 	public:
-		Mapping(Driver * driver, size_t size, size_t segmentSize);
+		Mapping(size_t size, size_t segmentSize, Driver * driver, Policy * localPolicy = NULL, Policy * globalPolicy = NULL);
 		virtual ~Mapping(void);
 		void onSegmentationFault(void * address, bool isWrite);
 		void flush(void);
@@ -39,6 +40,8 @@ class Mapping
 		void evict(size_t segmentId);
 	private:
 		Driver * driver;
+		Policy * localPolicy;
+		Policy * globalPolicy;
 		void * baseAddress;
 		size_t segments;
 		SegmentStatus * status;

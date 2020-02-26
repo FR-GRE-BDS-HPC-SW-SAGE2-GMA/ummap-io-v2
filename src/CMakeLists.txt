@@ -10,10 +10,14 @@ set(WITH_OS "Unix" CACHE STRING "On which OS we are running on to adapt system f
 
 ######################################################
 #default
-set(PORTABILITY_OS_UNIX OFF)
-#portabilty twicks
+set(UMMAP_PORTABILITY_OS_UNIX OFF)
+set(UMMAP_PORTABILITY_SPINLOCK_PTHREAD OFF)
+
+######################################################
+#portabilty tricks
 if (WITH_OS STREQUAL "Unix")
 	set(UMMAP_PORTABILITY_OS_UNIX ON)
+	set(UMMAP_PORTABILITY_SPINLOCK_PTHREAD ON)
 endif()
 
 ######################################################
@@ -34,8 +38,7 @@ set(UMMAP_INTERNAL_CODE
 	#$<TARGET_OBJECTS:ummap-policies>
 	#$<TARGET_OBJECTS:ummap-common>
 	#we should keep an eye on portability of this
-	#$<TARGET_OBJECTS:cdeps-portability>
-	#$<TARGET_OBJECTS:homelinux-portability>
+	$<TARGET_OBJECTS:ummap-portability>
 )
 
 ######################################################
