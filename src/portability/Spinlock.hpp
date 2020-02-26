@@ -27,6 +27,15 @@
 	{
 		typedef SpinlockPthread Spinlock;
 	}
+#elif defined(UMMAP_PORTABILITY_SPINLOCK_APPLE)
+	//pthread mode
+	#include "SpinlockApple.hpp"
+
+	//map types to generic names
+	namespace ummap
+	{
+		typedef SpinlockApple Spinlock;
+	}
 #elif defined(UMMAP_PORTABILITY_SPINLOCK_DUMMY)
 	//dummy mode (not thread safe, only for quik portability)
 	#include "LockDummy.hpp"

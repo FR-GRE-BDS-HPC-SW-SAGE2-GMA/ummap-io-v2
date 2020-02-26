@@ -12,12 +12,18 @@ set(WITH_OS "Unix" CACHE STRING "On which OS we are running on to adapt system f
 #default
 set(UMMAP_PORTABILITY_OS_UNIX OFF)
 set(UMMAP_PORTABILITY_SPINLOCK_PTHREAD OFF)
+set(UMMAP_PORTABILITY_SPINLOCK_DUMMY OFF)
+set(UMMAP_PORTABILITY_SPINLOCK_APPLE OFF)
 
 ######################################################
 #portabilty tricks
 if (WITH_OS STREQUAL "Unix")
 	set(UMMAP_PORTABILITY_OS_UNIX ON)
-	set(UMMAP_PORTABILITY_SPINLOCK_PTHREAD ON)
+	if (CMAKE_SYSTEM_NAME STREQUAL "APPLE")
+	set(UMMAP_PORTABILITY_SPINLOCK_APPLE ON)
+	else()
+		set(UMMAP_PORTABILITY_SPINLOCK_PTHREAD ON)
+	endif()
 endif()
 
 ######################################################
