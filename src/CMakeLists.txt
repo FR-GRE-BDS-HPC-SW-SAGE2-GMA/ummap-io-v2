@@ -30,7 +30,7 @@ set(UMMAP_INTERNAL_CODE
 	$<TARGET_OBJECTS:daqpipe-common>
 	#internal
 	$<TARGET_OBJECTS:ummap-core>
-	#$<TARGET_OBJECTS:ummap-drivers>
+	$<TARGET_OBJECTS:ummap-drivers>
 	#$<TARGET_OBJECTS:ummap-policies>
 	#$<TARGET_OBJECTS:ummap-common>
 	#we should keep an eye on portability of this

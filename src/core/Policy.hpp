@@ -4,7 +4,7 @@
 			 COPYRIGHT: 2020 Bull SAS
 *****************************************************/
 
-#ifnef UMMAP_POLICY_HPP
+#ifndef UMMAP_POLICY_HPP
 #define UMMAP_POLICY_HPP
 
 /********************  HEADERS  *********************/
