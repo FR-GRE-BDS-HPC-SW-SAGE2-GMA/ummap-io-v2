@@ -35,6 +35,7 @@ class Policy
 		virtual ~Policy(void);
 		virtual void * getElementStorage(Mapping * mapping, size_t segmentCount) = 0;
 		virtual void touch(void * storage, size_t index, bool isWrite) = 0;
+		virtual void evict(void * storage, size_t index) = 0;
 	protected:
 		void registerMapping(Mapping * mapping, void * storage, size_t size);
 		PolicyStorage getStorageInfo(void * entry);
