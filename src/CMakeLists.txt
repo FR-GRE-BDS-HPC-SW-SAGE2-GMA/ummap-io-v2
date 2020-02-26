@@ -25,6 +25,23 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/extern-deps)
 
 ######################################################
+set(UMMAP_INTERNAL_CODE
+	#extern deps
+	$<TARGET_OBJECTS:daqpipe-common>
+	#internal
+	$<TARGET_OBJECTS:ummap-core>
+	#$<TARGET_OBJECTS:ummap-drivers>
+	#$<TARGET_OBJECTS:ummap-policies>
+	#$<TARGET_OBJECTS:ummap-common>
+	#we should keep an eye on portability of this
+	#$<TARGET_OBJECTS:cdeps-portability>
+	#$<TARGET_OBJECTS:homelinux-portability>
+)
+
+######################################################
+add_library(ummap-io SHARED ${UMMAP_INTERNAL_CODE})
+
+######################################################
 add_subdirectory(common)
 add_subdirectory(core)
 add_subdirectory(drivers)
