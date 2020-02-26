@@ -40,6 +40,7 @@ class Mapping
 	private:
 		Driver * driver;
 		void * baseAddress;
+		size_t segments;
 		SegmentStatus * status;
 };
 
