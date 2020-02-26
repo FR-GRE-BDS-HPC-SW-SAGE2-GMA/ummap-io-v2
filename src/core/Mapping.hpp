@@ -47,10 +47,13 @@ class Mapping
 		void flush(size_t offset, size_t size);
 		void prefetch(size_t offset, size_t size);
 		void evict(size_t segmentId);
+		void * getAddress(void);
 	private:
 		Driver * driver;
 		Policy * localPolicy;
+		void * localPolicyStorage;
 		Policy * globalPolicy;
+		void * globalPolicyStorage;
 		MappingProtection protection;
 		void * baseAddress;
 		size_t segments;

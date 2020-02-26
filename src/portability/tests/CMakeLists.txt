@@ -5,16 +5,15 @@
 ######################################################
 
 ######################################################
-set(PORTABILITY_SRC "")
-if (WITH_OS STREQUAL "Unix")
-	list(APPEND PORTABILITY_SRC UnixOS.cpp)
-endif()
+#Use gtest
+include_directories(${GTEST_INCLUDE_DIRS} ${GMOCK_INCLUDE_DIRS})
 
 ######################################################
-add_library(ummap-portability OBJECT ${PORTABILITY_SRC})
-SET_TARGET_PROPERTIES(ummap-portability PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set(TEST_NAMES TestOS)
 
 ######################################################
-if (ENABLE_TESTS)
-	add_subdirectory(tests)
-endif()
+FOREACH(test_name ${TEST_NAMES})
+	add_executable(${test_name} ${test_name}.cpp)
+	target_link_libraries(${test_name} ${GTEST_BOTH_LIBRARIES} ${GMOCK_BOTH_LIBRARIES} ummap-io)
+	ummap_add_test(${test_name} ${test_name})
+ENDFOREACH(test_name)

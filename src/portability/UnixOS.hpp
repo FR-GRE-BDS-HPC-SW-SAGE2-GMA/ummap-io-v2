@@ -14,10 +14,13 @@
 namespace ummap
 {
 
+#define UMMAP_PAGE_SIZE 4096
+
 /*********************  STRUCT  *********************/
 struct UnixOS
 {
-	static void mmap(void);
+	static void * mmapProtNone(size_t size);
+	static void munmap(void * ptr, size_t size);
 };
 
 }

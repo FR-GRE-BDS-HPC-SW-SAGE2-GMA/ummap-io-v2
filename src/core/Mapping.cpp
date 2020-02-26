@@ -22,11 +22,8 @@ Mapping::Mapping(size_t size, size_t segmentSize, MappingProtection protection, 
 	//checks
 	assume(size > 0, "Do not accept null size mapping");
 	assume(segmentSize > 0, "Do not accept null segment size");
-	assumeArg(size % 4096 == 0, "Size should be multiple of page size (4K), got '%1'").arg(size).end();
-	assumeArg(size % segmentSize == 0, "Size should be multiple of segment size (%1), got '%2'")
-		.arg(segmentSize)
-		.arg(size)
-		.end();
+	assumeArg(size % UMMAP_PAGE_SIZE == 0, "Size should be multiple of page size (%1), got '%2'").arg(UMMAP_PAGE_SIZE).arg(size).end();
+	assumeArg(size % segmentSize == 0, "Size should be multiple of segment size (%1), got '%2'").arg(segmentSize).arg(size).end();
 
 	//set
 	this->driver = driver;
@@ -35,18 +32,36 @@ Mapping::Mapping(size_t size, size_t segmentSize, MappingProtection protection, 
 	this->protection = protection;
 
 	//establish mapping
-	//this->baseAddress = OS::mmap();
+	this->baseAddress = OS::mmapProtNone(size);
 	this->segments = size / segmentSize;
 
 	//establish state tracking
 	this->status = new SegmentStatus[this->segments];
 	memset(this->status, 0, sizeof(SegmentStatus) * this->segments);
+
+	//build policy status local storage
+	if (localPolicy != NULL)
+		this->localPolicyStorage = localPolicy->getElementStorage(this, this->segments);
+	else
+		this->localPolicyStorage = NULL;
+	
+	//build policy status global storage
+	if (globalPolicy != NULL)
+		this->globalPolicyStorage = globalPolicy->getElementStorage(this, this->segments);
+	else
+		this->globalPolicyStorage = NULL;
 }
 
 /*******************  FUNCTION  *********************/
 Mapping::~Mapping(void)
 {
 	
+}
+
+/*******************  FUNCTION  *********************/
+void * Mapping::getAddress(void)
+{
+	return this->baseAddress;
 }
 
 /*******************  FUNCTION  *********************/
