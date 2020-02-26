@@ -7,6 +7,10 @@
 #ifndef UMMAP_DRIVER_HPP
 #define UMMAP_DRIVER_HPP
 
+/********************  HEADERS  *********************/
+//std
+#include <cstdlib>
+
 /********************  NAMESPACE  *******************/
 namespace ummap
 {
@@ -17,6 +21,9 @@ class Driver
 	public:
 		Driver(void);
 		virtual ~Driver(void);
+		virtual ssize_t pwrite(const void * buffer, size_t size, size_t offset) = 0;
+		virtual ssize_t pwrite(void * buffer, size_t size, size_t offset) = 0;
+		virtual void sync(size_t offset, size_t size) = 0;
 };
 
 }
