@@ -11,6 +11,7 @@ project(ummap-io-v2 CXX)
 
 ######################################################
 # Tests
+set(ENABLE_TESTS ON CACHE BOOL "Enable unit tests requiring build of googletest and googlmock")
 enable_testing()
 
 ######################################################
