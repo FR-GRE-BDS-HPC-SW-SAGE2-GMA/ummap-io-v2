@@ -17,7 +17,7 @@
 using namespace ummap;
 
 /*******************  FUNCTION  *********************/
-Mapping::Mapping(size_t size, size_t segmentSize, Driver * driver, Policy * localPolicy, Policy * globalPolicy)
+Mapping::Mapping(size_t size, size_t segmentSize, MappingProtection protection, Driver * driver, Policy * localPolicy, Policy * globalPolicy)
 {
 	//checks
 	assume(size > 0, "Do not accept null size mapping");
@@ -32,6 +32,7 @@ Mapping::Mapping(size_t size, size_t segmentSize, Driver * driver, Policy * loca
 	this->driver = driver;
 	this->localPolicy = localPolicy;
 	this->globalPolicy = globalPolicy;
+	this->protection = protection;
 
 	//establish mapping
 	//this->baseAddress = OS::mmap();
