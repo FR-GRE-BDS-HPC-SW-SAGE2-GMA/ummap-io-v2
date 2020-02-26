@@ -21,6 +21,7 @@ struct UnixOS
 {
 	static void * mmapProtNone(size_t size);
 	static void munmap(void * ptr, size_t size);
+	static int cpuNumber(void);
 };
 
 }

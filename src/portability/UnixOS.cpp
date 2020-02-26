@@ -9,6 +9,7 @@
 #include <cassert>
 #include <cerrno>
 #include <cstring>
+#include <cstdio>
 //unix
 #include <sys/mman.h>
 //internal
@@ -53,4 +54,38 @@ void UnixOS::munmap(void * ptr, size_t size)
 		.arg(size)
 		.arg(strerror(errno))
 		.end();
+}
+
+/*******************  FUNCTION  *********************/
+int UnixOS::cpuNumber(void)
+{
+	//static to go faster
+	static int gblCpu = 0;
+
+	//alreay scanned
+	if (gblCpu > 0)
+		return gblCpu;
+
+	//open /proc/cpuinfo
+	FILE * fp = fopen("/proc/cpuinfo", "r");
+	assumeArg(fp != NULL, "Fail to open /proc/cpuinfo : %1").arg(strerror(errno)).end();
+
+	//read until end
+	char buffer[4096];
+	int cnt = 0;
+	while (!feof(fp)) {
+		char * tmp = fgets(buffer, sizeof(buffer), fp);
+		if (tmp != NULL) {
+			int id = 0;
+			if (sscanf(tmp, "processor       : %d",&id) == 1) {
+				cnt = id;
+			}
+		}
+	}
+
+	//final
+	gblCpu = cnt + 1;
+
+	//ok
+	return gblCpu;
 }

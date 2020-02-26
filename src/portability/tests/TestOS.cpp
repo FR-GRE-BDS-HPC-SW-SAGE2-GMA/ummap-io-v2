@@ -20,3 +20,10 @@ TEST(TestOS, mmapProtNone)
 	ASSERT_DEATH(ptr[0] = 'a', "");
 	OS::munmap(ptr, size);
 }
+
+/*******************  FUNCTION  *********************/
+TEST(TestOS, cpuNumber)
+{
+	int status = OS::cpuNumber();
+	ASSERT_GT(status, 0);
+}

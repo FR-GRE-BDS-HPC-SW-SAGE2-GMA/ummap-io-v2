@@ -10,6 +10,7 @@
 /********************  HEADERS  *********************/
 //std
 #include <cstdlib>
+#include <mutex>
 //internal
 #include "Policy.hpp"
 #include "Driver.hpp"
@@ -31,9 +32,10 @@ enum MappingProtection
 struct SegmentStatus
 {
 	size_t flushTime:56;
-	unsigned int unused:6;
-	bool readAccess:1;
-	bool writeAccess:1;
+	unsigned int unused:5;
+	bool mapped:1;
+	bool dirty:1;
+	bool needRead:1;
 };
 
 /*********************  CLASS  **********************/
@@ -48,6 +50,7 @@ class Mapping
 		void prefetch(size_t offset, size_t size);
 		void evict(size_t segmentId);
 		void * getAddress(void);
+		void skipFirstRead(void);
 	private:
 		Driver * driver;
 		Policy * localPolicy;
@@ -57,7 +60,10 @@ class Mapping
 		MappingProtection protection;
 		void * baseAddress;
 		size_t segments;
+		size_t segmentSize;
 		SegmentStatus * status;
+		std::mutex * segmentMutexes;
+		int segmentMutexesCnt;
 };
 
 }
