@@ -36,6 +36,7 @@ class Mapping
 		void flush(void);
 		void flush(size_t offset, size_t size);
 		void prefetch(size_t offset, size_t size);
+		void evict(size_t segmentId);
 	private:
 		Driver * driver;
 		void * baseAddress;
