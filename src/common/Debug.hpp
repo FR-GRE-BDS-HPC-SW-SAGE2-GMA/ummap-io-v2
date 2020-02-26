@@ -33,6 +33,10 @@ namespace ummap
 #define UMMAP_DEBUG_ARG(cat,x) DAQ_DEBUG_ARG(cat,x)
 
 /********************  MACROS  **********************/
+#define assume(check,message) do { if (!(check)) DAQ_FATAL(message); } while(0)
+#define assumeArg(check,message) if (!(check)) DAQ_FATAL_ARG(message)
+
+/********************  MACROS  **********************/
 #define DAQ_TO_STRING(x) #x
 #ifdef NDEBUG
 	#define UMMAP_ASSERT(x)      do{} while(0)

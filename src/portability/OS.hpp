@@ -11,9 +11,9 @@
 #include "config.h"
 
 /********************  HEADERS  *********************/
-#ifdef PORTABILITY_OS_UNIX
+#ifdef UMMAP_PORTABILITY_OS_UNIX
 	#include "UnixOS.hpp"
-	namespace UMMAP
+	namespace ummap
 	{
 		typedef UnixOS OS;
 	}
