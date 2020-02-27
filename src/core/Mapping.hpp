@@ -31,7 +31,7 @@ enum MappingProtection
 /*********************  STRUCT  *********************/
 struct SegmentStatus
 {
-	size_t flushTime:56;
+	size_t time:56;
 	unsigned int unused:5;
 	bool mapped:1;
 	bool dirty:1;
@@ -51,6 +51,10 @@ class Mapping
 		void evict(size_t segmentId);
 		void * getAddress(void);
 		void skipFirstRead(void);
+		SegmentStatus getSegmentStatus(size_t offset);
+		size_t getSize(void) const;
+	private:
+		void loadAndSwapSegment(size_t offset, bool writeAccess);
 	private:
 		Driver * driver;
 		Policy * localPolicy;

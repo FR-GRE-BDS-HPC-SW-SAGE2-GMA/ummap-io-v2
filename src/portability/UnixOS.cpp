@@ -38,6 +38,23 @@ void * UnixOS::mmapProtNone(size_t size)
 }
 
 /*******************  FUNCTION  *********************/
+void * UnixOS::mmapProtFull(size_t size)
+{
+	//check
+	assert(size % UMMAP_PAGE_SIZE == 0);
+	assert(size > 0);
+
+	//call
+	void * ptr = ::mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, 0, 0);
+
+	//post check
+	assumeArg(ptr != NULL, "Fail to call mmap with size=%1 : %2").arg(size).arg(strerror(errno)).end();
+
+	//ok
+	return ptr;
+}
+
+/*******************  FUNCTION  *********************/
 void UnixOS::munmap(void * ptr, size_t size)
 {
 	//check
@@ -54,6 +71,47 @@ void UnixOS::munmap(void * ptr, size_t size)
 		.arg(size)
 		.arg(strerror(errno))
 		.end();
+}
+
+/*******************  FUNCTION  *********************/
+void UnixOS::mremapForced(void * oldPtr, size_t size, void * newPtr)
+{
+	//check
+	assert(newPtr != NULL);
+	assert(oldPtr != NULL);
+	assert((size_t)newPtr % UMMAP_PAGE_SIZE == 0);
+	assert((size_t)oldPtr % UMMAP_PAGE_SIZE == 0);
+	assert(size > 0);
+	assert(size % UMMAP_PAGE_SIZE == 0);
+
+	//trivial
+	if (newPtr == oldPtr)
+		return;
+
+	//move
+	void * res = mremap(oldPtr, size, size, MREMAP_FIXED | MREMAP_MAYMOVE, newPtr);
+	assumeArg(res != MAP_FAILED, "Fail to call mremap : %1").arg(strerror(errno)).end();
+	assume(res == newPtr, "Fail to mremap the segment to a given address, got a different one !");
+}
+
+/*******************  FUNCTION  *********************/
+void UnixOS::mprotect(void * ptr, size_t size, bool read, bool write)
+{
+	//checks
+	assert(ptr != NULL);
+	assert((size_t)ptr % UMMAP_PAGE_SIZE == 0);
+	assert(size > 0);
+	assert(size % UMMAP_PAGE_SIZE == 0);
+
+	//prot
+	int prot = 0;
+	if (read)
+		prot |= PROT_READ;
+	if (write)
+		prot |= PROT_WRITE;
+
+	//apply
+	::mprotect(ptr, size, prot);
 }
 
 /*******************  FUNCTION  *********************/

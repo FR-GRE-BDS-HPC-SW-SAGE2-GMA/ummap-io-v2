@@ -7,6 +7,8 @@
 /********************  HEADERS  *********************/
 //std
 #include <cstring>
+#include <ctime>
+#include <cassert>
 //internal
 #include "../common/Debug.hpp"
 #include "../portability/OS.hpp"
@@ -55,19 +57,48 @@ Mapping::Mapping(size_t size, size_t segmentSize, MappingProtection protection, 
 
 	//build mutexes to protect segments
 	this->segmentMutexesCnt = (OS::cpuNumber() * 4) + 1;
+	if (this->segmentMutexesCnt > this->segments)
+		this->segmentMutexesCnt = this->segments;
 	this->segmentMutexes = new std::mutex[this->segmentMutexesCnt];
 }
 
 /*******************  FUNCTION  *********************/
 Mapping::~Mapping(void)
 {
-	
+	//TODO
 }
 
 /*******************  FUNCTION  *********************/
 void * Mapping::getAddress(void)
 {
 	return this->baseAddress;
+}
+
+/*******************  FUNCTION  *********************/
+void Mapping::loadAndSwapSegment(size_t offset, bool writeAccess)
+{
+	//In order to be atomic we load the data in a segment, then
+	//we mremap this segment on the expected one so it replace atomicaly
+	//the old one and open access. This is to avoid multi-threading issue
+	//if a second thread made first touch while the first one is reading the
+	//data if we just made madvise on the pre-existing PROT_NONE segment.
+
+	//map a page in RW access
+	void * ptr = OS::mmapProtFull(this->segmentSize);
+
+	//read inside new segment
+	ssize_t res = this->driver->pread(ptr, this->segmentSize, offset);
+	assumeArg(res == segmentSize, "Fail to read all data, got %1 instead of %2 !")
+		.arg(res)
+		.arg(segmentSize)
+		.end();
+
+	//make read only
+	if (!writeAccess)
+		OS::mprotect(ptr, segmentSize, true, false);
+	
+	//now remap to move the segment and override the PROT_NONE one
+	OS::mremapForced(ptr, segmentSize, (char*)this->baseAddress + offset);
 }
 
 /*******************  FUNCTION  *********************/
@@ -78,8 +109,10 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 		&& address < (char*)this->baseAddress + this->segments * this->segmentSize,
 		"Invalid address, not fit into the current segment !");
 
-	//cal segment id
+	//compute
 	size_t segmentId = ((char*)address - (char*)this->baseAddress) / this->segmentSize;
+	size_t offset = this->segmentSize * segmentId;
+	void * segmentBase = (char*)this->baseAddress + offset;
 	
 	//CRITICAL SECTION
 	{
@@ -90,11 +123,67 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 		//check status
 		SegmentStatus & status = this->status[segmentId];
 
-		//need to read
-		if (status.needRead) {
-			//TODO
+		//if not mapped
+		if (!status.mapped){
+			if (status.needRead) {
+				//Load in a temp buffer and swap for atomicity
+				this->loadAndSwapSegment(offset, isWrite);
+			}
 		}
+
+		//if write or not
+		if (isWrite) {
+			//this is a write, open write access
+			OS::mprotect(segmentBase, segmentSize, true, true);
+
+			//mark dirty
+			status.dirty = true;
+
+			//time
+			status.time = time(NULL);
+		} else {
+			//this is a first touch withou need read, open as readonly
+			OS::mprotect(segmentBase, segmentSize, true, false);
+		}
+
+		//mark as mapped
+		status.mapped = true;
 	}
+
+	//notify eviction policy
+	if (this->localPolicy != NULL)
+		this->localPolicy->touch(this->localPolicyStorage, offset, isWrite);
+	if (this->globalPolicy != NULL)
+		this->globalPolicy->touch(this->globalPolicyStorage, offset, isWrite);
+}
+
+/*******************  FUNCTION  *********************/
+SegmentStatus Mapping::getSegmentStatus(size_t offset)
+{
+	//checks
+	assert(offset < this->getSize());
+
+	//compute
+	size_t segmentId = offset / this->segmentSize;
+
+	//CRITICAL SECTION
+	{
+		//lock to access
+		int mutexId = segmentId % this->segmentMutexesCnt;
+		std::lock_guard<std::mutex> lockGuard(this->segmentMutexes[mutexId]);
+
+		//check status
+		SegmentStatus & status = this->status[segmentId];
+
+		//ok
+		return status;
+	}
+}
+
+/*******************  FUNCTION  *********************/
+size_t Mapping::getSize(void) const
+{
+	return this->segmentSize * this->segments;
 }
 
 /*******************  FUNCTION  *********************/
