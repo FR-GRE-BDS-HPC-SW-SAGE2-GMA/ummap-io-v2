@@ -204,13 +204,17 @@ size_t Mapping::getSize(void) const
 /*******************  FUNCTION  *********************/
 void Mapping::flush(void)
 {
-
+	this->flush(0, getSize());
 }
 
 /*******************  FUNCTION  *********************/
 void Mapping::flush(size_t offset, size_t size)
 {
+	//check
+	assume(offset % segmentSize == 0, "Should get offset multiple of segment size !");
+	assume(size % segmentSize == 0, "Should get offset multiple of segment size !");
 
+	//TODO
 }
 
 /*******************  FUNCTION  *********************/
