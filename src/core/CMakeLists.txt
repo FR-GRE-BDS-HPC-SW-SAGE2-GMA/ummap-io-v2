@@ -12,6 +12,6 @@ add_library(ummap-core OBJECT ${CORE_SRC})
 SET_TARGET_PROPERTIES(ummap-core PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 ######################################################
-#if (ENABLE_TESTS)
-#	add_subdirectory(tests)
-#endif (ENABLE_TESTS)
+if (ENABLE_TESTS)
+	add_subdirectory(tests)
+endif (ENABLE_TESTS)

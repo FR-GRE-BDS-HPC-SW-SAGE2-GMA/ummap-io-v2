@@ -24,6 +24,7 @@ class Driver
 		virtual ssize_t pwrite(const void * buffer, size_t size, size_t offset) = 0;
 		virtual ssize_t pread(void * buffer, size_t size, size_t offset) = 0;
 		virtual void sync(size_t offset, size_t size) = 0;
+		virtual Driver * dup(void) = 0;
 };
 
 }

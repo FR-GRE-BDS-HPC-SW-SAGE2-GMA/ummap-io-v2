@@ -42,3 +42,9 @@ void DummyDriver::sync(size_t offset, size_t size)
 {
 
 }
+
+/*******************  FUNCTION  *********************/
+Driver * DummyDriver::dup(void)
+{
+	return new DummyDriver(this->value);
+}

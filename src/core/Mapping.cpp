@@ -28,7 +28,7 @@ Mapping::Mapping(size_t size, size_t segmentSize, MappingProtection protection, 
 	assumeArg(size % segmentSize == 0, "Size should be multiple of segment size (%1), got '%2'").arg(segmentSize).arg(size).end();
 
 	//set
-	this->driver = driver;
+	this->driver = driver->dup();
 	this->localPolicy = localPolicy;
 	this->globalPolicy = globalPolicy;
 	this->protection = protection;
@@ -36,11 +36,12 @@ Mapping::Mapping(size_t size, size_t segmentSize, MappingProtection protection, 
 	//establish mapping
 	this->baseAddress = OS::mmapProtNone(size);
 	this->segments = size / segmentSize;
+	this->segmentSize = segmentSize;
 
 	//establish state tracking
 	this->status = new SegmentStatus[this->segments];
 	memset(this->status, 0, sizeof(SegmentStatus) * this->segments);
-	for (size_t i = 0 ; i < this->segmentSize ; i++)
+	for (size_t i = 0 ; i < this->segments ; i++)
 		this->status[i].needRead = true;
 
 	//build policy status local storage
@@ -65,7 +66,21 @@ Mapping::Mapping(size_t size, size_t segmentSize, MappingProtection protection, 
 /*******************  FUNCTION  *********************/
 Mapping::~Mapping(void)
 {
-	//TODO
+	//take all locks
+	for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
+		this->segmentMutexes[i].lock();
+
+	//destroy driver dup()
+	delete this->driver;
+
+	//policies
+	if (this->localPolicyStorage != NULL && this->localPolicy != NULL)
+		this->localPolicy->freeElementStorage(this->localPolicyStorage, this->segments);
+	if (this->globalPolicyStorage != NULL && this->globalPolicy != NULL)
+		this->globalPolicy->freeElementStorage(this->globalPolicyStorage, this->segments);
+
+	//destroy all
+	delete [] this->segmentMutexes;
 }
 
 /*******************  FUNCTION  *********************/
