@@ -16,9 +16,9 @@ cfg_add_enable_option --name='test' \
                       --doc='Disable unit tests' \
                       --invert-help
 #gcc test coverage
-cfg_add_enable_option --name='gcc-coverage'  \
-                      --on='-DENABLE_GCC_COVERAGE=${ON}' \
-                      --doc='Enable GCC option to generate test coverage of the lib' \
+cfg_add_enable_option --name='coverage'  \
+                      --on='-DENABLE_COVERAGE=${ON}' \
+                      --doc='Enable option to generate test coverage of the lib' \
 #junit xml out
 cfg_add_enable_option --name='junit-output'  \
                       --on='-DENABLE_JUNIT_OUTPUT=${ON}' \

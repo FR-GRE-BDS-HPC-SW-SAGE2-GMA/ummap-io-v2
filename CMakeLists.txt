@@ -27,9 +27,9 @@ include(${CMAKE_SOURCE_DIR}/cmake/unittest-macros.cmake)
 # setup
 ummap_setup_internal_gmock_and_gtest()
 ummap_enable_cxx_11()
-if (ENABLE_GCC_COVERAGE)
-        ummap_enable_gcc_coverage()
-endif(ENABLE_GCC_COVERAGE)
+if (ENABLE_COVERAGE)
+	ummap_enable_gcc_coverage()
+endif(ENABLE_COVERAGE)
 
 ######################################################
 add_subdirectory(extern-deps)
