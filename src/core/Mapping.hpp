@@ -65,7 +65,7 @@ class Mapping
 		void * baseAddress;
 		size_t segments;
 		size_t segmentSize;
-		SegmentStatus * status;
+		SegmentStatus * segmentStatus;
 		std::mutex * segmentMutexes;
 		int segmentMutexesCnt;
 };

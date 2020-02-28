@@ -39,10 +39,10 @@ Mapping::Mapping(size_t size, size_t segmentSize, MappingProtection protection, 
 	this->segmentSize = segmentSize;
 
 	//establish state tracking
-	this->status = new SegmentStatus[this->segments];
-	memset(this->status, 0, sizeof(SegmentStatus) * this->segments);
+	this->segmentStatus = new SegmentStatus[this->segments];
+	memset(this->segmentStatus, 0, sizeof(SegmentStatus) * this->segments);
 	for (size_t i = 0 ; i < this->segments ; i++)
-		this->status[i].needRead = true;
+		this->segmentStatus[i].needRead = true;
 
 	//build policy status local storage
 	if (localPolicy != NULL)
@@ -143,7 +143,7 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 		std::lock_guard<std::mutex> lockGuard(this->segmentMutexes[mutexId]);
 
 		//check status
-		SegmentStatus & status = this->status[segmentId];
+		SegmentStatus & status = this->segmentStatus[segmentId];
 
 		//if not mapped
 		if (!status.mapped && status.needRead){
@@ -193,7 +193,7 @@ SegmentStatus Mapping::getSegmentStatus(size_t offset)
 		std::lock_guard<std::mutex> lockGuard(this->segmentMutexes[mutexId]);
 
 		//check status
-		SegmentStatus & status = this->status[segmentId];
+		SegmentStatus & status = this->segmentStatus[segmentId];
 
 		//ok
 		return status;
@@ -219,7 +219,43 @@ void Mapping::flush(size_t offset, size_t size)
 	assume(offset % segmentSize == 0, "Should get offset multiple of segment size !");
 	assume(size % segmentSize == 0, "Should get offset multiple of segment size !");
 
-	//TODO
+	//CRITICAL SECTION
+	{
+		//lock the whole segment
+		//@TODO Can search to lock only related to touch pages
+		for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
+			this->segmentMutexes[i].lock();
+
+		//loop on all
+		//@TODO: bulk operation
+		for (size_t i = 0 ; i < this->segments ; i++) {
+			//check status
+			SegmentStatus & status = this->segmentStatus[i];
+			if (status.dirty) {
+				//compute
+				size_t offset = i * this->segmentSize;
+				void * ptr = (char*)this->baseAddress + offset;
+
+				//mrprotect
+				OS::mprotect(ptr, this->segmentSize, true, false);
+
+				//apply
+				ssize_t res = this->driver->pwrite(ptr, this->segmentSize, offset);
+
+				//errors
+				assumeArg(res != -1, "Fail to pwrite : %1").arg(strerror(errno)).end();
+				assumeArg(res == this->segmentSize, "Fail to fully write the segment, got : %1").arg(res).end();
+
+				//update status
+				status.dirty = false;
+				status.needRead = true;
+			}
+		}
+
+		//unlock
+		for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
+			this->segmentMutexes[i].unlock();
+	}
 }
 
 /*******************  FUNCTION  *********************/
@@ -238,5 +274,5 @@ void Mapping::evict(size_t segmentId)
 void Mapping::skipFirstRead(void)
 {
 	for (size_t i = 0 ; i < this->segmentSize ; i++)
-		this->status[i].needRead = false;
+		this->segmentStatus[i].needRead = false;
 }
