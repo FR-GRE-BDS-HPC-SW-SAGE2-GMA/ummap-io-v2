@@ -34,7 +34,7 @@ Mapping::Mapping(size_t size, size_t segmentSize, MappingProtection protection, 
 	this->protection = protection;
 
 	//establish mapping
-	this->baseAddress = OS::mmapProtNone(size);
+	this->baseAddress = (char*)OS::mmapProtNone(size);
 	this->segments = size / segmentSize;
 	this->segmentSize = segmentSize;
 
@@ -120,7 +120,7 @@ void Mapping::loadAndSwapSegment(size_t offset, bool writeAccess)
 		OS::mprotect(ptr, segmentSize, true, false);
 	
 	//now remap to move the segment and override the PROT_NONE one
-	OS::mremapForced(ptr, segmentSize, (char*)this->baseAddress + offset);
+	OS::mremapForced(ptr, segmentSize, this->baseAddress + offset);
 }
 
 /*******************  FUNCTION  *********************/
@@ -128,13 +128,13 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 {
 	//checks
 	assume(address >= this->baseAddress 
-		&& address < (char*)this->baseAddress + this->segments * this->segmentSize,
+		&& address < this->baseAddress + this->segments * this->segmentSize,
 		"Invalid address, not fit into the current segment !");
 
 	//compute
-	size_t segmentId = ((char*)address - (char*)this->baseAddress) / this->segmentSize;
+	size_t segmentId = ((char*)address - this->baseAddress) / this->segmentSize;
 	size_t offset = this->segmentSize * segmentId;
-	void * segmentBase = (char*)this->baseAddress + offset;
+	void * segmentBase = this->baseAddress + offset;
 	
 	//CRITICAL SECTION
 	{
@@ -207,6 +207,32 @@ size_t Mapping::getSize(void) const
 }
 
 /*******************  FUNCTION  *********************/
+const bool * Mapping::getMutexRange(size_t offset, size_t size) const
+{
+	//check
+	assert(offset < this->getSize());
+	assert(offset % this->segmentSize == 0);
+	assert(offset + size <= this->getSize());
+	assert(size % this->segmentSize == 0);
+
+	//allocate
+	bool * list = new bool[this->segmentMutexesCnt];
+	for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
+		list[i] = false;
+
+	//range
+	size_t baseId = offset / this->segmentSize;
+	size_t cnt = size / this->segmentSize;
+
+	//loop
+	for (size_t id = baseId ; id < baseId + cnt ; id++)
+		list[id % this->segmentMutexesCnt] = true;
+
+	//final
+	return list;
+}
+
+/*******************  FUNCTION  *********************/
 void Mapping::flush(void)
 {
 	this->flush(0, getSize());
@@ -216,31 +242,37 @@ void Mapping::flush(void)
 void Mapping::flush(size_t offset, size_t size)
 {
 	//check
+	assume(offset < this->getSize(), "Offset is not in valid range !");
+	assume(offset + size <= this->getSize(), "'Offset + size' is not in valid range !");
 	assume(offset % segmentSize == 0, "Should get offset multiple of segment size !");
 	assume(size % segmentSize == 0, "Should get offset multiple of segment size !");
+
+	//what to lock
+	const bool * toLock = getMutexRange(offset, size);
 
 	//CRITICAL SECTION
 	{
 		//lock the whole segment
-		//@TODO Can search to lock only related to touch pages
+		//@TODO Can search to lock only related pages
 		for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
-			this->segmentMutexes[i].lock();
+			if (toLock[i])
+				this->segmentMutexes[i % this->segmentMutexesCnt].lock();
+
+		//mprotect the whole considered segment
+		OS::mprotect(this->baseAddress + offset, size, true, false);
 
 		//loop on all
 		//@TODO: bulk operation
-		for (size_t i = 0 ; i < this->segments ; i++) {
+		for (size_t curOffset = offset ; curOffset < offset + size ; curOffset += this->segmentSize) {
+			size_t id = curOffset / this->segmentSize;
 			//check status
-			SegmentStatus & status = this->segmentStatus[i];
+			SegmentStatus & status = this->segmentStatus[id];
 			if (status.dirty) {
 				//compute
-				size_t offset = i * this->segmentSize;
-				void * ptr = (char*)this->baseAddress + offset;
-
-				//mrprotect
-				OS::mprotect(ptr, this->segmentSize, true, false);
+				void * segmentPtr = this->baseAddress + curOffset;
 
 				//apply
-				ssize_t res = this->driver->pwrite(ptr, this->segmentSize, offset);
+				ssize_t res = this->driver->pwrite(segmentPtr, this->segmentSize, curOffset);
 
 				//errors
 				assumeArg(res != -1, "Fail to pwrite : %1").arg(strerror(errno)).end();
@@ -254,7 +286,8 @@ void Mapping::flush(size_t offset, size_t size)
 
 		//unlock
 		for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
-			this->segmentMutexes[i].unlock();
+			if (toLock[i])
+				this->segmentMutexes[i].unlock();
 	}
 }
 

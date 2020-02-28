@@ -6,47 +6,27 @@
 
 /********************  HEADERS  *********************/
 #include <gtest/gtest.h>
-#include "../../portability/OS.hpp"
-#include "../../drivers/DummyDriver.hpp"
+#include "portability/OS.hpp"
+#include "drivers/DummyDriver.hpp"
+#include "drivers/GMockDriver.hpp"
 #include "../Mapping.hpp"
 
 /***************** USING NAMESPACE ******************/
 using namespace ummap;
-
-/*********************  CLASS  **********************/
-class TestMapping : public testing::Test
-{
-	public:
-		virtual void SetUp() override;
-		virtual void TearDown() override;
-	protected:
-		size_t segments;
-		size_t size;
-		Driver * driver;
-		Mapping * mapping;
-};
+using namespace testing;
 
 /*******************  FUNCTION  *********************/
-void TestMapping::SetUp()
+TEST(TestMapping, constructor_destructor)
 {
-	this->segments = 8;
-	this->size = segments * UMMAP_PAGE_SIZE;
-	this->driver = new DummyDriver(32);
-	this->mapping = new Mapping(size, UMMAP_PAGE_SIZE, MAPPING_PROT_RW, driver, NULL, NULL);
-}
+	//setup
+	size_t segments = 8;
+	size_t size = segments * UMMAP_PAGE_SIZE;
+	DummyDriver driver(32);
+	Mapping mapping(size, UMMAP_PAGE_SIZE, MAPPING_PROT_RW, &driver, NULL, NULL);
 
-/*******************  FUNCTION  *********************/
-void TestMapping::TearDown()
-{
-	delete this->mapping;
-	delete this->driver;
-}
-
-/*******************  FUNCTION  *********************/
-TEST_F(TestMapping, constructor_destructor)
-{
-	for (size_t i = 0 ; i < this->segments ; i++) {
-		SegmentStatus status = this->mapping->getSegmentStatus(i);
+	//check status
+	for (size_t i = 0 ; i < segments ; i++) {
+		SegmentStatus status = mapping.getSegmentStatus(i);
 		ASSERT_EQ(0, status.time);
 		ASSERT_FALSE(status.dirty);
 		ASSERT_FALSE(status.mapped);
@@ -55,24 +35,30 @@ TEST_F(TestMapping, constructor_destructor)
 }
 
 /*******************  FUNCTION  *********************/
-TEST_F(TestMapping, first_touch_read_first)
+TEST(TestMapping, first_touch_read_first)
 {
+	//setup
+	size_t segments = 8;
+	size_t size = segments * UMMAP_PAGE_SIZE;
+	DummyDriver driver(32);
+	Mapping mapping(size, UMMAP_PAGE_SIZE, MAPPING_PROT_RW, &driver, NULL, NULL);
+
 	//get
-	char * ptr = (char*)mapping->getAddress();
+	char * ptr = (char*)mapping.getAddress();
 
 	//first touch read first segment
-	mapping->onSegmentationFault(ptr, false);
+	mapping.onSegmentationFault(ptr, false);
 	ASSERT_EQ(32, ptr[0]);
 
 	//check status
-	SegmentStatus status0 = this->mapping->getSegmentStatus(0);
+	SegmentStatus status0 = mapping.getSegmentStatus(0);
 	ASSERT_EQ(0, status0.time);
 	ASSERT_FALSE(status0.dirty);
 	ASSERT_TRUE(status0.mapped);
 	ASSERT_TRUE(status0.needRead);
 
 	//check status
-	SegmentStatus status1 = this->mapping->getSegmentStatus(UMMAP_PAGE_SIZE);
+	SegmentStatus status1 = mapping.getSegmentStatus(UMMAP_PAGE_SIZE);
 	ASSERT_EQ(0, status1.time);
 	ASSERT_FALSE(status1.dirty);
 	ASSERT_FALSE(status1.mapped);
@@ -80,27 +66,69 @@ TEST_F(TestMapping, first_touch_read_first)
 }
 
 /*******************  FUNCTION  *********************/
-TEST_F(TestMapping, first_touch_write_first)
+TEST(TestMapping, first_touch_write_first)
 {
+	//setup
+	size_t segments = 8;
+	size_t size = segments * UMMAP_PAGE_SIZE;
+	DummyDriver driver(32);
+	Mapping mapping(size, UMMAP_PAGE_SIZE, MAPPING_PROT_RW, &driver, NULL, NULL);
+
 	//get
-	char * ptr = (char*)mapping->getAddress();
+	char * ptr = (char*)mapping.getAddress();
 
 	//first touch read first segment
-	mapping->onSegmentationFault(ptr, true);
+	mapping.onSegmentationFault(ptr, true);
 	ASSERT_EQ(32, ptr[0]);
 	ptr[0] = 64;
 
 	//check status
-	SegmentStatus status0 = this->mapping->getSegmentStatus(0);
+	SegmentStatus status0 = mapping.getSegmentStatus(0);
 	ASSERT_NE(0, status0.time);
 	ASSERT_TRUE(status0.dirty);
 	ASSERT_TRUE(status0.mapped);
 	ASSERT_TRUE(status0.needRead);
 
 	//check status
-	SegmentStatus status1 = this->mapping->getSegmentStatus(UMMAP_PAGE_SIZE);
+	SegmentStatus status1 = mapping.getSegmentStatus(UMMAP_PAGE_SIZE);
 	ASSERT_EQ(0, status1.time);
 	ASSERT_FALSE(status1.dirty);
 	ASSERT_FALSE(status1.mapped);
 	ASSERT_TRUE(status1.needRead);
+}
+
+/*******************  FUNCTION  *********************/
+TEST(TestMapping, flush)
+{
+	//setup
+	size_t segments = 8;
+	size_t size = segments * UMMAP_PAGE_SIZE;
+	GMockDriver * driver = new GMockDriver;
+	Mapping mapping(size, UMMAP_PAGE_SIZE, MAPPING_PROT_RW, driver, NULL, NULL);
+
+	//get
+	char * ptr = (char*)mapping.getAddress();
+
+	//we should see two read
+	EXPECT_CALL(*driver, pread(_, UMMAP_PAGE_SIZE, 0)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(*driver, pread(_, UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+
+	//touch to map
+	mapping.onSegmentationFault(ptr + 0 * UMMAP_PAGE_SIZE, true);
+	mapping.onSegmentationFault(ptr + 1 * UMMAP_PAGE_SIZE, true);
+
+	//set values
+	for (size_t i = 0 ; i < 2 * UMMAP_PAGE_SIZE ; i++) 
+		ptr[i] = 64;
+
+	//we should see two write
+	EXPECT_CALL(*driver, pwrite(_, UMMAP_PAGE_SIZE, 0)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(*driver, pwrite(_, UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+
+	//flush
+	mapping.flush();
+
+	//cannot access anymore
+	ASSERT_DEATH(ptr[0] = 10, "");
+	ASSERT_DEATH(ptr[UMMAP_PAGE_SIZE] = 10, "");
 }

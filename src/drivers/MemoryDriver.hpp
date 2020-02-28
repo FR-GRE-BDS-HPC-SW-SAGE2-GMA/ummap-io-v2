@@ -25,6 +25,8 @@ class MemoryDriver : public Driver
 		virtual ssize_t pread(void * buffer, size_t size, size_t offset);
 		virtual void sync(size_t offset, size_t size);
 		virtual Driver * dup(void);
+		const char * getBuffer(void) const;
+		size_t getSize(void) const;
 	private:
 		size_t size;
 		char * buffer;

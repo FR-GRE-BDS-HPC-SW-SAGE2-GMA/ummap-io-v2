@@ -7,6 +7,7 @@
 /********************  HEADERS  *********************/
 //std
 #include <cstring>
+#include <cassert>
 //internal
 #include "DummyDriver.hpp"
 
@@ -27,12 +28,18 @@ DummyDriver::~DummyDriver(void)
 /*******************  FUNCTION  *********************/
 ssize_t DummyDriver::pwrite(const void * buffer, size_t size, size_t offset)
 {
+	//check
+	assert(buffer != NULL);
+
 	return size;
 }
 
 /*******************  FUNCTION  *********************/
 ssize_t DummyDriver::pread(void * buffer, size_t size, size_t offset)
 {
+	//check
+	assert(buffer != NULL);
+
 	memset(buffer, this->value, size);
 	return size;
 }
@@ -40,7 +47,7 @@ ssize_t DummyDriver::pread(void * buffer, size_t size, size_t offset)
 /*******************  FUNCTION  *********************/
 void DummyDriver::sync(size_t offset, size_t size)
 {
-
+	//nothing to do
 }
 
 /*******************  FUNCTION  *********************/

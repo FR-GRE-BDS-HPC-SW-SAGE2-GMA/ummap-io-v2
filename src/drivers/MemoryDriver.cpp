@@ -36,11 +36,12 @@ MemoryDriver::~MemoryDriver(void)
 ssize_t MemoryDriver::pwrite(const void * buffer, size_t size, size_t offset)
 {
 	//check
-	assume(buffer != NULL, "Invalid NULL buffer !");
-	assume(offset < this->size, "Invalid offset, larger than memory size !");
-	assume(size + offset < this->size, "Invalid offset and size, larger than memory size !");
+	assert(buffer != NULL);
+	assert(offset < this->size);
+	assert(size + offset <= this->size);
 
 	//copy
+	assert(((char*)buffer)[0] == 64);
 	memcpy(this->buffer + offset, buffer, size);
 
 	//return
@@ -51,9 +52,9 @@ ssize_t MemoryDriver::pwrite(const void * buffer, size_t size, size_t offset)
 ssize_t MemoryDriver::pread(void * buffer, size_t size, size_t offset)
 {
 	//check
-	assume(buffer != NULL, "Invalid NULL buffer !");
-	assume(offset < this->size, "Invalid offset, larger than memory size !");
-	assume(size + offset < this->size, "Invalid offset and size, larger than memory size !");
+	assert(buffer != NULL);
+	assert(offset < this->size);
+	assert(size + offset <= this->size);
 
 	//copy
 	memcpy(buffer, this->buffer + offset, size);
@@ -65,7 +66,10 @@ ssize_t MemoryDriver::pread(void * buffer, size_t size, size_t offset)
 /*******************  FUNCTION  *********************/
 void MemoryDriver::sync(size_t offset, size_t size)
 {
-	//nothing to do
+	//check
+	assert(buffer != NULL);
+	assert(offset < this->size);
+	assert(size + offset <= this->size);
 }
 
 /*******************  FUNCTION  *********************/
@@ -79,4 +83,16 @@ Driver * MemoryDriver::dup(void)
 
 	//return
 	return copy;
+}
+
+/*******************  FUNCTION  *********************/
+const char * MemoryDriver::getBuffer(void) const
+{
+	return this->buffer;
+}
+
+/*******************  FUNCTION  *********************/
+size_t MemoryDriver::getSize(void) const
+{
+	return this->size;
 }
