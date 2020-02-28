@@ -57,6 +57,13 @@ Mapping::Mapping(size_t size, size_t segmentSize, MappingProtection protection, 
 		this->globalPolicyStorage = NULL;
 
 	//build mutexes to protect segments
+	//
+	//Rational 1: we use X mutexes so spread the contention. The access code will use
+	//a modulo to select the right mutex based on the segment ID.
+	//
+	//Rational 2: The +1 is used to break possible aligned accesses between two threads
+	//with distance exactly modulo. With an odd number there is less chance to fall in
+	//those multiples
 	this->segmentMutexesCnt = (OS::cpuNumber() * 4) + 1;
 	if (this->segmentMutexesCnt > this->segments)
 		this->segmentMutexesCnt = this->segments;
@@ -92,7 +99,7 @@ void * Mapping::getAddress(void)
 /*******************  FUNCTION  *********************/
 void Mapping::loadAndSwapSegment(size_t offset, bool writeAccess)
 {
-	//In order to be atomic we load the data in a segment, then
+	//Rational: In order to be atomic we load the data in a segment, then
 	//we mremap this segment on the expected one so it replace atomicaly
 	//the old one and open access. This is to avoid multi-threading issue
 	//if a second thread made first touch while the first one is reading the
@@ -139,11 +146,9 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 		SegmentStatus & status = this->status[segmentId];
 
 		//if not mapped
-		if (!status.mapped){
-			if (status.needRead) {
-				//Load in a temp buffer and swap for atomicity
-				this->loadAndSwapSegment(offset, isWrite);
-			}
+		if (!status.mapped && status.needRead){
+			//Load in a temp buffer and swap for atomicity
+			this->loadAndSwapSegment(offset, isWrite);
 		}
 
 		//if write or not
@@ -154,7 +159,7 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 			//mark dirty
 			status.dirty = true;
 
-			//time
+			//update dirty time for latter flush operation
 			status.time = time(NULL);
 		} else {
 			//this is a first touch withou need read, open as readonly
