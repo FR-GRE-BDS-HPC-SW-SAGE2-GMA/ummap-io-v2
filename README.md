@@ -17,4 +17,3 @@ License
 -------
 
 This project is distributed under Apache 2.0 license.
-
