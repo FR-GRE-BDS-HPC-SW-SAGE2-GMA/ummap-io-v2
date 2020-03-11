@@ -46,13 +46,13 @@ Mapping::Mapping(size_t size, size_t segmentSize, MappingProtection protection, 
 
 	//build policy status local storage
 	if (localPolicy != NULL)
-		this->localPolicyStorage = localPolicy->getElementStorage(this, this->segments);
+		this->localPolicyStorage = localPolicy->allocateElementStorage(this, this->segments);
 	else
 		this->localPolicyStorage = NULL;
 	
 	//build policy status global storage
 	if (globalPolicy != NULL)
-		this->globalPolicyStorage = globalPolicy->getElementStorage(this, this->segments);
+		this->globalPolicyStorage = globalPolicy->allocateElementStorage(this, this->segments);
 	else
 		this->globalPolicyStorage = NULL;
 
@@ -176,9 +176,9 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 
 	//notify eviction policy
 	if (this->localPolicy != NULL)
-		this->localPolicy->touch(this->localPolicyStorage, offset, isWrite);
+		this->localPolicy->notifyTouch(this->localPolicyStorage, offset, isWrite);
 	if (this->globalPolicy != NULL)
-		this->globalPolicy->touch(this->globalPolicyStorage, offset, isWrite);
+		this->globalPolicy->notifyTouch(this->globalPolicyStorage, offset, isWrite);
 }
 
 /*******************  FUNCTION  *********************/

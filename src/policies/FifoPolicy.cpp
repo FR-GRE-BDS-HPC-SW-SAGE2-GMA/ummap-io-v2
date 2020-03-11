@@ -35,7 +35,7 @@ FifoPolicy::~FifoPolicy(void)
 }
 
 /*******************  FUNCTION  *********************/
-void * FifoPolicy::getElementStorage(Mapping * mapping, size_t segmentCount)
+void * FifoPolicy::allocateElementStorage(Mapping * mapping, size_t segmentCount)
 {
 	ListElement * elts = new ListElement[segmentCount];
 	this->registerMapping(mapping, elts, segmentCount);
@@ -62,7 +62,7 @@ void FifoPolicy::freeElementStorage(void * storage, size_t segmentCount)
 		}
 
 		//unregister
-		//TODO
+		this->unregisterMapping(storage, segmentCount);
 
 		//free
 		delete [] elts;

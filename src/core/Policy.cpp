@@ -67,4 +67,22 @@ PolicyStorage Policy::getStorageInfo(void * entry)
 				return it;
 		}
 	}
+
+	//not found
+	UMMAP_FATAL("Fail to found policy storage entry !");
+	PolicyStorage res = {0,0,0};
+	return res;
+}
+
+/*******************  FUNCTION  *********************/
+void Policy::unregisterMapping(void * storage, size_t size)
+{
+	//start CRITICAL SECTION
+	std::lock_guard<Spinlock> lockGuard(this->storageRegistryLock);
+
+	//loop
+	for (auto it = storageRegistry.begin() ; it != storageRegistry.end() ; ++it) {
+		if (it->storage == storage && it->size == size)
+			storageRegistry.erase(it);
+	}
 }
