@@ -16,12 +16,6 @@
 using namespace ummap;
 
 /*******************  FUNCTION  *********************/
-ListElement::ListElement(void)
-{
-	this->next = this->prev = this;
-}
-
-/*******************  FUNCTION  *********************/
 FifoPolicy::FifoPolicy(size_t maxMemory, bool local)
 	:Policy(maxMemory, local)
 {
@@ -57,11 +51,7 @@ void FifoPolicy::freeElementStorage(Mapping * mapping)
 		ListElement * elts = static_cast<ListElement*>(storage.storage);
 		for (size_t i = 0 ; i < storage.elementCount ; i++) {
 			ListElement & cur = elts[i];
-			//remove
-			cur.next->prev = cur.prev;
-			cur.prev->next = cur.next;
-			//reset
-			cur.next = cur.prev = &cur;
+			cur.removeFromList();
 		}
 
 		//unregister
@@ -70,4 +60,32 @@ void FifoPolicy::freeElementStorage(Mapping * mapping)
 		//free
 		delete [] elts;
 	}
+}
+
+/*******************  FUNCTION  *********************/
+void FifoPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite)
+{
+	//get storage
+	PolicyStorage storage = this->getStorageInfo(mapping);
+
+	//get element
+	ListElement * elts = static_cast<ListElement*>(storage.storage);
+	ListElement & cur = elts[index];
+
+	//check if is new touch
+	bool isFirstAccess = cur.isAlone();
+
+	//CRITICAL SECTION
+	{
+		//take lock
+		std::lock_guard<Spinlock> lockGuard(this->rootLock);
+
+		//remove from list
+		cur.removeFromList();
+	
+		//insert in list head
+		
+	}
+
+
 }

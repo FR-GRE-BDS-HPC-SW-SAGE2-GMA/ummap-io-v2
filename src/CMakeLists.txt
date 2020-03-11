@@ -40,6 +40,7 @@ set(UMMAP_INTERNAL_CODE
 	#extern deps
 	$<TARGET_OBJECTS:daqpipe-common>
 	#internal
+	$<TARGET_OBJECTS:ummap-common>
 	$<TARGET_OBJECTS:ummap-core>
 	$<TARGET_OBJECTS:ummap-drivers>
 	$<TARGET_OBJECTS:ummap-policies>
