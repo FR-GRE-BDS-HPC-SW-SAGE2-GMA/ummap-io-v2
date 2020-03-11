@@ -239,7 +239,7 @@ void Mapping::flush(void)
 }
 
 /*******************  FUNCTION  *********************/
-void Mapping::flush(size_t offset, size_t size)
+void Mapping::flush(size_t offset, size_t size, bool unmap)
 {
 	//check
 	assume(offset < this->getSize(), "Offset is not in valid range !");
@@ -282,6 +282,18 @@ void Mapping::flush(size_t offset, size_t size)
 				status.dirty = false;
 				status.needRead = true;
 			}
+
+			//if unmap
+			if (unmap) {
+				//protect
+				OS::mprotect(this->baseAddress + offset, size, false, false);
+
+				//unamp
+				OS::madviseDontNeed(this->baseAddress + offset, size);
+
+				//mark unmapped
+				status.mapped = false;
+			}
 		}
 
 		//unlock
@@ -298,9 +310,16 @@ void Mapping::prefetch(size_t offset, size_t size)
 }
 
 /*******************  FUNCTION  *********************/
-void Mapping::evict(size_t segmentId)
+void Mapping::evict(Policy * sourcePolicy, size_t segmentId)
 {
-
+	//notify policies
+	if (sourcePolicy != localPolicy && localPolicy != NULL)
+		localPolicy->notifyEvict(this, segmentId);
+	if (sourcePolicy != globalPolicy && globalPolicy != NULL)
+		globalPolicy->notifyEvict(this, segmentId);
+	
+	//flush memory
+	flush(segmentId * segmentSize, segmentSize, true);
 }
 
 /*******************  FUNCTION  *********************/
@@ -308,4 +327,10 @@ void Mapping::skipFirstRead(void)
 {
 	for (size_t i = 0 ; i < this->segmentSize ; i++)
 		this->segmentStatus[i].needRead = false;
+}
+
+/*******************  FUNCTION  *********************/
+size_t Mapping::getSegmentSize(void) const
+{
+	return this->segmentSize;
 }

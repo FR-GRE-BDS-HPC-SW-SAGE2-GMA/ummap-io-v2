@@ -34,7 +34,7 @@ void Policy::registerMapping(Mapping * mapping, void * storage, size_t elementCo
 	//setup
 	PolicyStorage entry = {
 		.mapping = mapping,
-		.storage = storage,
+		.elements = storage,
 		.elementCount = elementCount
 	};
 
@@ -48,7 +48,7 @@ void Policy::registerMapping(Mapping * mapping, void * storage, size_t elementCo
 /*******************  FUNCTION  *********************/
 bool Policy::contains(PolicyStorage & storage, void * entry)
 {
-	return (entry >= storage.storage && entry < (char*)storage.storage + storage.elementCount);
+	return (entry >= storage.elements && entry < (char*)storage.elements + storage.elementCount);
 }
 
 /*******************  FUNCTION  *********************/

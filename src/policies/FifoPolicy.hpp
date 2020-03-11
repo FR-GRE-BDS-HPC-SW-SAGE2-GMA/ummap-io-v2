@@ -10,10 +10,10 @@
 /********************  HEADERS  *********************/
 //std
 #include <cstdlib>
+#include <mutex>
 #include <list>
 //local
 #include "common/ListElement.hpp"
-#include "portability/Spinlock.hpp"
 #include "core/Policy.hpp"
 
 /********************  NAMESPACE  *******************/
@@ -31,11 +31,12 @@ class FifoPolicy : public Policy
 		virtual ~FifoPolicy(void);
 		virtual void allocateElementStorage(Mapping * mapping, size_t segmentCount);
 		virtual void notifyTouch(Mapping * mapping, size_t index, bool isWrite);
-		virtual void notifyEvict(Mapping * mapping, size_t index) = 0;
+		virtual void notifyEvict(Mapping * mapping, size_t index);
 		virtual void freeElementStorage(Mapping * mapping);
 	protected:
 		ListElement root;
-		Spinlock rootLock;
+		std::mutex rootLock;
+		size_t currentMemory;
 };
 
 }

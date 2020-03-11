@@ -147,3 +147,9 @@ int UnixOS::cpuNumber(void)
 	//ok
 	return gblCpu;
 }
+
+/*******************  FUNCTION  *********************/
+void UnixOS::madviseDontNeed(void * ptr, size_t size)
+{
+	madvise(ptr, size, MADV_DONTNEED);
+}

@@ -25,7 +25,7 @@ class Mapping;
 struct PolicyStorage
 {
 	Mapping * mapping;
-	void * storage;
+	void * elements;
 	size_t elementCount;
 };
 
