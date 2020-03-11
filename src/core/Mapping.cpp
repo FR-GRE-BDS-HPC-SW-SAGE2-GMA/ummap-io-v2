@@ -85,8 +85,12 @@ Mapping::~Mapping(void)
 		this->localPolicy->freeElementStorage(this->localPolicyStorage, this->segments);
 	if (this->globalPolicyStorage != NULL && this->globalPolicy != NULL)
 		this->globalPolicy->freeElementStorage(this->globalPolicyStorage, this->segments);
+	
+	//clear policy
+	if (this->localPolicy != NULL)
+		delete this->localPolicy;
 
-	//destroy all
+	//destroy all mutexes
 	delete [] this->segmentMutexes;
 }
 

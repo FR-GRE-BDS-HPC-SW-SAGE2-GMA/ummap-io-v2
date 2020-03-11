@@ -11,6 +11,8 @@
 //std
 #include <cstdlib>
 #include <list>
+//local
+#include "portability/Spinlock.hpp"
 
 /********************  NAMESPACE  *******************/
 namespace ummap
@@ -23,7 +25,7 @@ class Mapping;
 struct PolicyStorage
 {
 	Mapping * mapping;
-	void * base;
+	void * storage;
 	size_t size;
 };
 
@@ -31,18 +33,21 @@ struct PolicyStorage
 class Policy
 {
 	public:
-		Policy(size_t maxMemory);
+		Policy(size_t maxMemory, bool local);
 		virtual ~Policy(void);
 		virtual void * getElementStorage(Mapping * mapping, size_t segmentCount) = 0;
 		virtual void touch(void * storage, size_t index, bool isWrite) = 0;
 		virtual void evict(void * storage, size_t index) = 0;
-		virtual void freeElementStorage(void * storage, size_t segmentCount);
+		virtual void freeElementStorage(void * storage, size_t segmentCount) = 0;
 	protected:
 		void registerMapping(Mapping * mapping, void * storage, size_t size);
 		PolicyStorage getStorageInfo(void * entry);
+		static bool contains(PolicyStorage & storage, void * entry);
 	protected:
+		bool local;
 		size_t maxMemory;
 		std::list<PolicyStorage> storageRegistry;
+		Spinlock storageRegistryLock;
 };
 
 }
