@@ -59,9 +59,7 @@ class Mapping
 	private:
 		Driver * driver;
 		Policy * localPolicy;
-		void * localPolicyStorage;
 		Policy * globalPolicy;
-		void * globalPolicyStorage;
 		MappingProtection protection;
 		char * baseAddress;
 		size_t segments;

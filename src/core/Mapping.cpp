@@ -46,15 +46,11 @@ Mapping::Mapping(size_t size, size_t segmentSize, MappingProtection protection, 
 
 	//build policy status local storage
 	if (localPolicy != NULL)
-		this->localPolicyStorage = localPolicy->allocateElementStorage(this, this->segments);
-	else
-		this->localPolicyStorage = NULL;
+		localPolicy->allocateElementStorage(this, this->segments);
 	
 	//build policy status global storage
 	if (globalPolicy != NULL)
-		this->globalPolicyStorage = globalPolicy->allocateElementStorage(this, this->segments);
-	else
-		this->globalPolicyStorage = NULL;
+		globalPolicy->allocateElementStorage(this, this->segments);
 
 	//build mutexes to protect segments
 	//
@@ -81,10 +77,10 @@ Mapping::~Mapping(void)
 	delete this->driver;
 
 	//policies
-	if (this->localPolicyStorage != NULL && this->localPolicy != NULL)
-		this->localPolicy->freeElementStorage(this->localPolicyStorage, this->segments);
-	if (this->globalPolicyStorage != NULL && this->globalPolicy != NULL)
-		this->globalPolicy->freeElementStorage(this->globalPolicyStorage, this->segments);
+	if (this->localPolicy != NULL)
+		this->localPolicy->freeElementStorage(this);
+	if (this->globalPolicy != NULL)
+		this->globalPolicy->freeElementStorage(this);
 	
 	//clear policy
 	if (this->localPolicy != NULL)
@@ -176,9 +172,9 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 
 	//notify eviction policy
 	if (this->localPolicy != NULL)
-		this->localPolicy->notifyTouch(this->localPolicyStorage, offset, isWrite);
+		this->localPolicy->notifyTouch(this, offset, isWrite);
 	if (this->globalPolicy != NULL)
-		this->globalPolicy->notifyTouch(this->globalPolicyStorage, offset, isWrite);
+		this->globalPolicy->notifyTouch(this, offset, isWrite);
 }
 
 /*******************  FUNCTION  *********************/

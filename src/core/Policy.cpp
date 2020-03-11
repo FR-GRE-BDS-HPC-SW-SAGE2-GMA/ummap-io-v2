@@ -29,13 +29,13 @@ Policy::~Policy(void)
 }
 
 /*******************  FUNCTION  *********************/
-void Policy::registerMapping(Mapping * mapping, void * storage, size_t size)
+void Policy::registerMapping(Mapping * mapping, void * storage, size_t elementCount)
 {
 	//setup
 	PolicyStorage entry = {
 		.mapping = mapping,
 		.storage = storage,
-		.size = size
+		.elementCount = elementCount
 	};
 
 	//register, CRITICAL SECTION
@@ -48,11 +48,29 @@ void Policy::registerMapping(Mapping * mapping, void * storage, size_t size)
 /*******************  FUNCTION  *********************/
 bool Policy::contains(PolicyStorage & storage, void * entry)
 {
-	return (entry >= storage.storage && entry < (char*)storage.storage + storage.size);
+	return (entry >= storage.storage && entry < (char*)storage.storage + storage.elementCount);
 }
 
 /*******************  FUNCTION  *********************/
 PolicyStorage Policy::getStorageInfo(void * entry)
+{
+	//start CRITICAL SECTION
+	std::lock_guard<Spinlock> lockGuard(this->storageRegistryLock);
+
+	//loop to search
+	for (auto it : this->storageRegistry) {
+		if (contains(it, entry))
+			return it;
+	}
+
+	//not found
+	UMMAP_FATAL("Fail to found policy storage entry !");
+	PolicyStorage res = {0,0,0};
+	return res;
+}
+
+/*******************  FUNCTION  *********************/
+PolicyStorage Policy::getStorageInfo(Mapping * mapping)
 {
 	if (local) {
 		assume(this->storageRegistry.size() == 1, "Invalid local list with multiple mapping registered !");
@@ -63,26 +81,26 @@ PolicyStorage Policy::getStorageInfo(void * entry)
 
 		//loop to search
 		for (auto it : this->storageRegistry) {
-			if (contains(it, entry))
+			if (it.mapping == mapping)
 				return it;
 		}
 	}
 
 	//not found
-	UMMAP_FATAL("Fail to found policy storage entry !");
+	UMMAP_FATAL("Fail to found policy of given mapping !");
 	PolicyStorage res = {0,0,0};
 	return res;
 }
 
 /*******************  FUNCTION  *********************/
-void Policy::unregisterMapping(void * storage, size_t size)
+void Policy::unregisterMapping(Mapping * mapping)
 {
 	//start CRITICAL SECTION
 	std::lock_guard<Spinlock> lockGuard(this->storageRegistryLock);
 
 	//loop
 	for (auto it = storageRegistry.begin() ; it != storageRegistry.end() ; ++it) {
-		if (it->storage == storage && it->size == size)
+		if (it->mapping == mapping)
 			storageRegistry.erase(it);
 	}
 }

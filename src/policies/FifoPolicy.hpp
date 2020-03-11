@@ -38,10 +38,10 @@ class FifoPolicy : public Policy
 	public:
 		FifoPolicy(size_t maxMemory, bool local);
 		virtual ~FifoPolicy(void);
-		virtual void * allocateElementStorage(Mapping * mapping, size_t segmentCount);
+		virtual void allocateElementStorage(Mapping * mapping, size_t segmentCount);
 		virtual void notifyTouch(void * storage, size_t index, bool isWrite);
 		virtual void notifyEvict(void * storage, size_t index) = 0;
-		virtual void freeElementStorage(void * storage, size_t segmentCount);
+		virtual void freeElementStorage(Mapping * mapping);
 	protected:
 		ListElement root;
 		Spinlock rootLock;

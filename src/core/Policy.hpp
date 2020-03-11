@@ -26,7 +26,7 @@ struct PolicyStorage
 {
 	Mapping * mapping;
 	void * storage;
-	size_t size;
+	size_t elementCount;
 };
 
 /*********************  CLASS  **********************/
@@ -35,14 +35,15 @@ class Policy
 	public:
 		Policy(size_t maxMemory, bool local);
 		virtual ~Policy(void);
-		virtual void * allocateElementStorage(Mapping * mapping, size_t segmentCount) = 0;
-		virtual void notifyTouch(void * storage, size_t index, bool isWrite) = 0;
-		virtual void notifyEvict(void * storage, size_t index) = 0;
-		virtual void freeElementStorage(void * storage, size_t segmentCount) = 0;
+		virtual void allocateElementStorage(Mapping * mapping, size_t segmentCount) = 0;
+		virtual void notifyTouch(Mapping * mapping, size_t index, bool isWrite) = 0;
+		virtual void notifyEvict(Mapping * mapping, size_t index) = 0;
+		virtual void freeElementStorage(Mapping * mapping) = 0;
 	protected:
-		void registerMapping(Mapping * mapping, void * storage, size_t size);
-		void unregisterMapping(void * storage, size_t size);
+		void registerMapping(Mapping * mapping, void * storage, size_t elementCount);
+		void unregisterMapping(Mapping * mapping);
 		PolicyStorage getStorageInfo(void * entry);
+		PolicyStorage getStorageInfo(Mapping * mapping);
 		static bool contains(PolicyStorage & storage, void * entry);
 	protected:
 		bool local;
