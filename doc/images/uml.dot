@@ -1,0 +1,93 @@
+digraph DAQPIPE
+{
+	//Some fonts
+	fontname = "Bitstream Vera Sans"
+	fontsize = 8
+	
+	//configure node
+	node [
+		fontname = "Bitstream Vera Sans"
+		fontsize = 8
+		shape = "record"
+	]
+	
+	//configure edge
+	edge [
+		arrowtail = "empty"
+		dir=back
+	]
+	
+	//Mapping classes
+	Mapping [
+		label = "{Mapping|\l|\l}"
+	]
+
+	//Policy classes
+	Policy [
+		label = "{Policy|\l|\l}"
+	]
+
+	FifoPolicy [
+		label = "{FifoPolicy|\l|\l}"
+	]
+
+	LifoPolicy [
+		label = "{LifoPolicy|\l|\l}"
+	]
+
+	DummyPolicy [
+		label = "{DummyPolicy|\l|\l}"
+	]
+
+	GMockPolicy [
+		label = "{GMockPolicy|\l|\l}"
+	]
+
+	//Registry classes
+	Driver [
+		label = "{Driver|\l|\l}"
+	]
+
+	MemoryDriver [
+		label = "{MemoryDriver|\l|\l}"
+	]
+
+	DummyDriver [
+		label = "{DummyDriver|\l|\l}"
+	]
+
+	FDDriver [
+		label = "{FDDriver|\l|\l}"
+	]
+
+	GMockDriver [
+		label = "{GMockDriver|\l|\l}"
+	]
+
+	//Registry classes
+	Registry [
+		label = "{Registry|\l|\l}"
+	]
+
+	//Registry classes
+	ListElement [
+		label = "{ListElement|\l|\l}"
+	]
+
+	//inheritance links
+	Policy -> FifoPolicy
+	Policy -> LifoPolicy
+	Policy -> DummyPolicy
+	Policy -> GMockPolicy
+	Driver -> DummyDriver
+	Driver -> FDDriver
+	Driver -> MemoryDriver
+	Driver -> GMockDriver
+
+	//composition
+	//Mapping->Policy[constraint=false, arrowtail=odiamond]
+	Mapping->Policy[arrowtail=odiamond]
+	Mapping->Driver[arrowtail=odiamond]
+	Registry -> Mapping[arrowtail=odiamond]
+	FifoPolicy -> ListElement[arrowtail=odiamond]
+}
