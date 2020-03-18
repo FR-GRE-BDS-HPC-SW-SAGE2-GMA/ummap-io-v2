@@ -12,6 +12,6 @@ add_library(ummap-policies OBJECT ${POLICIES_SRC})
 SET_TARGET_PROPERTIES(ummap-policies PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 ######################################################
-#if (ENABLE_TESTS)
-#	add_subdirectory(tests)
-#endif (ENABLE_TESTS)
+if (ENABLE_TESTS)
+	add_subdirectory(tests)
+endif (ENABLE_TESTS)

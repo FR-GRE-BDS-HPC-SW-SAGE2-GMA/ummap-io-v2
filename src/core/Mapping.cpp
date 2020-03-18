@@ -24,6 +24,7 @@ Mapping::Mapping(size_t size, size_t segmentSize, MappingProtection protection, 
 	//checks
 	assume(size > 0, "Do not accept null size mapping");
 	assume(segmentSize > 0, "Do not accept null segment size");
+	assumeArg(segmentSize % UMMAP_PAGE_SIZE == 0, "Segment size should be multiple of page size (%1), got '%2'").arg(UMMAP_PAGE_SIZE).arg(size).end();
 	assumeArg(size % UMMAP_PAGE_SIZE == 0, "Size should be multiple of page size (%1), got '%2'").arg(UMMAP_PAGE_SIZE).arg(size).end();
 	assumeArg(size % segmentSize == 0, "Size should be multiple of segment size (%1), got '%2'").arg(segmentSize).arg(size).end();
 
@@ -144,6 +145,10 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 
 		//check status
 		SegmentStatus & status = this->segmentStatus[segmentId];
+
+		//already done
+		if (isWrite == status.dirty && status.mapped)
+			return;
 
 		//if not mapped
 		if (!status.mapped && status.needRead){

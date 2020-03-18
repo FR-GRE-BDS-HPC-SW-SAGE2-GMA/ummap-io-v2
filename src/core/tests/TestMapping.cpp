@@ -9,6 +9,7 @@
 #include "portability/OS.hpp"
 #include "drivers/DummyDriver.hpp"
 #include "drivers/GMockDriver.hpp"
+#include "policies/GMockPolicy.hpp"
 #include "../Mapping.hpp"
 
 /***************** USING NAMESPACE ******************/
@@ -131,4 +132,41 @@ TEST(TestMapping, flush)
 	//cannot access anymore
 	ASSERT_DEATH(ptr[0] = 10, "");
 	ASSERT_DEATH(ptr[UMMAP_PAGE_SIZE] = 10, "");
+}
+
+TEST(TestMapping, policy)
+{
+	//setup
+	size_t segments = 8;
+	size_t size = segments * UMMAP_PAGE_SIZE;
+	DummyDriver driver(32);
+
+	//setup local policy
+	GMockPolicy * localPolicy = new GMockPolicy;
+	EXPECT_CALL(*localPolicy, allocateElementStorage(_, 8));
+
+	//setup global policy
+	GMockPolicy globalPolicy;
+	EXPECT_CALL(globalPolicy, allocateElementStorage(_, 8));
+	
+	//create
+	Mapping mapping(size, UMMAP_PAGE_SIZE, MAPPING_PROT_RW, &driver, localPolicy, &globalPolicy);
+	char * ptr = (char*)mapping.getAddress();
+
+	//touch read
+	EXPECT_CALL(*localPolicy, notifyTouch(&mapping, 0, false));
+	EXPECT_CALL(globalPolicy, notifyTouch(&mapping, 0, false));
+	mapping.onSegmentationFault(ptr, false);
+	
+	//touch write
+	EXPECT_CALL(*localPolicy, notifyTouch(&mapping, 0, true));
+	EXPECT_CALL(globalPolicy, notifyTouch(&mapping, 0, true));
+	mapping.onSegmentationFault(ptr, true);
+
+	//check not again
+	mapping.onSegmentationFault(ptr, true);
+
+	//expect free
+	EXPECT_CALL(*localPolicy, freeElementStorage(_));
+	EXPECT_CALL(globalPolicy, freeElementStorage(_));
 }
