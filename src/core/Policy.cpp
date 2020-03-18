@@ -7,6 +7,7 @@
 /********************  HEADERS  *********************/
 //std
 #include <mutex>
+#include <cassert>
 //internal
 #include "../common/Debug.hpp"
 //local
@@ -75,7 +76,9 @@ PolicyStorage Policy::getStorageInfo(Mapping * mapping)
 {
 	if (local) {
 		assume(this->storageRegistry.size() == 1, "Invalid local list with multiple mapping registered !");
-		return this->storageRegistry.front();
+		PolicyStorage res = this->storageRegistry.front();
+		assert(res.mapping == mapping);
+		return res;
 	} else {
 		//start CRITICAL SECTION
 		std::lock_guard<Spinlock> lockGuard(this->storageRegistryLock);
