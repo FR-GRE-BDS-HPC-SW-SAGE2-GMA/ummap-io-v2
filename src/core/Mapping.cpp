@@ -136,6 +136,12 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 	size_t segmentId = ((char*)address - this->baseAddress) / this->segmentSize;
 	size_t offset = this->segmentSize * segmentId;
 	void * segmentBase = this->baseAddress + offset;
+
+	//check
+	if (this->protection == MAPPING_PROT_NONE)
+		UMMAP_FATAL("Try to access a segment which is MAPPING_PROT_NONE");
+	if (isWrite && this->protection < MAPPING_PROT_WRITE)
+		UMMAP_FATAL("Try to write access a segment which is not writable");
 	
 	//CRITICAL SECTION
 	{
