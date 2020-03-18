@@ -1,7 +1,8 @@
 ummap-io-v2
 ===========
 
-This is a C++ re-implementation of the original ummap-io project from Sergio Rivas-Gomez. 
+This is a C++ re-implementation of the original ummap-io (https://github.com/sergiorg-kth/ummap-io) 
+project from Sergio Rivas-Gomez. 
 The goal is to handle a file memory mapping totaly controled in userspace.
 
 Dependencies
