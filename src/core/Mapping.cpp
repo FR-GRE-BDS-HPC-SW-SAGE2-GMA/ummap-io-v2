@@ -177,9 +177,9 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 
 	//notify eviction policy
 	if (this->localPolicy != NULL)
-		this->localPolicy->notifyTouch(this, offset, isWrite);
+		this->localPolicy->notifyTouch(this, segmentId, isWrite);
 	if (this->globalPolicy != NULL)
-		this->globalPolicy->notifyTouch(this, offset, isWrite);
+		this->globalPolicy->notifyTouch(this, segmentId, isWrite);
 }
 
 /*******************  FUNCTION  *********************/

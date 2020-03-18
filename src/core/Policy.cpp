@@ -29,13 +29,14 @@ Policy::~Policy(void)
 }
 
 /*******************  FUNCTION  *********************/
-void Policy::registerMapping(Mapping * mapping, void * storage, size_t elementCount)
+void Policy::registerMapping(Mapping * mapping, void * storage, size_t elementCount, size_t elementSize)
 {
 	//setup
 	PolicyStorage entry = {
 		.mapping = mapping,
 		.elements = storage,
-		.elementCount = elementCount
+		.elementCount = elementCount,
+		.elementSize = elementSize
 	};
 
 	//register, CRITICAL SECTION
@@ -48,7 +49,7 @@ void Policy::registerMapping(Mapping * mapping, void * storage, size_t elementCo
 /*******************  FUNCTION  *********************/
 bool Policy::contains(PolicyStorage & storage, void * entry)
 {
-	return (entry >= storage.elements && entry < (char*)storage.elements + storage.elementCount);
+	return (entry >= storage.elements && entry < (char*)storage.elements + (storage.elementCount * storage.elementSize));
 }
 
 /*******************  FUNCTION  *********************/
@@ -100,7 +101,10 @@ void Policy::unregisterMapping(Mapping * mapping)
 
 	//loop
 	for (auto it = storageRegistry.begin() ; it != storageRegistry.end() ; ++it) {
-		if (it->mapping == mapping)
-			storageRegistry.erase(it);
+		if (it->mapping == mapping) {
+			auto tmp = it;
+			++it;
+			storageRegistry.erase(tmp);
+		};
 	}
 }

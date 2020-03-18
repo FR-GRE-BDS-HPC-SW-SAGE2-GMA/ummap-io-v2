@@ -48,7 +48,7 @@ class Mapping
 		void flush(void);
 		void flush(size_t offset, size_t size, bool unmap = false);
 		void prefetch(size_t offset, size_t size);
-		void evict(Policy * sourcePolicy, size_t segmentId);
+		virtual void evict(Policy * sourcePolicy, size_t segmentId);
 		void * getAddress(void);
 		void skipFirstRead(void);
 		SegmentStatus getSegmentStatus(size_t offset);

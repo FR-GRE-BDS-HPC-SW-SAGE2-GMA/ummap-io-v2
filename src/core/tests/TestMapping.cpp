@@ -154,17 +154,17 @@ TEST(TestMapping, policy)
 	char * ptr = (char*)mapping.getAddress();
 
 	//touch read
-	EXPECT_CALL(*localPolicy, notifyTouch(&mapping, 0, false));
-	EXPECT_CALL(globalPolicy, notifyTouch(&mapping, 0, false));
-	mapping.onSegmentationFault(ptr, false);
+	EXPECT_CALL(*localPolicy, notifyTouch(&mapping, 1, false));
+	EXPECT_CALL(globalPolicy, notifyTouch(&mapping, 1, false));
+	mapping.onSegmentationFault(ptr+UMMAP_PAGE_SIZE, false);
 	
 	//touch write
-	EXPECT_CALL(*localPolicy, notifyTouch(&mapping, 0, true));
-	EXPECT_CALL(globalPolicy, notifyTouch(&mapping, 0, true));
-	mapping.onSegmentationFault(ptr, true);
+	EXPECT_CALL(*localPolicy, notifyTouch(&mapping, 1, true));
+	EXPECT_CALL(globalPolicy, notifyTouch(&mapping, 1, true));
+	mapping.onSegmentationFault(ptr+UMMAP_PAGE_SIZE, true);
 
 	//check not again
-	mapping.onSegmentationFault(ptr, true);
+	mapping.onSegmentationFault(ptr+UMMAP_PAGE_SIZE, true);
 
 	//expect free
 	EXPECT_CALL(*localPolicy, freeElementStorage(_));

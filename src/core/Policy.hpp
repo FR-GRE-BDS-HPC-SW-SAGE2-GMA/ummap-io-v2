@@ -27,6 +27,7 @@ struct PolicyStorage
 	Mapping * mapping;
 	void * elements;
 	size_t elementCount;
+	size_t elementSize;
 };
 
 /*********************  CLASS  **********************/
@@ -40,7 +41,7 @@ class Policy
 		virtual void notifyEvict(Mapping * mapping, size_t index) = 0;
 		virtual void freeElementStorage(Mapping * mapping) = 0;
 	protected:
-		void registerMapping(Mapping * mapping, void * storage, size_t elementCount);
+		void registerMapping(Mapping * mapping, void * storage, size_t elementCount, size_t elementSize);
 		void unregisterMapping(Mapping * mapping);
 		PolicyStorage getStorageInfo(void * entry);
 		PolicyStorage getStorageInfo(Mapping * mapping);

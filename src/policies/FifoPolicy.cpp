@@ -34,7 +34,7 @@ FifoPolicy::~FifoPolicy(void)
 void FifoPolicy::allocateElementStorage(Mapping * mapping, size_t segmentCount)
 {
 	ListElement * elts = new ListElement[segmentCount];
-	this->registerMapping(mapping, elts, segmentCount);
+	this->registerMapping(mapping, elts, segmentCount, sizeof(ListElement));
 }
 
 /*******************  FUNCTION  *********************/
