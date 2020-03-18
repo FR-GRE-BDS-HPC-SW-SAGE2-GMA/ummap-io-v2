@@ -57,6 +57,7 @@ class Mapping
 	private:
 		void loadAndSwapSegment(size_t offset, bool writeAccess);
 		const bool * getMutexRange(size_t offset, size_t size) const;
+		size_t readWriteSize(size_t offset);
 	private:
 		Driver * driver;
 		Policy * localPolicy;
@@ -65,6 +66,7 @@ class Mapping
 		char * baseAddress;
 		size_t segments;
 		size_t segmentSize;
+		size_t size;
 		SegmentStatus * segmentStatus;
 		std::mutex * segmentMutexes;
 		int segmentMutexesCnt;

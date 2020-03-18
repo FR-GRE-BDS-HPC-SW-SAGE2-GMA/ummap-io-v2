@@ -25,18 +25,24 @@ Mapping::Mapping(size_t size, size_t segmentSize, MappingProtection protection, 
 	assume(size > 0, "Do not accept null size mapping");
 	assume(segmentSize > 0, "Do not accept null segment size");
 	assumeArg(segmentSize % UMMAP_PAGE_SIZE == 0, "Segment size should be multiple of page size (%1), got '%2'").arg(UMMAP_PAGE_SIZE).arg(size).end();
-	assumeArg(size % UMMAP_PAGE_SIZE == 0, "Size should be multiple of page size (%1), got '%2'").arg(UMMAP_PAGE_SIZE).arg(size).end();
-	assumeArg(size % segmentSize == 0, "Size should be multiple of segment size (%1), got '%2'").arg(segmentSize).arg(size).end();
+
+	//calc map size
+	size_t mapSize = size;
+	if (size % segmentSize != 0)
+		mapSize += segmentSize - (size % segmentSize);
+	assumeArg(mapSize % UMMAP_PAGE_SIZE == 0, "Size should be multiple of page size (%1), got '%2'").arg(UMMAP_PAGE_SIZE).arg(size).end();
+	assumeArg(mapSize % segmentSize == 0, "Size should be multiple of segment size (%1), got '%2'").arg(segmentSize).arg(size).end();
 
 	//set
 	this->driver = driver->dup();
 	this->localPolicy = localPolicy;
 	this->globalPolicy = globalPolicy;
 	this->protection = protection;
+	this->size = size;
 
 	//establish mapping
-	this->baseAddress = (char*)OS::mmapProtNone(size);
-	this->segments = size / segmentSize;
+	this->baseAddress = (char*)OS::mmapProtNone(mapSize);
+	this->segments = mapSize / segmentSize;
 	this->segmentSize = segmentSize;
 
 	//establish state tracking
@@ -98,6 +104,9 @@ void * Mapping::getAddress(void)
 }
 
 /*******************  FUNCTION  *********************/
+
+
+/*******************  FUNCTION  *********************/
 void Mapping::loadAndSwapSegment(size_t offset, bool writeAccess)
 {
 	//Rational: In order to be atomic we load the data in a segment, then
@@ -110,7 +119,7 @@ void Mapping::loadAndSwapSegment(size_t offset, bool writeAccess)
 	void * ptr = OS::mmapProtFull(this->segmentSize);
 
 	//read inside new segment
-	ssize_t res = this->driver->pread(ptr, this->segmentSize, offset);
+	ssize_t res = this->driver->pread(ptr, readWriteSize(offset), offset);
 	assumeArg(res == segmentSize, "Fail to read all data, got %1 instead of %2 !")
 		.arg(res)
 		.arg(segmentSize)
@@ -250,6 +259,15 @@ void Mapping::flush(void)
 }
 
 /*******************  FUNCTION  *********************/
+size_t Mapping::readWriteSize(size_t offset)
+{
+	if (size - offset >= segmentSize)
+		return segmentSize;
+	else
+		return size - offset;
+}
+
+/*******************  FUNCTION  *********************/
 void Mapping::flush(size_t offset, size_t size, bool unmap)
 {
 	//check
@@ -283,7 +301,7 @@ void Mapping::flush(size_t offset, size_t size, bool unmap)
 				void * segmentPtr = this->baseAddress + curOffset;
 
 				//apply
-				ssize_t res = this->driver->pwrite(segmentPtr, this->segmentSize, curOffset);
+				ssize_t res = this->driver->pwrite(segmentPtr, readWriteSize(curOffset), curOffset);
 
 				//errors
 				assumeArg(res != -1, "Fail to pwrite : %1").arg(strerror(errno)).end();

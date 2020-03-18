@@ -99,6 +99,23 @@ TEST(TestMapping, first_touch_write_first)
 }
 
 /*******************  FUNCTION  *********************/
+TEST(TestMapping, first_last_non_full)
+{
+	//setup
+	size_t segments = 8;
+	size_t size = segments * UMMAP_PAGE_SIZE + 1024;
+	GMockDriver * driver = new GMockDriver;
+	Mapping mapping(size, UMMAP_PAGE_SIZE, MAPPING_PROT_RW, driver, NULL, NULL);
+
+	//get
+	char * ptr = (char*)mapping.getAddress();
+
+	//access
+	EXPECT_CALL(*driver, pread(_, 1024, segments * UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	mapping.onSegmentationFault(ptr + size - 10, false);
+}
+
+/*******************  FUNCTION  *********************/
 TEST(TestMapping, flush)
 {
 	//setup
