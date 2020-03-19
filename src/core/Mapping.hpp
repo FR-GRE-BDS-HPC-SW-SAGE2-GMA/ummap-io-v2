@@ -46,13 +46,14 @@ class Mapping
 		virtual ~Mapping(void);
 		void onSegmentationFault(void * address, bool isWrite);
 		void flush(void);
-		void flush(size_t offset, size_t size, bool unmap = false);
+		void flush(size_t offset, size_t size, bool unmap = false, bool lock = true);
 		void prefetch(size_t offset, size_t size);
 		virtual void evict(Policy * sourcePolicy, size_t segmentId);
 		void * getAddress(void);
 		void skipFirstRead(void);
 		SegmentStatus getSegmentStatus(size_t offset);
 		size_t getSize(void) const;
+		size_t getAlignedSize(void) const;
 		size_t getSegmentSize(void) const;
 	private:
 		void loadAndSwapSegment(size_t offset, bool writeAccess);

@@ -80,6 +80,12 @@ Mapping::~Mapping(void)
 	for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
 		this->segmentMutexes[i].lock();
 
+	//flush
+	this->flush(0, this->getAlignedSize(), false, false);
+
+	//unmap
+	OS::munmap(this->baseAddress, this->getAlignedSize());
+
 	//destroy driver dup()
 	delete this->driver;
 
@@ -225,6 +231,12 @@ SegmentStatus Mapping::getSegmentStatus(size_t offset)
 /*******************  FUNCTION  *********************/
 size_t Mapping::getSize(void) const
 {
+	return this->size;
+}
+
+/*******************  FUNCTION  *********************/
+size_t Mapping::getAlignedSize(void) const
+{
 	return this->segmentSize * this->segments;
 }
 
@@ -234,7 +246,7 @@ const bool * Mapping::getMutexRange(size_t offset, size_t size) const
 	//check
 	assert(offset < this->getSize());
 	assert(offset % this->segmentSize == 0);
-	assert(offset + size <= this->getSize());
+	assert(offset + size <= this->getAlignedSize());
 	assert(size % this->segmentSize == 0);
 
 	//allocate
@@ -270,13 +282,13 @@ size_t Mapping::readWriteSize(size_t offset)
 }
 
 /*******************  FUNCTION  *********************/
-void Mapping::flush(size_t offset, size_t size, bool unmap)
+void Mapping::flush(size_t offset, size_t size, bool unmap, bool lock)
 {
 	//check
-	assume(offset < this->getSize(), "Offset is not in valid range !");
-	assume(offset + size <= this->getSize(), "'Offset + size' is not in valid range !");
-	assume(offset % segmentSize == 0, "Should get offset multiple of segment size !");
-	assume(size % segmentSize == 0, "Should get offset multiple of segment size !");
+	assumeArg(offset < this->getSize(), "Offset (%1) is not in valid range !").arg(offset).end();
+	assumeArg(offset + size <= this->getAlignedSize(), "'Offset (%1) + size' is not in valid range !").arg(offset).end();
+	assumeArg(offset % segmentSize == 0, "Should get offset (%1) multiple of segment size !").arg(offset).end();
+	assumeArg(size % segmentSize == 0, "Should get size (%1) multiple of segment size !").arg(size).end();
 
 	//what to lock
 	const bool * toLock = getMutexRange(offset, size);
@@ -285,9 +297,10 @@ void Mapping::flush(size_t offset, size_t size, bool unmap)
 	{
 		//lock the whole segment
 		//@TODO Can search to lock only related pages
-		for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
-			if (toLock[i])
-				this->segmentMutexes[i % this->segmentMutexesCnt].lock();
+		if (lock)
+			for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
+				if (toLock[i])
+					this->segmentMutexes[i % this->segmentMutexesCnt].lock();
 
 		//mprotect the whole considered segment
 		OS::mprotect(this->baseAddress + offset, size, true, false);
@@ -328,9 +341,10 @@ void Mapping::flush(size_t offset, size_t size, bool unmap)
 		}
 
 		//unlock
-		for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
-			if (toLock[i])
-				this->segmentMutexes[i].unlock();
+		if (lock)
+			for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
+				if (toLock[i])
+					this->segmentMutexes[i].unlock();
 	}
 }
 
