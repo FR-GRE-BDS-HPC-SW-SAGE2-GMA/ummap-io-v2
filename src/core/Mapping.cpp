@@ -357,14 +357,22 @@ void Mapping::prefetch(size_t offset, size_t size)
 /*******************  FUNCTION  *********************/
 void Mapping::evict(Policy * sourcePolicy, size_t segmentId)
 {
-	//notify policies
-	if (sourcePolicy != localPolicy && localPolicy != NULL)
-		localPolicy->notifyEvict(this, segmentId);
-	if (sourcePolicy != globalPolicy && globalPolicy != NULL)
-		globalPolicy->notifyEvict(this, segmentId);
+	//CRITICAL SECTION
+	{
+		//lock to access
+		int mutexId = segmentId % this->segmentMutexesCnt;
+		std::lock_guard<std::mutex> lockGuard(this->segmentMutexes[mutexId]);
+
+
+		//notify policies
+		if (sourcePolicy != localPolicy && localPolicy != NULL)
+			localPolicy->notifyEvict(this, segmentId);
+		if (sourcePolicy != globalPolicy && globalPolicy != NULL)
+			globalPolicy->notifyEvict(this, segmentId);
 	
-	//flush memory
-	flush(segmentId * segmentSize, segmentSize, true);
+		//flush memory
+		flush(segmentId * segmentSize, segmentSize, true, false);
+	}
 }
 
 /*******************  FUNCTION  *********************/
