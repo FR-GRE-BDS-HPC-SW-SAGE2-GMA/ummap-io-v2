@@ -14,6 +14,10 @@ namespace ummap
 {
 
 /*********************  CLASS  **********************/
+/**
+ * Define a listable element with prev/next pointers.
+ * This is used to build the list for FIFO/LIFO policies.
+**/
 class ListElement
 {
 	public:
@@ -29,7 +33,9 @@ class ListElement
 		ListElement * popNext(void);
 		ListElement * popPrev(void);
 	protected:
+		/** Pointer to previous element **/
 		ListElement * prev;
+		/** Pointer to next element **/
 		ListElement * next;
 };
 
