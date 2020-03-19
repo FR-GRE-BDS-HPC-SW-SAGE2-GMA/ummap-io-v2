@@ -22,14 +22,38 @@ MemoryDriver::MemoryDriver(size_t size, char defaultValue)
 	assert(size > 0);
 	this->size = size;
 	this->buffer = new char[size];
+	this->share = new int;
+	*this->share = 1;
 	memset(this->buffer, defaultValue, size);
+}
+
+/*******************  FUNCTION  *********************/
+MemoryDriver::MemoryDriver(MemoryDriver * driver)
+{
+	//check
+	assert(driver != NULL);
+	assert(driver->share != NULL);
+
+	//copy
+	this->share = driver->share;
+	this->buffer = driver->buffer;
+
+	//inc sharing
+	(*this->share)++;
 }
 
 /*******************  FUNCTION  *********************/
 MemoryDriver::~MemoryDriver(void)
 {
-	delete [] this->buffer;
+	if (*this->share == 1) {
+		delete [] this->buffer;
+		delete this->share;
+	} else {
+		(*this->share)--;
+	}
+
 	this->buffer = NULL;
+	this->share = NULL;
 }
 
 /*******************  FUNCTION  *********************/
@@ -41,7 +65,6 @@ ssize_t MemoryDriver::pwrite(const void * buffer, size_t size, size_t offset)
 	assert(size + offset <= this->size);
 
 	//copy
-	assert(((char*)buffer)[0] == 64);
 	memcpy(this->buffer + offset, buffer, size);
 
 	//return
@@ -76,17 +99,14 @@ void MemoryDriver::sync(size_t offset, size_t size)
 Driver * MemoryDriver::dup(void)
 {
 	//alloc new
-	MemoryDriver * copy = new MemoryDriver(this->size, 0);
-
-	//copy content
-	memcpy(copy->buffer, this->buffer, this->size);
+	MemoryDriver * copy = new MemoryDriver(this);
 
 	//return
 	return copy;
 }
 
 /*******************  FUNCTION  *********************/
-const char * MemoryDriver::getBuffer(void) const
+char * MemoryDriver::getBuffer(void)
 {
 	return this->buffer;
 }
