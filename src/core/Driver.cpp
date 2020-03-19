@@ -11,11 +11,17 @@
 using namespace ummap;
 
 /*******************  FUNCTION  *********************/
+/**
+ * Base constructor, do nothing for now.
+**/
 Driver::Driver(void)
 {
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Base destructor, do nothing for now.
+**/
 Driver::~Driver(void)
 {
 }
