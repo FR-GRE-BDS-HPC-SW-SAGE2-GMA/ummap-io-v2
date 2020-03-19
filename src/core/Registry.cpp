@@ -113,3 +113,19 @@ Mapping * Registry::getMapping(void * addr)
 		return NULL;
 	}
 }
+
+/*******************  FUNCTION  *********************/
+void Registry::deleteAllMappings(void)
+{
+	//CRITICAL SECTION
+	{
+		std::lock_guard<Spinlock> lockGuard(this->lock);
+
+		//loop to delete
+		for (auto it : this->entries)
+			delete it.mapping;
+
+		//clear all
+		this->entries.clear();
+	}
+}
