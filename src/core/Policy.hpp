@@ -37,7 +37,7 @@ class Policy
 		Policy(size_t maxMemory, bool local);
 		virtual ~Policy(void);
 		virtual void allocateElementStorage(Mapping * mapping, size_t segmentCount) = 0;
-		virtual void notifyTouch(Mapping * mapping, size_t index, bool isWrite) = 0;
+		virtual void notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool mapped, bool dirty) = 0;
 		virtual void notifyEvict(Mapping * mapping, size_t index) = 0;
 		virtual void freeElementStorage(Mapping * mapping) = 0;
 	protected:

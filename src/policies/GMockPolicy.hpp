@@ -24,7 +24,7 @@ class GMockPolicy : public Policy
 		GMockPolicy(void): Policy(2*4096, true) {};
 		virtual ~GMockPolicy(void) {};
 		MOCK_METHOD(void, allocateElementStorage,(Mapping * mapping, size_t segmentCount));
-		MOCK_METHOD(void, notifyTouch,(Mapping * mapping, size_t index, bool isWrite));
+		MOCK_METHOD(void, notifyTouch,(Mapping * mapping, size_t index, bool isWrite, bool mapped, bool dirty));
 		MOCK_METHOD(void, notifyEvict,(Mapping * mapping, size_t index));
 		MOCK_METHOD(void, freeElementStorage,(Mapping * mapping));
 };

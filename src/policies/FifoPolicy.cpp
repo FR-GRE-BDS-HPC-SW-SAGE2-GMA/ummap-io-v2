@@ -65,7 +65,7 @@ void FifoPolicy::freeElementStorage(Mapping * mapping)
 }
 
 /*******************  FUNCTION  *********************/
-void FifoPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite)
+void FifoPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool mapped, bool dirty)
 {
 	//get storage
 	PolicyStorage storage = this->getStorageInfo(mapping);

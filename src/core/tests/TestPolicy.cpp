@@ -20,7 +20,7 @@ class PublicPolicy: public Policy
 	public:
 		PublicPolicy(void) : Policy(4096, false) {};
 		virtual void allocateElementStorage(Mapping * mapping, size_t segmentCount) {};
-		virtual void notifyTouch(Mapping * mapping, size_t index, bool isWrite) {};
+		virtual void notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool mapped, bool dirty) {};
 		virtual void notifyEvict(Mapping * mapping, size_t index) {};
 		virtual void freeElementStorage(Mapping * mapping) {};
 		void registerMapping(Mapping * mapping, void * storage, size_t elementCount, size_t elementSize) {Policy::registerMapping(mapping, storage, elementCount, elementSize);};

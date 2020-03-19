@@ -30,7 +30,7 @@ class FifoPolicy : public Policy
 		FifoPolicy(size_t maxMemory, bool local);
 		virtual ~FifoPolicy(void);
 		virtual void allocateElementStorage(Mapping * mapping, size_t segmentCount);
-		virtual void notifyTouch(Mapping * mapping, size_t index, bool isWrite);
+		virtual void notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool mapped, bool dirty);
 		virtual void notifyEvict(Mapping * mapping, size_t index);
 		virtual void freeElementStorage(Mapping * mapping);
 	protected:

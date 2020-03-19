@@ -78,7 +78,7 @@ TEST(TestFifoPolicy, evict_notify_other)
 	char * ptr = (char*)mapping.getAddress();
 
 	//touch no effect
-	EXPECT_CALL(globalPolicy, notifyTouch(&mapping, _, true)).Times(3);
+	EXPECT_CALL(globalPolicy, notifyTouch(&mapping, _, true, false, false)).Times(3);
 	mapping.onSegmentationFault(ptr+0*UMMAP_PAGE_SIZE, true);
 	mapping.onSegmentationFault(ptr+1*UMMAP_PAGE_SIZE, true);
 

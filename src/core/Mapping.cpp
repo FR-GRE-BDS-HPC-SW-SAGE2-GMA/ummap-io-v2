@@ -145,6 +145,7 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 	size_t segmentId = ((char*)address - this->baseAddress) / this->segmentSize;
 	size_t offset = this->segmentSize * segmentId;
 	void * segmentBase = this->baseAddress + offset;
+	SegmentStatus oldStatus;
 
 	//check
 	if (this->protection == MAPPING_PROT_NONE)
@@ -160,6 +161,7 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 
 		//check status
 		SegmentStatus & status = this->segmentStatus[segmentId];
+		oldStatus = status;
 
 		//already done
 		if (isWrite == status.dirty && status.mapped)
@@ -192,9 +194,9 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 
 	//notify eviction policy
 	if (this->localPolicy != NULL)
-		this->localPolicy->notifyTouch(this, segmentId, isWrite);
+		this->localPolicy->notifyTouch(this, segmentId, isWrite, oldStatus.mapped, oldStatus.dirty);
 	if (this->globalPolicy != NULL)
-		this->globalPolicy->notifyTouch(this, segmentId, isWrite);
+		this->globalPolicy->notifyTouch(this, segmentId, isWrite, oldStatus.mapped, oldStatus.dirty);
 }
 
 /*******************  FUNCTION  *********************/

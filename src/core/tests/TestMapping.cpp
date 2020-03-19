@@ -171,13 +171,13 @@ TEST(TestMapping, policy)
 	char * ptr = (char*)mapping.getAddress();
 
 	//touch read
-	EXPECT_CALL(*localPolicy, notifyTouch(&mapping, 1, false));
-	EXPECT_CALL(globalPolicy, notifyTouch(&mapping, 1, false));
+	EXPECT_CALL(*localPolicy, notifyTouch(&mapping, 1, false, false, false));
+	EXPECT_CALL(globalPolicy, notifyTouch(&mapping, 1, false, false, false));
 	mapping.onSegmentationFault(ptr+UMMAP_PAGE_SIZE, false);
 	
 	//touch write
-	EXPECT_CALL(*localPolicy, notifyTouch(&mapping, 1, true));
-	EXPECT_CALL(globalPolicy, notifyTouch(&mapping, 1, true));
+	EXPECT_CALL(*localPolicy, notifyTouch(&mapping, 1, true, true, false));
+	EXPECT_CALL(globalPolicy, notifyTouch(&mapping, 1, true, true, false));
 	mapping.onSegmentationFault(ptr+UMMAP_PAGE_SIZE, true);
 
 	//check not again
