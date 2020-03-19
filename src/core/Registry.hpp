@@ -11,6 +11,7 @@
 //std
 #include <list>
 //local
+#include "portability/Spinlock.hpp"
 #include "Mapping.hpp"
 
 /********************  NAMESPACE  *******************/
@@ -37,6 +38,7 @@ class Registry
 	private:
 		bool contain(Mapping * mapping);
 	private:
+		Spinlock lock;
 		std::list<RegistryEntry> entries;
 };
 
