@@ -24,6 +24,9 @@ include(${CMAKE_SOURCE_DIR}/cmake/macros.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/unittest-macros.cmake)
 
 ######################################################
+find_package(OpenMP REQUIRED)
+
+######################################################
 # setup
 ummap_setup_internal_gmock_and_gtest()
 ummap_enable_cxx_11()

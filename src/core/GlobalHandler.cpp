@@ -32,10 +32,9 @@ void ummap::setupSegfaultHandler(void)
 	gblOldHandler = oldAction.sa_sigaction;
 
 	//struct
-	struct sigaction sa = { 
-		.sa_flags = SA_SIGINFO,
-		.sa_sigaction = segfaultHandler,
-	};
+	struct sigaction sa; 
+	sa.sa_flags = SA_SIGINFO;
+	sa.sa_sigaction = segfaultHandler;
 
 	//mask
 	sigfillset(&sa.sa_mask);

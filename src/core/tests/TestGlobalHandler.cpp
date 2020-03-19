@@ -64,16 +64,78 @@ TEST(TestGlobalHandler, basic_write_workflow)
 
 	//mapping
 	DummyDriver * driver = new DummyDriver(32);
-	Mapping mapping(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, MAPPING_PROT_RW, driver);
+	Mapping mapping(8 * UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, MAPPING_PROT_RW, driver);
 	gblHandler->registerMapping(&mapping);
 
 	//read access
 	char * ptr = (char*)mapping.getAddress();
-	for (int i = 0 ; i < 8*UMMAP_PAGE_SIZE ; i++)
+	for (int i = 0 ; i < 8 * UMMAP_PAGE_SIZE ; i++)
 		ptr[i] = 48;
 	
 	//read access
-	for (int i = 0 ; i < 8*UMMAP_PAGE_SIZE ; i++)
+	for (int i = 0 ; i < 8 * UMMAP_PAGE_SIZE ; i++)
+		ASSERT_EQ(48, ptr[i]);
+
+	//clean
+	unsetSegfaultHandler();
+	clearGlobalHandler();
+}
+
+/*******************  FUNCTION  *********************/
+TEST(TestGlobalHandler, basic_read_workflow_parallel)
+{
+	//setup global
+	GlobalHandler * handler = new GlobalHandler(NULL);
+	setGlobalHandler(handler);
+	setupSegfaultHandler();
+
+	//mapping
+	DummyDriver * driver = new DummyDriver(32);
+	Mapping mapping(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, MAPPING_PROT_READ, driver);
+	gblHandler->registerMapping(&mapping);
+
+	//read access
+	char * ptr = (char*)mapping.getAddress();
+	bool ok = true;
+	#pragma omp parallel shared(ok)
+	{
+		#pragma omp barrier
+		for (int i = 0 ; i < 8*UMMAP_PAGE_SIZE ; i++) {
+			if (ptr[i] != 32)
+				ok = false;
+		}
+	}
+	ASSERT_TRUE(ok);
+
+	//clean
+	unsetSegfaultHandler();
+	clearGlobalHandler();
+}
+
+/*******************  FUNCTION  *********************/
+TEST(TestGlobalHandler, basic_write_workflow_parallel)
+{
+	//setup global
+	GlobalHandler * handler = new GlobalHandler(NULL);
+	setGlobalHandler(handler);
+	setupSegfaultHandler();
+
+	//mapping
+	DummyDriver * driver = new DummyDriver(32);
+	Mapping mapping(8 * UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, MAPPING_PROT_RW, driver);
+	gblHandler->registerMapping(&mapping);
+
+	//read access
+	char * ptr = (char*)mapping.getAddress();
+	#pragma omp parallel
+	{
+		#pragma omp barrier
+		for (int i = 0 ; i < 8 * UMMAP_PAGE_SIZE ; i++)
+			ptr[i] = 48;
+	}
+	
+	//read access
+	for (int i = 0 ; i < 8 * UMMAP_PAGE_SIZE ; i++)
 		ASSERT_EQ(48, ptr[i]);
 
 	//clean
