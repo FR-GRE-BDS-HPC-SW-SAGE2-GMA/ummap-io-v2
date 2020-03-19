@@ -7,6 +7,7 @@
 /********************  HEADERS  *********************/
 //unix
 #include <cstdint>
+#include <cassert>
 #include <signal.h>
 //local
 #include "../common/Debug.hpp"
@@ -19,11 +20,17 @@ using namespace ummap;
 #define GET_REG_ERR(context) ((ucontext_t *)context)->uc_mcontext.gregs[REG_ERR]
 
 /********************  GLOBAL  **********************/
-Handler * ummap::gblHandler = NULL;
+GlobalHandler * ummap::gblHandler = NULL;
+static void (*gblOldHandler) (int, siginfo_t *, void *) = NULL;
 
 /*******************  FUNCTION  *********************/
 void ummap::setupSegfaultHandler(void)
 {
+	//get old action
+	struct sigaction oldAction;
+	sigaction(SIGSEGV, NULL, &oldAction);
+	gblOldHandler = oldAction.sa_sigaction;
+
 	//struct
 	struct sigaction sa = { 
 		.sa_flags = SA_SIGINFO,
@@ -38,6 +45,12 @@ void ummap::setupSegfaultHandler(void)
 }
 
 /*******************  FUNCTION  *********************/
+void ummap::unsetSegfaultHandler(void)
+{
+	signal(SIGSEGV, SIG_DFL);
+}
+
+/*******************  FUNCTION  *********************/
 void ummap::segfaultHandler(int sig, siginfo_t *si, void *context)
 {
 	//extract
@@ -46,43 +59,65 @@ void ummap::segfaultHandler(int sig, siginfo_t *si, void *context)
     uint8_t   isWrite  = (type == PAGEFAULT_WRITE);
 
 	//transmit
-	gblHandler->onSegFault(addr, isWrite);
+	if (gblHandler->onSegFault(addr, isWrite) == false)
+		if (gblOldHandler != NULL)
+			gblOldHandler(sig, si, context);
 }
 
 /*******************  FUNCTION  *********************/
-Handler::Handler(Policy * globalPolicy)
+GlobalHandler::GlobalHandler(Policy * globalPolicy)
 {
 	this->globalPolicy = globalPolicy;
 }
 
 /*******************  FUNCTION  *********************/
-Handler::~Handler(void)
+GlobalHandler::~GlobalHandler(void)
 {
 }
 
 /*******************  FUNCTION  *********************/
-void Handler::deleteAllMappings(void)
+void GlobalHandler::deleteAllMappings(void)
 {
 	this->mappingRegistry.deleteAllMappings();
 }
 
 /*******************  FUNCTION  *********************/
-void Handler::registerMapping(Mapping * mapping)
+void GlobalHandler::registerMapping(Mapping * mapping)
 {
 	this->mappingRegistry.registerMapping(mapping);
 }
 
 /*******************  FUNCTION  *********************/
-void Handler::onSegFault(void * addr, bool isWrite)
+bool GlobalHandler::onSegFault(void * addr, bool isWrite)
 {
 	//get mapping
 	Mapping * mapping = this->mappingRegistry.getMapping(addr);
 
 	//chec
-	assumeArg(mapping != NULL, "Unknown ummap mapping for the faulting address %1")
-		.arg(addr)
-		.end();
+	if (mapping == NULL) {
+		UMMAP_WARNING_ARG("Unknown ummap mapping for the faulting address %1")
+			.arg(addr)
+			.end();
+		return false;
+	} else {
+		//fault handling
+		mapping->onSegmentationFault(addr, isWrite);
+		return true;
+	}
+}
 
-	//fault handling
-	mapping->onSegmentationFault(addr, isWrite);
+/*******************  FUNCTION  *********************/
+void ummap::setGlobalHandler(GlobalHandler * handler)
+{
+	assert(handler != NULL);
+	gblHandler = handler;
+}
+
+/*******************  FUNCTION  *********************/
+void ummap::clearGlobalHandler(void)
+{
+	if (gblHandler != NULL) {
+		delete gblHandler;
+		gblHandler = NULL;
+	}
 }

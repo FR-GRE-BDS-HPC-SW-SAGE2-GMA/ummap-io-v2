@@ -23,13 +23,13 @@ enum PageFaultType
 };
 
 /*********************  CLASS  **********************/
-class Handler
+class GlobalHandler
 {
 	public:
-		Handler(Policy * globalPolicy);
-		~Handler(void);
+		GlobalHandler(Policy * globalPolicy);
+		~GlobalHandler(void);
 		void registerMapping(Mapping * mapping);
-		void onSegFault(void * addr, bool isWrite);
+		bool onSegFault(void * addr, bool isWrite);
 		void deleteAllMappings(void);
 	private:
 		Registry mappingRegistry;
@@ -37,11 +37,14 @@ class Handler
 };
 
 /********************* GLOBAL  **********************/
-extern Handler * gblHandler;
+extern GlobalHandler * gblHandler;
 
 /*******************  FUNCTION  *********************/
 void setupSegfaultHandler(void);
+void unsetSegfaultHandler(void);
 void segfaultHandler(int sig, siginfo_t *si, void *context);
+void setGlobalHandler(GlobalHandler * handler);
+void clearGlobalHandler(void);
 
 }
 
