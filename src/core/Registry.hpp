@@ -35,6 +35,7 @@ class Registry
 		void registerMapping(Mapping * mapping);
 		void unregisterMapping(Mapping * mapping);
 		void deleteAllMappings(void);
+		bool isEmpty(void);
 		Mapping * getMapping(void * addr);
 	private:
 		bool contain(Mapping * mapping);

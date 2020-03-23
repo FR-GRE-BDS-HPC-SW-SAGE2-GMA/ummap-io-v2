@@ -31,6 +31,7 @@ class GlobalHandler
 		void registerMapping(Mapping * mapping);
 		bool onSegFault(void * addr, bool isWrite);
 		void deleteAllMappings(void);
+		void setGlobalPolicy(Policy * policy);
 	private:
 		Registry mappingRegistry;
 		Policy * globalPolicy;

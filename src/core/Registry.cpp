@@ -129,3 +129,13 @@ void Registry::deleteAllMappings(void)
 		this->entries.clear();
 	}
 }
+
+/*******************  FUNCTION  *********************/
+bool Registry::isEmpty(void)
+{
+	//CRITICAL SECTION
+	{
+		std::lock_guard<Spinlock> lockGuard(this->lock);
+		return this->entries.empty();
+	}
+}

@@ -72,6 +72,7 @@ GlobalHandler::GlobalHandler(Policy * globalPolicy)
 /*******************  FUNCTION  *********************/
 GlobalHandler::~GlobalHandler(void)
 {
+	delete globalPolicy;
 }
 
 /*******************  FUNCTION  *********************/
@@ -84,6 +85,15 @@ void GlobalHandler::deleteAllMappings(void)
 void GlobalHandler::registerMapping(Mapping * mapping)
 {
 	this->mappingRegistry.registerMapping(mapping);
+}
+
+/*******************  FUNCTION  *********************/
+void GlobalHandler::setGlobalPolicy(Policy * policy)
+{
+	assume(this->mappingRegistry.isEmpty(), "Cannot change policy after mapping segments !");
+	if (this->globalPolicy != NULL)
+		delete this->globalPolicy;
+	this->globalPolicy = policy;
 }
 
 /*******************  FUNCTION  *********************/
