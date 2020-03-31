@@ -14,5 +14,5 @@ set -e
 
 ######################################################
 lcov -o out.info -c -d .
-lcov -o out.info --remove out.info '/usr/*' '/Test*' '*/googletest/*' '*/googlemock/*'
+lcov -o out.info --remove out.info '/usr/*' '*/Test*' '*/googletest/*' '*/googlemock/*'
 genhtml -o html out.info
