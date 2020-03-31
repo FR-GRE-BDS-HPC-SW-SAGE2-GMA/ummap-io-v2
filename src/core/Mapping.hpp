@@ -42,7 +42,7 @@ struct SegmentStatus
 class Mapping
 {
 	public:
-		Mapping(size_t size, size_t segmentSize, MappingProtection protection, Driver * driver, Policy * localPolicy = NULL, Policy * globalPolicy = NULL);
+		Mapping(size_t size, size_t segmentSize, size_t storageOffset, MappingProtection protection, Driver * driver, Policy * localPolicy = NULL, Policy * globalPolicy = NULL);
 		virtual ~Mapping(void);
 		void onSegmentationFault(void * address, bool isWrite);
 		void flush(void);
@@ -68,6 +68,7 @@ class Mapping
 		size_t segments;
 		size_t segmentSize;
 		size_t size;
+		size_t storageOffset;
 		SegmentStatus * segmentStatus;
 		std::mutex * segmentMutexes;
 		int segmentMutexesCnt;

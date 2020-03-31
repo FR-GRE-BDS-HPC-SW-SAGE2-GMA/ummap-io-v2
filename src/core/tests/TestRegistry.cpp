@@ -26,7 +26,7 @@ TEST(TestRegistry, reg)
 {
 	//deps
 	DummyDriver * driver = new DummyDriver;
-	Mapping mapping(10*1024*1024, UMMAP_PAGE_SIZE, MAPPING_PROT_RW, driver);
+	Mapping mapping(10*1024*1024, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, driver);
 
 	//create
 	Registry registry;

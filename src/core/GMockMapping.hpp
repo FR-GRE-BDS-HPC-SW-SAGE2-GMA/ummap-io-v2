@@ -21,8 +21,8 @@ namespace ummap
 class GMockMapping : public Mapping
 {
 	public:
-		GMockMapping(size_t size, size_t segmentSize, MappingProtection protection, Driver * driver, Policy * localPolicy = NULL, Policy * globalPolicy = NULL)
-			: Mapping(size, segmentSize, protection, driver, localPolicy, globalPolicy) {};
+		GMockMapping(size_t size, size_t segmentSize, size_t storageOffset, MappingProtection protection, Driver * driver, Policy * localPolicy = NULL, Policy * globalPolicy = NULL)
+			: Mapping(size, segmentSize, storageOffset, protection, driver, localPolicy, globalPolicy) {};
 		MOCK_METHOD(void, evict, (Policy * sourcePolicy, size_t segmentId));
 };
 

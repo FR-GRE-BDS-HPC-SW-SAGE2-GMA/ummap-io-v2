@@ -41,7 +41,7 @@ TEST(TestGlobalHandler, basic_read_workflow)
 
 	//mapping
 	DummyDriver * driver = new DummyDriver(32);
-	Mapping mapping(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, MAPPING_PROT_READ, driver);
+	Mapping mapping(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_READ, driver);
 	gblHandler->registerMapping(&mapping);
 
 	//read access
@@ -64,7 +64,7 @@ TEST(TestGlobalHandler, basic_write_workflow)
 
 	//mapping
 	DummyDriver * driver = new DummyDriver(32);
-	Mapping mapping(8 * UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, MAPPING_PROT_RW, driver);
+	Mapping mapping(8 * UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, driver);
 	gblHandler->registerMapping(&mapping);
 
 	//read access
@@ -91,7 +91,7 @@ TEST(TestGlobalHandler, basic_read_workflow_parallel)
 
 	//mapping
 	DummyDriver * driver = new DummyDriver(32);
-	Mapping mapping(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, MAPPING_PROT_READ, driver);
+	Mapping mapping(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_READ, driver);
 	gblHandler->registerMapping(&mapping);
 
 	//read access
@@ -122,7 +122,7 @@ TEST(TestGlobalHandler, basic_write_workflow_parallel)
 
 	//mapping
 	DummyDriver * driver = new DummyDriver(32);
-	Mapping mapping(8 * UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, MAPPING_PROT_RW, driver);
+	Mapping mapping(8 * UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, driver);
 	gblHandler->registerMapping(&mapping);
 
 	//read access

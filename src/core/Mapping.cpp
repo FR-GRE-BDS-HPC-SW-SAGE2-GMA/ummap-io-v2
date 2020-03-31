@@ -19,7 +19,7 @@
 using namespace ummap;
 
 /*******************  FUNCTION  *********************/
-Mapping::Mapping(size_t size, size_t segmentSize, MappingProtection protection, Driver * driver, Policy * localPolicy, Policy * globalPolicy)
+Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, MappingProtection protection, Driver * driver, Policy * localPolicy, Policy * globalPolicy)
 {
 	//checks
 	assume(size > 0, "Do not accept null size mapping");
@@ -39,6 +39,7 @@ Mapping::Mapping(size_t size, size_t segmentSize, MappingProtection protection, 
 	this->globalPolicy = globalPolicy;
 	this->protection = protection;
 	this->size = size;
+	this->storageOffset = storageOffset;
 
 	//establish mapping
 	this->baseAddress = (char*)OS::mmapProtNone(mapSize);
@@ -126,7 +127,7 @@ void Mapping::loadAndSwapSegment(size_t offset, bool writeAccess)
 	void * ptr = OS::mmapProtFull(this->segmentSize);
 
 	//read inside new segment
-	ssize_t res = this->driver->pread(ptr, readWriteSize(offset), offset);
+	ssize_t res = this->driver->pread(ptr, readWriteSize(offset), this->storageOffset + offset);
 	assumeArg(res == segmentSize, "Fail to read all data, got %1 instead of %2 !")
 		.arg(res)
 		.arg(segmentSize)
@@ -317,7 +318,7 @@ void Mapping::flush(size_t offset, size_t size, bool unmap, bool lock)
 				void * segmentPtr = this->baseAddress + curOffset;
 
 				//apply
-				ssize_t res = this->driver->pwrite(segmentPtr, readWriteSize(curOffset), curOffset);
+				ssize_t res = this->driver->pwrite(segmentPtr, readWriteSize(curOffset), this->storageOffset + curOffset);
 
 				//errors
 				assumeArg(res != -1, "Fail to pwrite : %1").arg(strerror(errno)).end();
