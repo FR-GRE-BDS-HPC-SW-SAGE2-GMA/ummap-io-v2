@@ -10,6 +10,7 @@
 #include "drivers/DummyDriver.hpp"
 #include "drivers/GMockDriver.hpp"
 #include "policies/GMockPolicy.hpp"
+#include "policies/FifoPolicy.hpp"
 #include "../Mapping.hpp"
 
 /***************** USING NAMESPACE ******************/
@@ -186,4 +187,44 @@ TEST(TestMapping, policy)
 	//expect free
 	EXPECT_CALL(*localPolicy, freeElementStorage(_));
 	EXPECT_CALL(globalPolicy, freeElementStorage(_));
+}
+
+TEST(TestMapping, globalPolicy)
+{
+	//setup
+	size_t segments = 8;
+	size_t size = segments * UMMAP_PAGE_SIZE;
+	DummyDriver driver(32);
+
+	//setup local policy
+	GMockPolicy * localPolicy1 = new GMockPolicy;
+	EXPECT_CALL(*localPolicy1, allocateElementStorage(_, 8));
+	GMockPolicy * localPolicy2 = new GMockPolicy;
+	EXPECT_CALL(*localPolicy2, allocateElementStorage(_, 8));
+
+	//setup global policy
+	FifoPolicy globalPolicy(2*UMMAP_PAGE_SIZE, false);
+	
+	//create
+	Mapping mapping1(size, UMMAP_PAGE_SIZE, MAPPING_PROT_RW, &driver, localPolicy1, &globalPolicy);
+	char * ptr1 = (char*)mapping1.getAddress();
+	Mapping mapping2(size, UMMAP_PAGE_SIZE, MAPPING_PROT_RW, &driver, localPolicy2, &globalPolicy);
+	char * ptr2 = (char*)mapping2.getAddress();
+
+	//touch read first segment
+	EXPECT_CALL(*localPolicy1, notifyTouch(&mapping1, 1, false, false, false));
+	mapping1.onSegmentationFault(ptr1+UMMAP_PAGE_SIZE, false);
+
+	//touch read first segment
+	EXPECT_CALL(*localPolicy2, notifyTouch(&mapping2, 1, false, false, false));
+	mapping2.onSegmentationFault(ptr2+UMMAP_PAGE_SIZE, false);
+
+	//touch another which might generate flish
+	EXPECT_CALL(*localPolicy2, notifyTouch(&mapping2, 2, false, false, false));
+	EXPECT_CALL(*localPolicy1, notifyEvict(_,1));
+	mapping2.onSegmentationFault(ptr2+2*UMMAP_PAGE_SIZE, false);
+
+	//expect free
+	EXPECT_CALL(*localPolicy1, freeElementStorage(_));
+	EXPECT_CALL(*localPolicy2, freeElementStorage(_));
 }
