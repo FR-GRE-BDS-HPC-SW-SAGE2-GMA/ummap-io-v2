@@ -34,7 +34,7 @@ Mapping::Mapping(size_t size, size_t segmentSize, MappingProtection protection, 
 	assumeArg(mapSize % segmentSize == 0, "Size should be multiple of segment size (%1), got '%2'").arg(segmentSize).arg(size).end();
 
 	//set
-	this->driver = driver->dup();
+	this->driver = driver;
 	this->localPolicy = localPolicy;
 	this->globalPolicy = globalPolicy;
 	this->protection = protection;
@@ -86,9 +86,6 @@ Mapping::~Mapping(void)
 	//unmap
 	OS::munmap(this->baseAddress, this->getAlignedSize());
 
-	//destroy driver dup()
-	delete this->driver;
-
 	//policies
 	if (this->localPolicy != NULL)
 		this->localPolicy->freeElementStorage(this);
@@ -101,6 +98,10 @@ Mapping::~Mapping(void)
 
 	//destroy all mutexes
 	delete [] this->segmentMutexes;
+
+	//destroy driver dup()
+	if (this->driver->hasAutoclean())
+		delete this->driver;
 }
 
 /*******************  FUNCTION  *********************/

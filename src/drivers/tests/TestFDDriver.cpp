@@ -30,19 +30,6 @@ TEST(TestFDDriver, constructor)
 }
 
 /*******************  FUNCTION  *********************/
-TEST(TestFDDriver, dup)
-{
-	std::string fname = "/tmp/ummap-io-v2-test-fd-driver-dup.txt";
-	int fd = open(fname.c_str(), O_APPEND|O_CREAT, S_IRWXU);
-	OS::removeFile(fname);
-	ASSERT_GT(fd, 0);
-	FDDriver driver(fd);
-	Driver * dupDriver = driver.dup();
-	delete dupDriver;
-	close(fd);
-}
-
-/*******************  FUNCTION  *********************/
 TEST(TestFDDriver, pwrite_pread)
 {
 	std::string fname = "/tmp/ummap-io-v2-test-fd-driver-dup.txt";

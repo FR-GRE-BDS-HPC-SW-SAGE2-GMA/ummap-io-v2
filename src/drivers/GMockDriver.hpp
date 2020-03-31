@@ -26,7 +26,6 @@ class GMockDriver : public Driver
 		MOCK_METHOD(ssize_t, pwrite,(const void * buffer, size_t size, size_t offset));
 		MOCK_METHOD(ssize_t, pread,(void * buffer, size_t size, size_t offset));
 		MOCK_METHOD(void, sync,(size_t offset, size_t size));
-		virtual Driver * dup(void) {return this;};
 	private:
 		char value;
 };

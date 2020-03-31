@@ -47,14 +47,10 @@ class Driver
 		 * @param size Size of the segment to sync.
 		**/
 		virtual void sync(size_t offset, size_t size) = 0;
-		/**
-		 * Duplicate the current driver so the original one can be closed
-		 * and the dup one can still be used. This operation is used
-		 * by the Mapping constructor to let the caller closing
-		 * its driver.
-		 * @return The duplicated driver.
-		**/
-		virtual Driver * dup(void) = 0;
+		void setAutoclean(bool status = true);
+		bool hasAutoclean(void) const;
+	private:
+		bool autoclean;
 };
 
 }

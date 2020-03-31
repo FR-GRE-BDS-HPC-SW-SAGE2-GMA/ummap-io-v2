@@ -96,16 +96,6 @@ void MemoryDriver::sync(size_t offset, size_t size)
 }
 
 /*******************  FUNCTION  *********************/
-Driver * MemoryDriver::dup(void)
-{
-	//alloc new
-	MemoryDriver * copy = new MemoryDriver(this);
-
-	//return
-	return copy;
-}
-
-/*******************  FUNCTION  *********************/
 char * MemoryDriver::getBuffer(void)
 {
 	return this->buffer;

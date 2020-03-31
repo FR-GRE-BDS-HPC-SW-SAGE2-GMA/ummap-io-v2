@@ -104,14 +104,14 @@ TEST(TestMapping, first_last_non_full)
 	//setup
 	size_t segments = 8;
 	size_t size = segments * UMMAP_PAGE_SIZE + 1024;
-	GMockDriver * driver = new GMockDriver;
-	Mapping mapping(size, UMMAP_PAGE_SIZE, MAPPING_PROT_RW, driver, NULL, NULL);
+	GMockDriver driver;
+	Mapping mapping(size, UMMAP_PAGE_SIZE, MAPPING_PROT_RW, &driver, NULL, NULL);
 
 	//get
 	char * ptr = (char*)mapping.getAddress();
 
 	//access
-	EXPECT_CALL(*driver, pread(_, 1024, segments * UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(driver, pread(_, 1024, segments * UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
 	mapping.onSegmentationFault(ptr + size - 10, false);
 }
 
@@ -121,15 +121,15 @@ TEST(TestMapping, flush)
 	//setup
 	size_t segments = 8;
 	size_t size = segments * UMMAP_PAGE_SIZE;
-	GMockDriver * driver = new GMockDriver;
-	Mapping mapping(size, UMMAP_PAGE_SIZE, MAPPING_PROT_RW, driver, NULL, NULL);
+	GMockDriver driver;
+	Mapping mapping(size, UMMAP_PAGE_SIZE, MAPPING_PROT_RW, &driver, NULL, NULL);
 
 	//get
 	char * ptr = (char*)mapping.getAddress();
 
 	//we should see two read
-	EXPECT_CALL(*driver, pread(_, UMMAP_PAGE_SIZE, 0)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
-	EXPECT_CALL(*driver, pread(_, UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 0)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
 
 	//touch to map
 	mapping.onSegmentationFault(ptr + 0 * UMMAP_PAGE_SIZE, true);
@@ -140,8 +140,8 @@ TEST(TestMapping, flush)
 		ptr[i] = 64;
 
 	//we should see two write
-	EXPECT_CALL(*driver, pwrite(_, UMMAP_PAGE_SIZE, 0)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
-	EXPECT_CALL(*driver, pwrite(_, UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(driver, pwrite(_, UMMAP_PAGE_SIZE, 0)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(driver, pwrite(_, UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
 
 	//flush
 	mapping.flush();

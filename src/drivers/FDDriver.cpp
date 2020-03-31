@@ -60,9 +60,3 @@ void FDDriver::sync(size_t offset, size_t size)
 {
 	::fdatasync(fd);
 }
-
-/*******************  FUNCTION  *********************/
-Driver * FDDriver::dup(void)
-{
-	return new FDDriver(fd);
-}

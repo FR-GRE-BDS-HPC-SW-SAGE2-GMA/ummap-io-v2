@@ -65,7 +65,7 @@ TEST(TestMemoryDriver, getSize)
 TEST(TestMemoryDriver, dup)
 {
 	MemoryDriver driver(1024*1024, 32);
-	MemoryDriver * dup = dynamic_cast<MemoryDriver *>(driver.dup());
+	MemoryDriver * dup = new MemoryDriver(&driver);
 
 	//set
 	for (int i = 0 ; i < 1024*1024; i++)
