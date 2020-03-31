@@ -6,7 +6,8 @@
 
 ######################################################
 set(DRIVERS_SRC DummyDriver.cpp
-                MemoryDriver.cpp)
+				MemoryDriver.cpp
+				FDDriver.cpp)
 
 ######################################################
 add_library(ummap-drivers OBJECT ${DRIVERS_SRC})

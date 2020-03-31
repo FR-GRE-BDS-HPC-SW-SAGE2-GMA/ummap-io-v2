@@ -12,6 +12,7 @@
 #include <cstdio>
 //unix
 #include <sys/mman.h>
+#include <unistd.h>
 //internal
 #include "../common/Debug.hpp"
 //local
@@ -152,4 +153,11 @@ int UnixOS::cpuNumber(void)
 void UnixOS::madviseDontNeed(void * ptr, size_t size)
 {
 	madvise(ptr, size, MADV_DONTNEED);
+}
+
+/*******************  FUNCTION  *********************/
+void UnixOS::removeFile(const std::string & path)
+{
+	int res = unlink(path.c_str());
+	assumeArg(res == 0, "Fail to remove file %s : %s").arg(path).arg(strerror(errno));
 }

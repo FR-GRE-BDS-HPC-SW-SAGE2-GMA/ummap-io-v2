@@ -26,6 +26,7 @@ struct UnixOS
 	static void mprotect(void * ptr, size_t size, bool read, bool write);
 	static void madviseDontNeed(void * ptr, size_t size);
 	static int cpuNumber(void);
+	static void removeFile(const std::string & path);
 };
 
 }
