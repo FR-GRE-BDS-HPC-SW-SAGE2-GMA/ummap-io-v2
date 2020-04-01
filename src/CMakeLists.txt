@@ -51,6 +51,8 @@ set(UMMAP_INTERNAL_CODE
 
 ######################################################
 add_library(ummap-io SHARED ${UMMAP_INTERNAL_CODE})
+set_target_properties(ummap-io PROPERTIES VERSION 0.0.0 SOVERSION 0)
+install(TARGETS ummap-io DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 ######################################################
 add_subdirectory(common)

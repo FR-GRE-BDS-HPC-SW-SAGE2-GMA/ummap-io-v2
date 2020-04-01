@@ -24,6 +24,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/macros.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/unittest-macros.cmake)
 
 ######################################################
+include(GNUInstallDirs)
 find_package(OpenMP REQUIRED)
 
 ######################################################
