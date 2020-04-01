@@ -169,6 +169,19 @@ int GlobalHandler::umunmap(void * ptr)
 }
 
 /*******************  FUNCTION  *********************/
+void GlobalHandler::skipFirstRead(void * ptr)
+{
+	//get mapping
+	Mapping * mapping = this->mappingRegistry.getMapping(ptr);
+
+	//error
+	assumeArg(mapping != NULL, "Fail to find ummap mapping to unmap : %1").arg(ptr).end();
+
+	//apply
+	mapping->skipFirstRead();
+}
+
+/*******************  FUNCTION  *********************/
 void ummapio::setGlobalHandler(GlobalHandler * handler)
 {
 	assert(handler != NULL);

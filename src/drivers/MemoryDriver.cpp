@@ -61,8 +61,15 @@ ssize_t MemoryDriver::pwrite(const void * buffer, size_t size, size_t offset)
 {
 	//check
 	assert(buffer != NULL);
-	assert(offset < this->size);
-	assert(size + offset <= this->size);
+	assumeArg(offset < this->size, "Invalid position, offset overpass memory limit: offset=%2, mem=%3")
+		.arg(offset)
+		.arg(this->size)
+		.end();
+	assumeArg(size + offset <= this->size, "Invalid position, overpass memory limit: size=%1, offset=%2, mem=%3")
+		.arg(size)
+		.arg(offset)
+		.arg(this->size)
+		.end();
 
 	//copy
 	memcpy(this->buffer + offset, buffer, size);
@@ -76,8 +83,15 @@ ssize_t MemoryDriver::pread(void * buffer, size_t size, size_t offset)
 {
 	//check
 	assert(buffer != NULL);
-	assert(offset < this->size);
-	assert(size + offset <= this->size);
+	assumeArg(offset < this->size, "Invalid position, offset overpass memory limit: offset=%1, mem=%2")
+		.arg(offset)
+		.arg(this->size)
+		.end();
+	assumeArg(size + offset <= this->size, "Invalid position, overpass memory limit: size=%1, offset=%2, mem=%3")
+		.arg(size)
+		.arg(offset)
+		.arg(this->size)
+		.end();
 
 	//copy
 	memcpy(buffer, this->buffer + offset, size);

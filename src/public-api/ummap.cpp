@@ -6,7 +6,13 @@
 
 /********************  HEADERS  *********************/
 #include <cassert>
+#include <cstdio>
+#include <cstring>
+#include <cerrno>
+#include "../common/Debug.hpp"
 #include "../core/GlobalHandler.hpp"
+#include "../drivers/FDDriver.hpp"
+#include "../drivers/MemoryDriver.hpp"
 #include "../drivers/DummyDriver.hpp"
 #include "ummap.h"
 
@@ -55,8 +61,69 @@ int umunmap(void * ptr)
 }
 
 /*******************  FUNCTION  *********************/
+void ummap_skip_first_read(void * ptr)
+{
+	//check
+	assert(gblHandler != NULL);
+	assert(ptr != NULL);
+
+	//call
+	return gblHandler->skipFirstRead(ptr);
+}
+
+/*******************  FUNCTION  *********************/
 ummap_driver_t * ummap_driver_create_dummy(char value)
 {
 	Driver * driver = new DummyDriver(value);
 	return (ummap_driver_t*)driver;
+}
+
+/*******************  FUNCTION  *********************/
+ummap_driver_t * ummap_driver_create_fopen(const char * file_path, const char * mode)
+{
+	//open
+	FILE * fp = fopen(file_path, mode);
+	assumeArg(fp != NULL, "Fail to open file '%1': %2")
+		.arg(file_path)
+		.arg(strerror(errno))
+		.end();
+	
+	//create driver
+	ummap_driver_t * res = ummap_driver_create_fd(fileno(fp));
+
+	//close
+	fclose(fp);
+
+	//return
+	return res;
+}
+
+/*******************  FUNCTION  *********************/
+ummap_driver_t * ummap_driver_create_fd(int fd)
+{
+	Driver * driver = new FDDriver(fd);
+	return (ummap_driver_t*)driver;
+}
+
+/*******************  FUNCTION  *********************/
+ummap_driver_t * ummap_driver_create_memory(size_t size)
+{
+	Driver * driver = new MemoryDriver(size);
+	return (ummap_driver_t*)driver;
+}
+
+/*******************  FUNCTION  *********************/
+void ummap_driver_destroy(ummap_driver_t * driver)
+{
+	assert(driver != NULL);
+	Driver * driv = (Driver*)driver;
+	delete driv;
+}
+
+/*******************  FUNCTION  *********************/
+void ummap_driver_set_autoclean(ummap_driver_t * driver, bool autoclean)
+{
+	assert(driver != NULL);
+	Driver * driv = (Driver*)(void*)driver;
+	driv->setAutoclean(autoclean);
 }
