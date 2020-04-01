@@ -13,7 +13,7 @@
 #include "pthread.h"
 
 /*******************  NAMESPACE  ********************/
-namespace ummap_io
+namespace ummapio
 {
 
 /*********************  CLASS  **********************/

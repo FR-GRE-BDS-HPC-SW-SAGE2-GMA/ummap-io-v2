@@ -13,7 +13,7 @@
 #include "MemoryDriver.hpp"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap_io;
+using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
 MemoryDriver::MemoryDriver(size_t size, char defaultValue)

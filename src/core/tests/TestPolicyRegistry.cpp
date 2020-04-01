@@ -10,7 +10,7 @@
 #include "../PolicyRegistry.hpp"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap_io;
+using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
 TEST(TestPolicyRegistry, constructor)

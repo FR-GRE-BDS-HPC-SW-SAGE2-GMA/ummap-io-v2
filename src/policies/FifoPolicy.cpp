@@ -15,7 +15,7 @@
 #include "FifoPolicy.hpp"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap_io;
+using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
 FifoPolicy::FifoPolicy(size_t maxMemory, bool local = false)

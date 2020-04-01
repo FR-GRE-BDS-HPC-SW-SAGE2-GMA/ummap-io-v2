@@ -11,7 +11,7 @@
 #include <string>
 
 /********************  NAMESPACE  *******************/
-namespace ummap_io
+namespace ummapio
 {
 
 #define UMMAP_PAGE_SIZE 4096

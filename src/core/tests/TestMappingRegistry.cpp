@@ -13,7 +13,7 @@
 #include "../MappingRegistry.hpp"
 
 /********************  HEADERS  *********************/
-using namespace ummap_io;
+using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
 TEST(TestRegistry, constructor)

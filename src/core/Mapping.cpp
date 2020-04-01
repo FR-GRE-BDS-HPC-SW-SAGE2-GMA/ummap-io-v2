@@ -16,7 +16,7 @@
 #include "Mapping.hpp"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap_io;
+using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
 Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, MappingProtection protection, Driver * driver, Policy * localPolicy, Policy * globalPolicy)

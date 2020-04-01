@@ -16,7 +16,7 @@
 #include "../FifoPolicy.hpp"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap_io;
+using namespace ummapio;
 using namespace testing;
 
 /*******************  FUNCTION  *********************/

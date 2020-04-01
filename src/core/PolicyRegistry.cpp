@@ -13,7 +13,7 @@
 #include "PolicyRegistry.hpp"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap_io;
+using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
 PolicyRegistry::PolicyRegistry(void)

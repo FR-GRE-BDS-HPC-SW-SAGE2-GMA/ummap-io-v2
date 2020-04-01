@@ -19,7 +19,7 @@
 #include "UnixOS.hpp"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap_io;
+using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
 void * UnixOS::mmapProtNone(size_t size)

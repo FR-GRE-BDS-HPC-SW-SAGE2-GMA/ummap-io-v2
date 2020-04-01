@@ -14,17 +14,17 @@
 #include "GlobalHandler.hpp"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap_io;
+using namespace ummapio;
 
 /********************  MACROS  **********************/
 #define GET_REG_ERR(context) ((ucontext_t *)context)->uc_mcontext.gregs[REG_ERR]
 
 /********************  GLOBAL  **********************/
-GlobalHandler * ummap_io::gblHandler = NULL;
+GlobalHandler * ummapio::gblHandler = NULL;
 static void (*gblOldHandler) (int, siginfo_t *, void *) = NULL;
 
 /*******************  FUNCTION  *********************/
-void ummap_io::setupSegfaultHandler(void)
+void ummapio::setupSegfaultHandler(void)
 {
 	//get old action
 	struct sigaction oldAction;
@@ -44,13 +44,13 @@ void ummap_io::setupSegfaultHandler(void)
 }
 
 /*******************  FUNCTION  *********************/
-void ummap_io::unsetSegfaultHandler(void)
+void ummapio::unsetSegfaultHandler(void)
 {
 	signal(SIGSEGV, SIG_DFL);
 }
 
 /*******************  FUNCTION  *********************/
-void ummap_io::segfaultHandler(int sig, siginfo_t *si, void *context)
+void ummapio::segfaultHandler(int sig, siginfo_t *si, void *context)
 {
 	//extract
 	void* addr         = (void*)si->si_addr;
@@ -133,7 +133,7 @@ bool GlobalHandler::onSegFault(void * addr, bool isWrite)
 }
 
 /*******************  FUNCTION  *********************/
-void ummap_io::setGlobalHandler(GlobalHandler * handler)
+void ummapio::setGlobalHandler(GlobalHandler * handler)
 {
 	assert(handler != NULL);
 	assume(gblHandler == NULL, "Try to re-init ummap-io without previously destroy states !");
@@ -141,7 +141,7 @@ void ummap_io::setGlobalHandler(GlobalHandler * handler)
 }
 
 /*******************  FUNCTION  *********************/
-void ummap_io::clearGlobalHandler(void)
+void ummapio::clearGlobalHandler(void)
 {
 	if (gblHandler != NULL) {
 		delete gblHandler;

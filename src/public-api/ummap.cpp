@@ -9,19 +9,19 @@
 #include "ummap.h"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap_io;
+using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
 void ummap_init(void)
 {
-	ummap_io::GlobalHandler * handler = new ummap_io::GlobalHandler();
-	ummap_io::setGlobalHandler(handler);
-	ummap_io::setupSegfaultHandler();
+	ummapio::GlobalHandler * handler = new ummapio::GlobalHandler();
+	ummapio::setGlobalHandler(handler);
+	ummapio::setupSegfaultHandler();
 }
 
 /*******************  FUNCTION  *********************/
 void ummap_finalize(void)
 {
-	ummap_io::unsetSegfaultHandler();
-	ummap_io::clearGlobalHandler();
+	ummapio::unsetSegfaultHandler();
+	ummapio::clearGlobalHandler();
 }

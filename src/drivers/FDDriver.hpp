@@ -11,7 +11,7 @@
 #include "../core/Driver.hpp"
 
 /********************  NAMESPACE  *******************/
-namespace ummap_io
+namespace ummapio
 {
 
 /*********************  CLASS  **********************/

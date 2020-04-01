@@ -11,7 +11,7 @@
 #include "../MemoryDriver.hpp"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap_io;
+using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
 TEST(TestMemoryDriver, constructor)

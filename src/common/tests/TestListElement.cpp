@@ -9,7 +9,7 @@
 #include "../ListElement.hpp"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap_io;
+using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
 TEST(TestListElement, constructor)

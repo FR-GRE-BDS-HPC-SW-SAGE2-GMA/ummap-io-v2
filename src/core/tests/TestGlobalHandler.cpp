@@ -14,7 +14,7 @@
 #include "../GlobalHandler.hpp"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap_io;
+using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
 TEST(TestGlobalHandler, constructor)

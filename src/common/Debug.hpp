@@ -13,7 +13,7 @@
 #include <from-cern-lhcb-daqpipe-v2/Debug.hpp>
 
 /********************  NAMESPACE  *******************/
-namespace ummap_io
+namespace ummapio
 {
 
 /********************  MACROS  **********************/

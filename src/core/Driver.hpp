@@ -12,7 +12,7 @@
 #include <cstdlib>
 
 /********************  NAMESPACE  *******************/
-namespace ummap_io
+namespace ummapio
 {
 
 /*********************  CLASS  **********************/

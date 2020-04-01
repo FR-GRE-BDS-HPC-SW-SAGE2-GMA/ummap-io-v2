@@ -16,7 +16,7 @@
 #include "Driver.hpp"
 
 /********************  NAMESPACE  *******************/
-namespace ummap_io
+namespace ummapio
 {
 
 /*********************  TYPES  **********************/
