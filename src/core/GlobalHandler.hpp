@@ -10,7 +10,7 @@
 /********************  HEADERS  *********************/
 #include <map>
 #include <signal.h>
-#include "Registry.hpp"
+#include "MappingRegistry.hpp"
 #include "Policy.hpp"
 
 /********************  NAMESPACE  *******************/
@@ -35,16 +35,20 @@ class GlobalHandler
 		bool onSegFault(void * addr, bool isWrite);
 		void deleteAllMappings(void);
 	private:
-		Registry mappingRegistry;
+		MappingRegistry mappingRegistry;
 };
 
 /********************* GLOBAL  **********************/
 extern GlobalHandler * gblHandler;
 
 /*******************  FUNCTION  *********************/
+//fault handler
 void setupSegfaultHandler(void);
 void unsetSegfaultHandler(void);
 void segfaultHandler(int sig, siginfo_t *si, void *context);
+
+/*******************  FUNCTION  *********************/
+//global handler
 void setGlobalHandler(GlobalHandler * handler);
 void clearGlobalHandler(void);
 

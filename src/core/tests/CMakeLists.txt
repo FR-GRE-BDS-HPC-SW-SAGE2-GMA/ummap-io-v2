@@ -12,7 +12,7 @@ include_directories(${GTEST_INCLUDE_DIRS} ${GMOCK_INCLUDE_DIRS})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
 ######################################################
-set(TEST_NAMES TestMapping TestRegistry TestPolicy TestGlobalHandler)
+set(TEST_NAMES TestMapping TestMappingRegistry TestPolicy TestGlobalHandler)
 
 ######################################################
 FOREACH(test_name ${TEST_NAMES})

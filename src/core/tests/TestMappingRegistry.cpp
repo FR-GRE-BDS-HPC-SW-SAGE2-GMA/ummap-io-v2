@@ -10,7 +10,7 @@
 //local
 #include "drivers/DummyDriver.hpp"
 #include "portability/OS.hpp"
-#include "../Registry.hpp"
+#include "../MappingRegistry.hpp"
 
 /********************  HEADERS  *********************/
 using namespace ummap_io;
@@ -18,7 +18,7 @@ using namespace ummap_io;
 /*******************  FUNCTION  *********************/
 TEST(TestRegistry, constructor)
 {
-	Registry registry;
+	MappingRegistry registry;
 }
 
 /*******************  FUNCTION  *********************/
@@ -29,7 +29,7 @@ TEST(TestRegistry, reg)
 	Mapping mapping(10*1024*1024, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, driver);
 
 	//create
-	Registry registry;
+	MappingRegistry registry;
 	
 	//fill
 	registry.registerMapping(&mapping);

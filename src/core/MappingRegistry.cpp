@@ -9,25 +9,25 @@
 #include <cassert>
 #include <mutex>
 //local
-#include "Registry.hpp"
+#include "MappingRegistry.hpp"
 
 /***************** USING NAMESPACE ******************/
 using namespace ummap_io;
 
 /*******************  FUNCTION  *********************/
-Registry::Registry(void)
+MappingRegistry::MappingRegistry(void)
 {
 
 }
 
 /*******************  FUNCTION  *********************/
-Registry::~Registry(void)
+MappingRegistry::~MappingRegistry(void)
 {
 	deleteAllMappings();
 }
 
 /*******************  FUNCTION  *********************/
-void Registry::registerMapping(Mapping * mapping)
+void MappingRegistry::registerMapping(Mapping * mapping)
 {
 	//check
 	assert(mapping != NULL);
@@ -54,7 +54,7 @@ void Registry::registerMapping(Mapping * mapping)
 }
 
 /*******************  FUNCTION  *********************/
-bool Registry::contain(Mapping * mapping)
+bool MappingRegistry::contain(Mapping * mapping)
 {
 	//CRITICAL SECTION
 	{
@@ -74,7 +74,7 @@ bool Registry::contain(Mapping * mapping)
 }
 
 /*******************  FUNCTION  *********************/
-void Registry::unregisterMapping(Mapping * mapping)
+void MappingRegistry::unregisterMapping(Mapping * mapping)
 {
 	//CRITICAL SECTION
 	{
@@ -95,7 +95,7 @@ void Registry::unregisterMapping(Mapping * mapping)
 }
 
 /*******************  FUNCTION  *********************/
-Mapping * Registry::getMapping(void * addr)
+Mapping * MappingRegistry::getMapping(void * addr)
 {
 	//check
 	assert(addr != NULL);
@@ -115,7 +115,7 @@ Mapping * Registry::getMapping(void * addr)
 }
 
 /*******************  FUNCTION  *********************/
-void Registry::deleteAllMappings(void)
+void MappingRegistry::deleteAllMappings(void)
 {
 	//CRITICAL SECTION
 	{
@@ -131,7 +131,7 @@ void Registry::deleteAllMappings(void)
 }
 
 /*******************  FUNCTION  *********************/
-bool Registry::isEmpty(void)
+bool MappingRegistry::isEmpty(void)
 {
 	//CRITICAL SECTION
 	{

@@ -27,11 +27,11 @@ struct RegistryEntry
 };
 
 /*********************  CLASS  **********************/
-class Registry
+class MappingRegistry
 {
 	public:
-		Registry(void);
-		~Registry(void);
+		MappingRegistry(void);
+		~MappingRegistry(void);
 		void registerMapping(Mapping * mapping);
 		void unregisterMapping(Mapping * mapping);
 		void deleteAllMappings(void);
