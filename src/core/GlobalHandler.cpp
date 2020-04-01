@@ -20,7 +20,7 @@ using namespace ummapio;
 #define GET_REG_ERR(context) ((ucontext_t *)context)->uc_mcontext.gregs[REG_ERR]
 
 /********************  GLOBAL  **********************/
-GlobalHandler * ummapio::gblHandler = NULL;
+static GlobalHandler * gblHandler = NULL;
 static void (*gblOldHandler) (int, siginfo_t *, void *) = NULL;
 
 /*******************  FUNCTION  *********************/
@@ -182,6 +182,45 @@ void GlobalHandler::skipFirstRead(void * ptr)
 }
 
 /*******************  FUNCTION  *********************/
+void GlobalHandler::flush(void * ptr, size_t size)
+{
+	//get mapping
+	Mapping * mapping = this->mappingRegistry.getMapping(ptr);
+
+	//error
+	assumeArg(mapping != NULL, "Fail to find ummap mapping to unmap : %1").arg(ptr).end();
+
+	//compute
+	size_t offset = (char*)ptr - (char*)mapping->getAddress();
+	size_t segmentSize = mapping->getSegmentSize();
+
+	//printf("flush internal %lu -> %lu -> %lu\n", offset, size, mapping->getAlignedSize());
+
+	//size
+	if (size == 0)
+		size = mapping->getAlignedSize() - offset;
+	
+	//align
+	if (offset % segmentSize != 0) {
+		size_t delta = offset - offset % segmentSize;
+		offset -= delta;
+		size += delta;
+	}
+	if (size % segmentSize != 0) {
+		size += segmentSize - offset % segmentSize;
+	}
+
+	//printf("flush internal %lu -> %lu -> %lu\n", offset, size, mapping->getAlignedSize());
+
+	//check
+	assume((char*)ptr + size <= (char*)mapping->getAddress() + mapping->getAlignedSize(),
+		"Invalid flush size, not fit in ummap mapping !");
+
+	//apply
+	mapping->flush(offset, size);
+}
+
+/*******************  FUNCTION  *********************/
 void ummapio::setGlobalHandler(GlobalHandler * handler)
 {
 	assert(handler != NULL);
@@ -196,4 +235,11 @@ void ummapio::clearGlobalHandler(void)
 		delete gblHandler;
 		gblHandler = NULL;
 	}
+}
+
+/*******************  FUNCTION  *********************/
+GlobalHandler * ummapio::getGlobalhandler(void)
+{
+	assume(gblHandler != NULL, "Missing initialization of ummap-io before use !");
+	return gblHandler;
 }

@@ -128,7 +128,7 @@ void Mapping::loadAndSwapSegment(size_t offset, bool writeAccess)
 
 	//read inside new segment
 	ssize_t res = this->driver->pread(ptr, readWriteSize(offset), this->storageOffset + offset);
-	assumeArg(res == segmentSize, "Fail to read all data, got %1 instead of %2 !")
+	assumeArg(res >= 0, "Fail to read all data, got %1 instead of %2 !")
 		.arg(res)
 		.arg(segmentSize)
 		.end();
@@ -322,7 +322,7 @@ void Mapping::flush(size_t offset, size_t size, bool unmap, bool lock)
 
 				//errors
 				assumeArg(res != -1, "Fail to pwrite : %1").arg(strerror(errno)).end();
-				assumeArg(res == this->segmentSize, "Fail to fully write the segment, got : %1").arg(res).end();
+				assumeArg(res >= 0, "Fail to fully write the segment, got : %1").arg(res).end();
 
 				//update status
 				status.dirty = false;
@@ -380,7 +380,7 @@ void Mapping::evict(Policy * sourcePolicy, size_t segmentId)
 /*******************  FUNCTION  *********************/
 void Mapping::skipFirstRead(void)
 {
-	for (size_t i = 0 ; i < this->segmentSize ; i++)
+	for (size_t i = 0 ; i < this->segments ; i++)
 		this->segmentStatus[i].needRead = false;
 }
 

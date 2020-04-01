@@ -199,3 +199,21 @@ TEST_F(TestPublicAPI, policy_group)
 	//unmap
 	umunmap(ptr1);
 }
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, lbm_bugguy_case_1)
+{
+	//set buggy size non multiple of 1MB
+	size_t size = 37140768;
+
+	//map
+	void * ptr1 = ummap(size, 1024*1024, 0, UMMAP_PROT_RW, ummap_driver_create_dummy(64), NULL, "none");
+
+	//touch
+	#pragma parallel
+	for (size_t i = 0 ; i < size ; i++)
+		((char*)ptr1)[i] = 34;
+
+	//unam
+	umunmap(ptr1);
+}

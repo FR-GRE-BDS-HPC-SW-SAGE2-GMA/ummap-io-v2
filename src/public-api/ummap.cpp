@@ -39,7 +39,7 @@ void ummap_finalize(void)
 void * ummap(size_t size, size_t segment_size, size_t storage_offset, ummap_mapping_prot_t protection, ummap_driver_t * driver, ummap_policy_t * local_policy, const char * policy_group)
 {
 	//check
-	assert(gblHandler != NULL);
+	assert(getGlobalhandler() != NULL);
 
 	//convert
 	MappingProtection prot = (MappingProtection)protection;
@@ -47,29 +47,29 @@ void * ummap(size_t size, size_t segment_size, size_t storage_offset, ummap_mapp
 	Policy * pol = (Policy*)(local_policy);
 
 	//call & ret
-	return gblHandler->ummap(size, segment_size, storage_offset, prot, driv, pol, policy_group);
+	return getGlobalhandler()->ummap(size, segment_size, storage_offset, prot, driv, pol, policy_group);
 }
 
 /*******************  FUNCTION  *********************/
 int umunmap(void * ptr)
 {
 	//check
-	assert(gblHandler != NULL);
+	assert(getGlobalhandler() != NULL);
 	assert(ptr != NULL);
 
 	//call
-	return gblHandler->umunmap(ptr);
+	return getGlobalhandler()->umunmap(ptr);
 }
 
 /*******************  FUNCTION  *********************/
 void ummap_skip_first_read(void * ptr)
 {
 	//check
-	assert(gblHandler != NULL);
+	assert(getGlobalhandler() != NULL);
 	assert(ptr != NULL);
 
 	//call
-	return gblHandler->skipFirstRead(ptr);
+	return getGlobalhandler()->skipFirstRead(ptr);
 }
 
 /*******************  FUNCTION  *********************/
@@ -133,23 +133,23 @@ void ummap_driver_set_autoclean(ummap_driver_t * driver, bool autoclean)
 void ummap_policy_group_register(const char * name, ummap_policy_t * policy)
 {
 	//check
-	assert(gblHandler != NULL);
+	assert(getGlobalhandler() != NULL);
 	assert(name != NULL);
 	
 	//reg
 	Policy * pol = (Policy*)policy;
-	gblHandler->registerPolicy(name, pol);
+	getGlobalhandler()->registerPolicy(name, pol);
 }
 
 /*******************  FUNCTION  *********************/
 void ummap_policy_group_destroy(const char * name)
 {
 	//check
-	assert(gblHandler != NULL);
+	assert(getGlobalhandler() != NULL);
 	assert(name != NULL);
 	
 	//unreg
-	gblHandler->unregisterPolicy(name);
+	getGlobalhandler()->unregisterPolicy(name);
 }
 
 /*******************  FUNCTION  *********************/
@@ -157,4 +157,10 @@ ummap_policy_t * umamp_policy_create_fifo(size_t max_size, bool local)
 {
 	Policy * policy = new FifoPolicy(max_size, local);
 	return (ummap_policy_t*)policy;
+}
+
+/*******************  FUNCTION  *********************/
+void ummap_flush(void * ptr, size_t size)
+{
+	getGlobalhandler()->flush(ptr, size);
 }

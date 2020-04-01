@@ -43,7 +43,7 @@ TEST(TestGlobalHandler, basic_read_workflow)
 	//mapping
 	DummyDriver * driver = new DummyDriver(32);
 	Mapping mapping(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_READ, driver);
-	gblHandler->registerMapping(&mapping);
+	getGlobalhandler()->registerMapping(&mapping);
 
 	//read access
 	char * ptr = (char*)mapping.getAddress();
@@ -51,7 +51,7 @@ TEST(TestGlobalHandler, basic_read_workflow)
 		ASSERT_EQ(32, ptr[i]);
 
 	//clean
-	gblHandler->unregisterMapping(&mapping);
+	getGlobalhandler()->unregisterMapping(&mapping);
 	unsetSegfaultHandler();
 	clearGlobalHandler();
 }
@@ -67,7 +67,7 @@ TEST(TestGlobalHandler, basic_write_workflow)
 	//mapping
 	DummyDriver * driver = new DummyDriver(32);
 	Mapping mapping(8 * UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, driver);
-	gblHandler->registerMapping(&mapping);
+	getGlobalhandler()->registerMapping(&mapping);
 
 	//read access
 	char * ptr = (char*)mapping.getAddress();
@@ -79,7 +79,7 @@ TEST(TestGlobalHandler, basic_write_workflow)
 		ASSERT_EQ(48, ptr[i]);
 
 	//clean
-	gblHandler->unregisterMapping(&mapping);
+	getGlobalhandler()->unregisterMapping(&mapping);
 	unsetSegfaultHandler();
 	clearGlobalHandler();
 }
@@ -95,7 +95,7 @@ TEST(TestGlobalHandler, basic_read_workflow_parallel)
 	//mapping
 	DummyDriver * driver = new DummyDriver(32);
 	Mapping mapping(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_READ, driver);
-	gblHandler->registerMapping(&mapping);
+	getGlobalhandler()->registerMapping(&mapping);
 
 	//read access
 	char * ptr = (char*)mapping.getAddress();
@@ -111,7 +111,7 @@ TEST(TestGlobalHandler, basic_read_workflow_parallel)
 	ASSERT_TRUE(ok);
 
 	//clean
-	gblHandler->unregisterMapping(&mapping);
+	getGlobalhandler()->unregisterMapping(&mapping);
 	unsetSegfaultHandler();
 	clearGlobalHandler();
 }
@@ -127,7 +127,7 @@ TEST(TestGlobalHandler, basic_write_workflow_parallel)
 	//mapping
 	DummyDriver * driver = new DummyDriver(32);
 	Mapping mapping(8 * UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, driver);
-	gblHandler->registerMapping(&mapping);
+	getGlobalhandler()->registerMapping(&mapping);
 
 	//read access
 	char * ptr = (char*)mapping.getAddress();
@@ -143,7 +143,7 @@ TEST(TestGlobalHandler, basic_write_workflow_parallel)
 		ASSERT_EQ(48, ptr[i]);
 
 	//clean
-	gblHandler->unregisterMapping(&mapping);
+	getGlobalhandler()->unregisterMapping(&mapping);
 	unsetSegfaultHandler();
 	clearGlobalHandler();
 }
