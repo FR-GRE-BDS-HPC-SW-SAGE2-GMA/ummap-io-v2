@@ -116,6 +116,7 @@ bool GlobalHandler::onSegFault(void * addr, bool isWrite)
 void ummap_io::setGlobalHandler(GlobalHandler * handler)
 {
 	assert(handler != NULL);
+	assume(gblHandler == NULL, "Try to re-init ummap-io without previously destroy states !");
 	gblHandler = handler;
 }
 

@@ -12,6 +12,6 @@ add_library(ummap-public-api OBJECT ${PUBLIC_API_SRC})
 SET_TARGET_PROPERTIES(ummap-public-api PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 ######################################################
-#if (ENABLE_TESTS)
-#	add_subdirectory(tests)
-#endif (ENABLE_TESTS)
+if (ENABLE_TESTS)
+	add_subdirectory(tests)
+endif (ENABLE_TESTS)
