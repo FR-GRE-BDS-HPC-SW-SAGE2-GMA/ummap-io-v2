@@ -133,6 +133,42 @@ bool GlobalHandler::onSegFault(void * addr, bool isWrite)
 }
 
 /*******************  FUNCTION  *********************/
+void * GlobalHandler::ummap(size_t size, size_t segmentSize, size_t storageOffset, MappingProtection protection, Driver * driver, Policy * localPolicy, const std::string & policyGroup)
+{
+	//get policy
+	Policy * globalPolicy = NULL;
+	if (policyGroup != "none")
+	{
+		globalPolicy = this->policyRegistry.get(policyGroup);
+		assumeArg(globalPolicy != NULL, "Fail to find requested policy group : %1").arg(policyGroup).end();
+	}
+
+	//create mapping
+	Mapping * mapping = new Mapping(size, segmentSize, storageOffset, protection, driver, localPolicy, globalPolicy);
+	this->mappingRegistry.registerMapping(mapping);
+	
+	//return
+	return mapping->getAddress();
+}
+
+/*******************  FUNCTION  *********************/
+int GlobalHandler::umunmap(void * ptr)
+{
+	//get mapping
+	Mapping * mapping = this->mappingRegistry.getMapping(ptr);
+
+	//error
+	assumeArg(mapping != NULL, "Fail to find ummap mapping to unmap : %1").arg(ptr).end();
+
+	//unmap
+	this->mappingRegistry.unregisterMapping(mapping);
+	delete mapping;
+
+	//ok
+	return 0;
+}
+
+/*******************  FUNCTION  *********************/
 void ummapio::setGlobalHandler(GlobalHandler * handler)
 {
 	assert(handler != NULL);

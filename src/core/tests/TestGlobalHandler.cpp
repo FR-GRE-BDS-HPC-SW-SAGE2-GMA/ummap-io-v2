@@ -161,3 +161,36 @@ TEST(TestGlobalHandler, policy)
 	handler.unregisterPorlicy("test");
 	ASSERT_EQ(NULL, handler.getPolicy("test"));
 }
+
+
+/*******************  FUNCTION  *********************/
+TEST(TestGlobalHandler, mmap_and_unmap)
+{
+	//setup
+	GlobalHandler handler;
+
+	//map 2
+	void * ptr1 = handler.ummap(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, new DummyDriver(16), NULL, "none");
+	void * ptr2 = handler.ummap(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, new DummyDriver(16), NULL, "none");
+
+	//destroy 1
+	ASSERT_EQ(0, handler.umunmap(ptr1));
+}
+
+/*******************  FUNCTION  *********************/
+TEST(TestGlobalHandler, mmap_and_policy)
+{
+	//setup
+	GlobalHandler handler;
+
+	//create policy
+	handler.registerPolicy("global", new FifoPolicy(4*UMMAP_PAGE_SIZE, false));
+
+	//map 2
+	void * ptr1 = handler.ummap(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, new DummyDriver(16), NULL, "global");
+	void * ptr2 = handler.ummap(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, new DummyDriver(16), NULL, "global");
+
+	//destroy 1
+	ASSERT_EQ(0, handler.umunmap(ptr1));
+}
+

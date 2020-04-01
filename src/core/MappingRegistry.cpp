@@ -76,12 +76,12 @@ bool MappingRegistry::contain(Mapping * mapping)
 /*******************  FUNCTION  *********************/
 void MappingRegistry::unregisterMapping(Mapping * mapping)
 {
+	//check
+	assert(mapping != NULL);
+
 	//CRITICAL SECTION
 	{
 		std::lock_guard<Spinlock> lockGuard(this->lock);
-
-		//check
-		assert(mapping != NULL);
 
 		//loop
 		for (auto it = entries.begin() ; it != entries.end() ; ++it) {
