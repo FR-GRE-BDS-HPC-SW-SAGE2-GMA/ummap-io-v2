@@ -34,7 +34,7 @@ class GlobalHandler
 		int umunmap(void * ptr);
 		void skipFirstRead(void * ptr);
 		void registerPolicy(const std::string & name, Policy * policy);
-		void unregisterPorlicy(const std::string & name);
+		void unregisterPolicy(const std::string & name);
 		Policy * getPolicy(const std::string & name);
 		void registerMapping(Mapping * mapping);
 		void unregisterMapping(Mapping * mapping);

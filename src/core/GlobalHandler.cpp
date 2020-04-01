@@ -102,7 +102,7 @@ void GlobalHandler::registerPolicy(const std::string & name, Policy * policy)
 }
 
 /*******************  FUNCTION  *********************/
-void GlobalHandler::unregisterPorlicy(const std::string & name)
+void GlobalHandler::unregisterPolicy(const std::string & name)
 {
 	this->policyRegistry.unregisterPolicy(name);
 }

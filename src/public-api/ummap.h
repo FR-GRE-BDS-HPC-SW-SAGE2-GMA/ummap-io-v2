@@ -58,7 +58,7 @@ void ummap_policy_group_destroy(const char * name);
 
 /*******************  FUNCTION  *********************/
 //policies
-ummap_policy_t * umamp_policy_create_fifo(size_t max_size);
+ummap_policy_t * umamp_policy_create_fifo(size_t max_size, bool local);
 
 #ifdef __cplusplus
 }

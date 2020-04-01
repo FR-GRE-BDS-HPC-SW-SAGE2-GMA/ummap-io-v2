@@ -166,3 +166,36 @@ TEST_F(TestPublicAPI, map_driver_dummy)
 	//unmap 1 and let the other for cleaup
 	umunmap(ptr1);
 }
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, destroy_driver)
+{
+	ummap_driver_t * driver = ummap_driver_create_dummy(64);
+	ummap_driver_destroy(driver);
+}
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, autoclean_driver)
+{
+	ummap_driver_t * driver = ummap_driver_create_dummy(64);
+	ummap_driver_set_autoclean(driver, false);
+	ummap_driver_destroy(driver);
+}
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, policy_group)
+{
+	//setup policies
+	ummap_policy_t * globalPolicy = umamp_policy_create_fifo(4*4096, false);
+	ummap_policy_t * localPolicy = umamp_policy_create_fifo(4*4096, true);
+
+	//reg global
+	ummap_policy_group_register("global", globalPolicy);
+
+	//map
+	void * ptr1 = ummap(8*4096, 4096, 0, UMMAP_PROT_RW, ummap_driver_create_dummy(64), localPolicy, "global");
+	memset(ptr1, 0 , 8*4096);
+
+	//unmap
+	umunmap(ptr1);
+}

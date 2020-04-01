@@ -158,7 +158,7 @@ TEST(TestGlobalHandler, policy)
 	ASSERT_EQ(policy, handler.getPolicy("test"));
 	ASSERT_EQ(NULL, handler.getPolicy("test2"));
 
-	handler.unregisterPorlicy("test");
+	handler.unregisterPolicy("test");
 	ASSERT_EQ(NULL, handler.getPolicy("test"));
 }
 

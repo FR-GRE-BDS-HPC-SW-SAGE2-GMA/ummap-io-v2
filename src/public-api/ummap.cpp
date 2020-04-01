@@ -14,6 +14,7 @@
 #include "../drivers/FDDriver.hpp"
 #include "../drivers/MemoryDriver.hpp"
 #include "../drivers/DummyDriver.hpp"
+#include "../policies/FifoPolicy.hpp"
 #include "ummap.h"
 
 /***************** USING NAMESPACE ******************/
@@ -126,4 +127,34 @@ void ummap_driver_set_autoclean(ummap_driver_t * driver, bool autoclean)
 	assert(driver != NULL);
 	Driver * driv = (Driver*)(void*)driver;
 	driv->setAutoclean(autoclean);
+}
+
+/*******************  FUNCTION  *********************/
+void ummap_policy_group_register(const char * name, ummap_policy_t * policy)
+{
+	//check
+	assert(gblHandler != NULL);
+	assert(name != NULL);
+	
+	//reg
+	Policy * pol = (Policy*)policy;
+	gblHandler->registerPolicy(name, pol);
+}
+
+/*******************  FUNCTION  *********************/
+void ummap_policy_group_destroy(const char * name)
+{
+	//check
+	assert(gblHandler != NULL);
+	assert(name != NULL);
+	
+	//unreg
+	gblHandler->unregisterPolicy(name);
+}
+
+/*******************  FUNCTION  *********************/
+ummap_policy_t * umamp_policy_create_fifo(size_t max_size, bool local)
+{
+	Policy * policy = new FifoPolicy(max_size, local);
+	return (ummap_policy_t*)policy;
 }
