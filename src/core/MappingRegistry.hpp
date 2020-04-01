@@ -4,8 +4,8 @@
 			 COPYRIGHT: 2020 Bull SAS
 *****************************************************/
 
-#ifndef UMMAP_REGISTRY_HPP
-#define UMMAP_REGISTRY_HPP
+#ifndef UMMAP_MAPPING_REGISTRY_HPP
+#define UMMAP_MAPPING_REGISTRY_HPP
 
 /********************  HEADERS  *********************/
 //std
@@ -46,4 +46,4 @@ class MappingRegistry
 
 }
 
-#endif //UMMAP_REGISTRY_HPP
+#endif //UMMAP_MAPPING_REGISTRY_HPP

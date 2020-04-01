@@ -5,7 +5,7 @@
 ######################################################
 
 ######################################################
-set(CORE_SRC Driver.cpp Mapping.cpp Policy.cpp MappingRegistry.cpp GlobalHandler.cpp)
+set(CORE_SRC Driver.cpp Mapping.cpp Policy.cpp MappingRegistry.cpp GlobalHandler.cpp PolicyRegistry.cpp)
 
 ######################################################
 add_library(ummap-core OBJECT ${CORE_SRC})

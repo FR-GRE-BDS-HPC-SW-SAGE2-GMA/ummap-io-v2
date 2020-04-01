@@ -18,7 +18,7 @@
 using namespace ummap_io;
 
 /*******************  FUNCTION  *********************/
-FifoPolicy::FifoPolicy(size_t maxMemory, bool local)
+FifoPolicy::FifoPolicy(size_t maxMemory, bool local = false)
 	:Policy(maxMemory, local)
 {
 	this->currentMemory = 0;
