@@ -11,7 +11,7 @@
 #include <map>
 #include <signal.h>
 #include "MappingRegistry.hpp"
-#include "Policy.hpp"
+#include "PolicyRegistry.hpp"
 
 /********************  NAMESPACE  *******************/
 namespace ummap_io
@@ -30,12 +30,16 @@ class GlobalHandler
 	public:
 		GlobalHandler(void);
 		~GlobalHandler(void);
+		void registerPolicy(const std::string & name, Policy * policy);
+		void unregisterPorlicy(const std::string & name);
+		Policy * getPolicy(const std::string & name);
 		void registerMapping(Mapping * mapping);
 		void unregisterMapping(Mapping * mapping);
 		bool onSegFault(void * addr, bool isWrite);
 		void deleteAllMappings(void);
 	private:
 		MappingRegistry mappingRegistry;
+		PolicyRegistry policyRegistry;
 };
 
 /********************* GLOBAL  **********************/

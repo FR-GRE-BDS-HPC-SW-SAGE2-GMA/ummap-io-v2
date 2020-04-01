@@ -73,6 +73,7 @@ GlobalHandler::~GlobalHandler(void)
 {
 	if (this->mappingRegistry.isEmpty() == false) {
 		UMMAP_WARNING("CAUTION: stopping ummap environnement while still having mapping, they will be destroyed.");
+		this->mappingRegistry.deleteAllMappings();
 	}
 }
 
@@ -88,9 +89,28 @@ void GlobalHandler::registerMapping(Mapping * mapping)
 	this->mappingRegistry.registerMapping(mapping);
 }
 
+/*******************  FUNCTION  *********************/
 void GlobalHandler::unregisterMapping(Mapping * mapping)
 {
 	this->mappingRegistry.unregisterMapping(mapping);
+}
+
+/*******************  FUNCTION  *********************/
+void GlobalHandler::registerPolicy(const std::string & name, Policy * policy)
+{
+	this->policyRegistry.registerPolicy(name, policy);
+}
+
+/*******************  FUNCTION  *********************/
+void GlobalHandler::unregisterPorlicy(const std::string & name)
+{
+	this->policyRegistry.unregisterPolicy(name);
+}
+
+/*******************  FUNCTION  *********************/
+Policy * GlobalHandler::getPolicy(const std::string & name)
+{
+	return this->policyRegistry.get(name);
 }
 
 /*******************  FUNCTION  *********************/

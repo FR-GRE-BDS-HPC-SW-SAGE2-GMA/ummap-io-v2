@@ -10,6 +10,7 @@
 //local
 #include "../../portability/OS.hpp"
 #include "../../drivers/DummyDriver.hpp"
+#include "../../policies/FifoPolicy.hpp"
 #include "../GlobalHandler.hpp"
 
 /***************** USING NAMESPACE ******************/
@@ -145,4 +146,18 @@ TEST(TestGlobalHandler, basic_write_workflow_parallel)
 	gblHandler->unregisterMapping(&mapping);
 	unsetSegfaultHandler();
 	clearGlobalHandler();
+}
+
+/*******************  FUNCTION  *********************/
+TEST(TestGlobalHandler, policy)
+{
+	FifoPolicy * policy = new FifoPolicy(4096, false);
+	GlobalHandler handler;
+	
+	handler.registerPolicy("test", policy);
+	ASSERT_EQ(policy, handler.getPolicy("test"));
+	ASSERT_EQ(NULL, handler.getPolicy("test2"));
+
+	handler.unregisterPorlicy("test");
+	ASSERT_EQ(NULL, handler.getPolicy("test"));
 }
