@@ -12,7 +12,7 @@
 #include "../Policy.hpp"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap;
+using namespace ummap_io;
 
 /*********************  CLASS  **********************/
 class PublicPolicy: public Policy

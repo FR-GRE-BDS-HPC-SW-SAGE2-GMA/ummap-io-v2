@@ -23,7 +23,7 @@
 	#include "SpinlockPthread.hpp"
 
 	//map types to generic names
-	namespace ummap
+	namespace ummap_io
 	{
 		typedef SpinlockPthread Spinlock;
 	}

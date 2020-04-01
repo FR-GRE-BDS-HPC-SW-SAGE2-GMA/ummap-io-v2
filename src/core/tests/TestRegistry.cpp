@@ -13,7 +13,7 @@
 #include "../Registry.hpp"
 
 /********************  HEADERS  *********************/
-using namespace ummap;
+using namespace ummap_io;
 
 /*******************  FUNCTION  *********************/
 TEST(TestRegistry, constructor)

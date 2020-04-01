@@ -13,18 +13,18 @@
 #include "../GlobalHandler.hpp"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap;
+using namespace ummap_io;
 
 /*******************  FUNCTION  *********************/
 TEST(TestGlobalHandler, constructor)
 {
-	GlobalHandler handler(NULL);
+	GlobalHandler handler;
 }
 
 /*******************  FUNCTION  *********************/
 TEST(TestGlobalHandler, setup)
 {
-	GlobalHandler * handler = new GlobalHandler(NULL);
+	GlobalHandler * handler = new GlobalHandler;
 	setGlobalHandler(handler);
 	setupSegfaultHandler();
 	unsetSegfaultHandler();
@@ -35,7 +35,7 @@ TEST(TestGlobalHandler, setup)
 TEST(TestGlobalHandler, basic_read_workflow)
 {
 	//setup global
-	GlobalHandler * handler = new GlobalHandler(NULL);
+	GlobalHandler * handler = new GlobalHandler();
 	setGlobalHandler(handler);
 	setupSegfaultHandler();
 
@@ -50,6 +50,7 @@ TEST(TestGlobalHandler, basic_read_workflow)
 		ASSERT_EQ(32, ptr[i]);
 
 	//clean
+	gblHandler->unregisterMapping(&mapping);
 	unsetSegfaultHandler();
 	clearGlobalHandler();
 }
@@ -58,7 +59,7 @@ TEST(TestGlobalHandler, basic_read_workflow)
 TEST(TestGlobalHandler, basic_write_workflow)
 {
 	//setup global
-	GlobalHandler * handler = new GlobalHandler(NULL);
+	GlobalHandler * handler = new GlobalHandler();
 	setGlobalHandler(handler);
 	setupSegfaultHandler();
 
@@ -77,6 +78,7 @@ TEST(TestGlobalHandler, basic_write_workflow)
 		ASSERT_EQ(48, ptr[i]);
 
 	//clean
+	gblHandler->unregisterMapping(&mapping);
 	unsetSegfaultHandler();
 	clearGlobalHandler();
 }
@@ -85,7 +87,7 @@ TEST(TestGlobalHandler, basic_write_workflow)
 TEST(TestGlobalHandler, basic_read_workflow_parallel)
 {
 	//setup global
-	GlobalHandler * handler = new GlobalHandler(NULL);
+	GlobalHandler * handler = new GlobalHandler();
 	setGlobalHandler(handler);
 	setupSegfaultHandler();
 
@@ -108,6 +110,7 @@ TEST(TestGlobalHandler, basic_read_workflow_parallel)
 	ASSERT_TRUE(ok);
 
 	//clean
+	gblHandler->unregisterMapping(&mapping);
 	unsetSegfaultHandler();
 	clearGlobalHandler();
 }
@@ -116,7 +119,7 @@ TEST(TestGlobalHandler, basic_read_workflow_parallel)
 TEST(TestGlobalHandler, basic_write_workflow_parallel)
 {
 	//setup global
-	GlobalHandler * handler = new GlobalHandler(NULL);
+	GlobalHandler * handler = new GlobalHandler;
 	setGlobalHandler(handler);
 	setupSegfaultHandler();
 
@@ -139,6 +142,7 @@ TEST(TestGlobalHandler, basic_write_workflow_parallel)
 		ASSERT_EQ(48, ptr[i]);
 
 	//clean
+	gblHandler->unregisterMapping(&mapping);
 	unsetSegfaultHandler();
 	clearGlobalHandler();
 }

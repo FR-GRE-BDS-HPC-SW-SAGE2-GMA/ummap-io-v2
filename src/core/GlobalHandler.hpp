@@ -8,11 +8,13 @@
 #define UMMAP_GLOBAL_HANDLER_HPP
 
 /********************  HEADERS  *********************/
+#include <map>
+#include <signal.h>
 #include "Registry.hpp"
 #include "Policy.hpp"
 
 /********************  NAMESPACE  *******************/
-namespace ummap
+namespace ummap_io
 {
 
 /*********************  TYPES  **********************/
@@ -26,15 +28,14 @@ enum PageFaultType
 class GlobalHandler
 {
 	public:
-		GlobalHandler(Policy * globalPolicy);
+		GlobalHandler(void);
 		~GlobalHandler(void);
 		void registerMapping(Mapping * mapping);
+		void unregisterMapping(Mapping * mapping);
 		bool onSegFault(void * addr, bool isWrite);
 		void deleteAllMappings(void);
-		void setGlobalPolicy(Policy * policy);
 	private:
 		Registry mappingRegistry;
-		Policy * globalPolicy;
 };
 
 /********************* GLOBAL  **********************/

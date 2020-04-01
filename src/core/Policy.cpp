@@ -14,7 +14,7 @@
 #include "Policy.hpp"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap;
+using namespace ummap_io;
 
 /*******************  FUNCTION  *********************/
 Policy::Policy(size_t maxMemory, bool local)

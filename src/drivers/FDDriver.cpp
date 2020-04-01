@@ -16,7 +16,7 @@
 #include "FDDriver.hpp"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap;
+using namespace ummap_io;
 
 /*******************  FUNCTION  *********************/
 FDDriver::FDDriver(int fd)

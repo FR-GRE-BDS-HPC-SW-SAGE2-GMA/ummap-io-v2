@@ -12,7 +12,7 @@
 #include "Registry.hpp"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap;
+using namespace ummap_io;
 
 /*******************  FUNCTION  *********************/
 Registry::Registry(void)
@@ -23,7 +23,7 @@ Registry::Registry(void)
 /*******************  FUNCTION  *********************/
 Registry::~Registry(void)
 {
-
+	deleteAllMappings();
 }
 
 /*******************  FUNCTION  *********************/

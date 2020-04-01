@@ -14,17 +14,17 @@
 #include "GlobalHandler.hpp"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap;
+using namespace ummap_io;
 
 /********************  MACROS  **********************/
 #define GET_REG_ERR(context) ((ucontext_t *)context)->uc_mcontext.gregs[REG_ERR]
 
 /********************  GLOBAL  **********************/
-GlobalHandler * ummap::gblHandler = NULL;
+GlobalHandler * ummap_io::gblHandler = NULL;
 static void (*gblOldHandler) (int, siginfo_t *, void *) = NULL;
 
 /*******************  FUNCTION  *********************/
-void ummap::setupSegfaultHandler(void)
+void ummap_io::setupSegfaultHandler(void)
 {
 	//get old action
 	struct sigaction oldAction;
@@ -44,13 +44,13 @@ void ummap::setupSegfaultHandler(void)
 }
 
 /*******************  FUNCTION  *********************/
-void ummap::unsetSegfaultHandler(void)
+void ummap_io::unsetSegfaultHandler(void)
 {
 	signal(SIGSEGV, SIG_DFL);
 }
 
 /*******************  FUNCTION  *********************/
-void ummap::segfaultHandler(int sig, siginfo_t *si, void *context)
+void ummap_io::segfaultHandler(int sig, siginfo_t *si, void *context)
 {
 	//extract
 	void* addr         = (void*)si->si_addr;
@@ -64,15 +64,16 @@ void ummap::segfaultHandler(int sig, siginfo_t *si, void *context)
 }
 
 /*******************  FUNCTION  *********************/
-GlobalHandler::GlobalHandler(Policy * globalPolicy)
+GlobalHandler::GlobalHandler(void)
 {
-	this->globalPolicy = globalPolicy;
 }
 
 /*******************  FUNCTION  *********************/
 GlobalHandler::~GlobalHandler(void)
 {
-	delete globalPolicy;
+	if (this->mappingRegistry.isEmpty() == false) {
+		UMMAP_WARNING("CAUTION: stopping ummap environnement while still having mapping, they will be destroyed.");
+	}
 }
 
 /*******************  FUNCTION  *********************/
@@ -87,13 +88,9 @@ void GlobalHandler::registerMapping(Mapping * mapping)
 	this->mappingRegistry.registerMapping(mapping);
 }
 
-/*******************  FUNCTION  *********************/
-void GlobalHandler::setGlobalPolicy(Policy * policy)
+void GlobalHandler::unregisterMapping(Mapping * mapping)
 {
-	assume(this->mappingRegistry.isEmpty(), "Cannot change policy after mapping segments !");
-	if (this->globalPolicy != NULL)
-		delete this->globalPolicy;
-	this->globalPolicy = policy;
+	this->mappingRegistry.unregisterMapping(mapping);
 }
 
 /*******************  FUNCTION  *********************/
@@ -116,14 +113,14 @@ bool GlobalHandler::onSegFault(void * addr, bool isWrite)
 }
 
 /*******************  FUNCTION  *********************/
-void ummap::setGlobalHandler(GlobalHandler * handler)
+void ummap_io::setGlobalHandler(GlobalHandler * handler)
 {
 	assert(handler != NULL);
 	gblHandler = handler;
 }
 
 /*******************  FUNCTION  *********************/
-void ummap::clearGlobalHandler(void)
+void ummap_io::clearGlobalHandler(void)
 {
 	if (gblHandler != NULL) {
 		delete gblHandler;

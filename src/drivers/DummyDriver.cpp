@@ -12,7 +12,7 @@
 #include "DummyDriver.hpp"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap;
+using namespace ummap_io;
 
 /*******************  FUNCTION  *********************/
 DummyDriver::DummyDriver(char value)

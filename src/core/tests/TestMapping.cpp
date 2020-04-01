@@ -14,7 +14,7 @@
 #include "../Mapping.hpp"
 
 /***************** USING NAMESPACE ******************/
-using namespace ummap;
+using namespace ummap_io;
 using namespace testing;
 
 /*******************  FUNCTION  *********************/

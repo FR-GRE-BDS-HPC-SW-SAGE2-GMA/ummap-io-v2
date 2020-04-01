@@ -13,7 +13,7 @@
 /********************  HEADERS  *********************/
 #ifdef UMMAP_PORTABILITY_OS_UNIX
 	#include "UnixOS.hpp"
-	namespace ummap
+	namespace ummap_io
 	{
 		typedef UnixOS OS;
 	}

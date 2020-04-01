@@ -40,6 +40,7 @@ int umunmap(void * ptr);
 
 /*******************  FUNCTION  *********************/
 //drivers
+ummap_driver_t * ummap_driver_create_fname(const char * file_path);
 ummap_driver_t * ummap_driver_create_fd(int fd);
 ummap_driver_t * ummap_driver_create_memory(size_t size);
 ummap_driver_t * ummap_driver_create_dummy(char value);

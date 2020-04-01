@@ -44,7 +44,7 @@ set(UMMAP_INTERNAL_CODE
 	$<TARGET_OBJECTS:ummap-core>
 	$<TARGET_OBJECTS:ummap-drivers>
 	$<TARGET_OBJECTS:ummap-policies>
-	#$<TARGET_OBJECTS:ummap-common>
+	$<TARGET_OBJECTS:ummap-public-api>
 	#we should keep an eye on portability of this
 	$<TARGET_OBJECTS:ummap-portability>
 )
