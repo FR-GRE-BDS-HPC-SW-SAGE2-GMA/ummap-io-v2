@@ -45,6 +45,7 @@ void ummap_skip_first_read(void * ptr);
 
 /*******************  FUNCTION  *********************/
 //drivers
+ummap_driver_t * ummap_driver_create_uri(const char * uri);
 ummap_driver_t * ummap_driver_create_fopen(const char * file_path, const char * mode);
 ummap_driver_t * ummap_driver_create_fd(int fd);
 ummap_driver_t * ummap_driver_create_memory(size_t size);

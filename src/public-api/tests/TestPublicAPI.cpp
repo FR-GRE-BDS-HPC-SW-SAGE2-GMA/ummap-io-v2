@@ -217,3 +217,29 @@ TEST_F(TestPublicAPI, lbm_bugguy_case_1)
 	//unam
 	umunmap(ptr1);
 }
+
+/*******************  FUNCTION  *********************/
+void test_create_uri(const char * uri)
+{
+	//set buggy size non multiple of 1MB
+	size_t segmentSize = 4096;
+	size_t size = 8*segmentSize;
+
+	//map
+	void * ptr1 = ummap(size, segmentSize, 0, UMMAP_PROT_RW, ummap_driver_create_uri(uri), NULL, "none");
+
+	//touch
+	for (size_t i = 0 ; i < size ; i++)
+		((char*)ptr1)[i] = 34;
+
+	//unam
+	umunmap(ptr1);
+}
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, create_uri_fname)
+{
+	test_create_uri("file:///tmp/test-uri.txt?mode=w+");
+	test_create_uri("dummy://16");
+	test_create_uri("mem://32768");
+}

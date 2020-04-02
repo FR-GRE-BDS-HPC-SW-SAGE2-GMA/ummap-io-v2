@@ -10,6 +10,7 @@
 #include <cstring>
 #include <cerrno>
 #include "../common/Debug.hpp"
+#include "../common/URI.hpp"
 #include "../core/GlobalHandler.hpp"
 #include "../drivers/FDDriver.hpp"
 #include "../drivers/MemoryDriver.hpp"
@@ -163,4 +164,25 @@ ummap_policy_t * umamp_policy_create_fifo(size_t max_size, bool local)
 void ummap_flush(void * ptr, size_t size)
 {
 	getGlobalhandler()->flush(ptr, size);
+}
+
+/*******************  FUNCTION  *********************/
+ummap_driver_t * ummap_driver_create_uri(const char * uri)
+{
+	//check
+	assert(uri != NULL);
+	URI parser(uri);
+
+	//cases
+	std::string type = parser.getType();
+	if (type == "file") {
+		return ummap_driver_create_fopen(parser.getPath().c_str(), parser.getParam("mode").c_str());
+	} else if (type == "mem") {
+		return ummap_driver_create_memory(atol(parser.getPath().c_str()));
+	} else if (type == "dummy") {
+		return ummap_driver_create_dummy(atol(parser.getPath().c_str()));
+	} else {
+		UMMAP_FATAL_ARG("Invalid ressource type : %1").arg(uri).end();
+		return NULL;
+	}
 }
