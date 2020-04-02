@@ -182,7 +182,37 @@ ummap_driver_t * ummap_driver_create_uri(const char * uri)
 	} else if (type == "dummy") {
 		return ummap_driver_create_dummy(atol(parser.getPath().c_str()));
 	} else {
-		UMMAP_FATAL_ARG("Invalid ressource type : %1").arg(uri).end();
+		UMMAP_FATAL_ARG("Invalid ressource type to build driver : %1").arg(uri).end();
 		return NULL;
 	}
+}
+
+/*******************  FUNCTION  *********************/
+ummap_policy_t * umamp_policy_create_uri(const char * uri, bool local)
+{
+	//check
+	assert(uri != NULL);
+	URI parser(uri);
+
+	//cases
+	std::string type = parser.getType();
+	if (type == "fifo") {
+		return umamp_policy_create_fifo(atol(parser.getPath().c_str()), local);
+	} else {
+		UMMAP_FATAL_ARG("Invalid ressource type to build policy : %1").arg(uri).end();
+		return NULL;
+	}
+}
+
+/*******************  FUNCTION  *********************/
+void ummap_policy_destroy(ummap_policy_t * policy)
+{
+	//check
+	assert(policy != NULL);
+
+	//convert
+	Driver * pol = (Driver*)policy;
+	
+	//destroy
+	delete pol;
 }

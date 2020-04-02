@@ -60,7 +60,9 @@ void ummap_policy_group_destroy(const char * name);
 
 /*******************  FUNCTION  *********************/
 //policies
+ummap_policy_t * umamp_policy_create_uri(const char * uri, bool local);
 ummap_policy_t * umamp_policy_create_fifo(size_t max_size, bool local);
+void ummap_policy_destroy(ummap_policy_t * policy);
 
 #ifdef __cplusplus
 }

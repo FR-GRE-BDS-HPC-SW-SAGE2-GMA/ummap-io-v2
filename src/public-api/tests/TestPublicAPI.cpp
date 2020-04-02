@@ -237,9 +237,19 @@ void test_create_uri(const char * uri)
 }
 
 /*******************  FUNCTION  *********************/
-TEST_F(TestPublicAPI, create_uri_fname)
+TEST_F(TestPublicAPI, create_driver_uri)
 {
 	test_create_uri("file:///tmp/test-uri.txt?mode=w+");
 	test_create_uri("dummy://16");
 	test_create_uri("mem://32768");
+}
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, create_policy_uri)
+{
+	ummap_policy_t * policy;
+	
+	//fifo
+	policy = umamp_policy_create_uri("fifo://4096", true);
+	ummap_policy_destroy(policy);
 }
