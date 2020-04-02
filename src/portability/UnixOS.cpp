@@ -32,7 +32,7 @@ void * UnixOS::mmapProtNone(size_t size)
 	void * ptr = ::mmap(NULL, size, PROT_NONE, MAP_ANON | MAP_PRIVATE, 0, 0);
 
 	//post check
-	assumeArg(ptr != NULL, "Fail to call mmap with size=%1 : %2").arg(size).arg(strerror(errno)).end();
+	assumeArg(ptr != MAP_FAILED, "Fail to call mmap with size=%1 : %2").arg(size).arg(strerror(errno)).end();
 
 	//ok
 	return ptr;
@@ -49,7 +49,7 @@ void * UnixOS::mmapProtFull(size_t size)
 	void * ptr = ::mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, 0, 0);
 
 	//post check
-	assumeArg(ptr != NULL, "Fail to call mmap with size=%1 : %2").arg(size).arg(strerror(errno)).end();
+	assumeArg(ptr != MAP_FAILED, "Fail to call mmap with size=%1 : %2").arg(size).arg(strerror(errno)).end();
 
 	//ok
 	return ptr;
