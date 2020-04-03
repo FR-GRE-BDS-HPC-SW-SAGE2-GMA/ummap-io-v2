@@ -14,6 +14,37 @@ To build you need:
 
 For usage there is currently no dependencies.
 
+Build
+-----
+
+This project use cmake to build. It also provide a wrapper configure script
+to ease usage, just use it as autocools projects.
+
+```sh
+mkdir build
+cd build
+../configure
+make
+```
+
+Then you can run the tests:
+
+```sh
+make test
+```
+
+Then to install
+
+```sh
+make install
+```
+
+To get more options you can look on:
+
+```sh
+../configure --help
+```
+
 License
 -------
 
