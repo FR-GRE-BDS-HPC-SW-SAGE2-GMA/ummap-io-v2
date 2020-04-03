@@ -11,7 +11,7 @@
 #include <libkern/OSAtomic.h>
 
 /*******************  NAMESPACE  ********************/
-namespace ummap {
+namespace ummapio {
 
 /*********************  CLASS  **********************/
 class SpinlockApple {
