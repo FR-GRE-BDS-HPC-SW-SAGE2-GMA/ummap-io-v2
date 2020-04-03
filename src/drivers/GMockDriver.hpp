@@ -23,11 +23,9 @@ class GMockDriver : public Driver
 	public:
 		GMockDriver(void) {};
 		virtual ~GMockDriver(void) {};
-		MOCK_METHOD(ssize_t, pwrite,(const void * buffer, size_t size, size_t offset));
-		MOCK_METHOD(ssize_t, pread,(void * buffer, size_t size, size_t offset));
-		MOCK_METHOD(void, sync,(size_t offset, size_t size));
-	private:
-		char value;
+		MOCK_METHOD(ssize_t, pwrite,(const void * buffer, size_t size, size_t offset), override);
+		MOCK_METHOD(ssize_t, pread,(void * buffer, size_t size, size_t offset), override);
+		MOCK_METHOD(void, sync,(size_t offset, size_t size), override);
 };
 
 }
