@@ -15,21 +15,21 @@ namespace ummapio {
 
 /*********************  CLASS  **********************/
 class SpinlockApple {
-  OSSpinLock m_lock;
+	OSSpinLock m_lock;
 
- public:
-  SpinlockApple()
-      : m_lock(0) {
-  }
-  void lock() {
-    OSSpinLockLock(&m_lock);
-  }
-  void unlock() {
-    OSSpinLockUnlock(&m_lock);
-  }
-  bool tryLock() {
-    return OSSpinLockTry(&m_lock);
-  }
+	public:
+	SpinlockApple()
+		: m_lock(0) {
+	}
+	void lock() {
+		OSSpinLockLock(&m_lock);
+	}
+	void unlock() {
+		OSSpinLockUnlock(&m_lock);
+	}
+	bool tryLock() {
+		return OSSpinLockTry(&m_lock);
+	}
 };
 
 }
