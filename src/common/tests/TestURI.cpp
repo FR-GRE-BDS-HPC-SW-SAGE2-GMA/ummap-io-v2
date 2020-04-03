@@ -69,3 +69,35 @@ TEST(TestURI, parse_epxected_uris)
 	//memory
 	URI uri_dummy("dummy://16");
 }
+
+TEST(TestURI, getParam)
+{
+	URI uri("file://fname?mode=w+");
+	ASSERT_EQ("w+", uri.getParam("mode"));
+	ASSERT_EQ("w+", uri.getParam("mode", "default"));
+	ASSERT_EQ("default", uri.getParam("other", "default"));
+	ASSERT_DEATH(uri.getParam("none"), "Fail to find");
+}
+
+TEST(TestURI, getParamAsInt)
+{
+	URI uri("file://fname?mode=10");
+	ASSERT_EQ(10, uri.getParamAsInt("mode"));
+	ASSERT_EQ(10, uri.getParamAsInt("mode", 15));
+	ASSERT_EQ(20, uri.getParamAsInt("other", 20));
+	ASSERT_DEATH(uri.getParamAsInt("none"), "Fail to find");
+}
+
+TEST(TestURI, getParamAsSizet)
+{
+	URI uri("file://fname?mode=10");
+	ASSERT_EQ(10, uri.getParamAsSizet("mode"));
+	ASSERT_EQ(10, uri.getParamAsSizet("mode", 25));
+	ASSERT_EQ(20, uri.getParamAsSizet("other", 20));
+	ASSERT_DEATH(uri.getParamAsSizet("none"), "Fail to find");
+}
+
+TEST(TestURI, constructor_invalid)
+{
+	ASSERT_DEATH(URI uri("blabla"), "Unrecongnized ummap URI format");
+}

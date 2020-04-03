@@ -21,15 +21,13 @@ using namespace ummapio;
 
 /********************  GLOBAL  **********************/
 static GlobalHandler * gblHandler = NULL;
-static void (*gblOldHandler) (int, siginfo_t *, void *) = NULL;
+static struct sigaction gblOldHandler;
 
 /*******************  FUNCTION  *********************/
 void ummapio::setupSegfaultHandler(void)
 {
 	//get old action
-	struct sigaction oldAction;
-	sigaction(SIGSEGV, NULL, &oldAction);
-	gblOldHandler = oldAction.sa_sigaction;
+	sigaction(SIGSEGV, NULL, &gblOldHandler);
 
 	//struct
 	struct sigaction sa; 
@@ -46,7 +44,11 @@ void ummapio::setupSegfaultHandler(void)
 /*******************  FUNCTION  *********************/
 void ummapio::unsetSegfaultHandler(void)
 {
-	signal(SIGSEGV, SIG_DFL);
+	//mask
+	sigfillset(&gblOldHandler.sa_mask);
+	
+	//reg
+	sigaction(SIGSEGV, &gblOldHandler, NULL);
 }
 
 /*******************  FUNCTION  *********************/
@@ -54,13 +56,12 @@ void ummapio::segfaultHandler(int sig, siginfo_t *si, void *context)
 {
 	//extract
 	void* addr         = (void*)si->si_addr;
-    PageFaultType type = (PageFaultType)((GET_REG_ERR(context) & 2) >> 1);
-    uint8_t   isWrite  = (type == PAGEFAULT_WRITE);
+	PageFaultType type = (PageFaultType)((GET_REG_ERR(context) & 2) >> 1);
+	uint8_t   isWrite  = (type == PAGEFAULT_WRITE);
 
 	//transmit
 	if (gblHandler->onSegFault(addr, isWrite) == false)
-		if (gblOldHandler != NULL)
-			gblOldHandler(sig, si, context);
+		gblOldHandler.sa_sigaction(sig, si, context);
 }
 
 /*******************  FUNCTION  *********************/

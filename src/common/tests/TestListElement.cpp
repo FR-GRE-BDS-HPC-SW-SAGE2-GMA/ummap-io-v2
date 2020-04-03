@@ -111,3 +111,26 @@ TEST(TestListElement, popNext)
 	ListElement * pop3 = e1.popNext();
 	ASSERT_EQ(nullptr, pop3);
 }
+
+/*******************  FUNCTION  *********************/
+TEST(TestListElement, popPrev)
+{
+	//create
+	ListElement e1;
+	ListElement e2;
+	ListElement e3;
+
+	//insert
+	e1.insertBefore(e2);
+	e2.insertBefore(e3);
+
+	//pop
+	ListElement * pop1 = e1.popPrev();
+	ASSERT_EQ(&e2, pop1);
+
+	ListElement * pop2 = e1.popPrev();
+	ASSERT_EQ(&e3, pop2);
+
+	ListElement * pop3 = e1.popPrev();
+	ASSERT_EQ(nullptr, pop3);
+}

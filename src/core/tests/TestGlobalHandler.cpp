@@ -33,6 +33,44 @@ TEST(TestGlobalHandler, setup)
 }
 
 /*******************  FUNCTION  *********************/
+void failure_handler(int sig, siginfo_t *si, void *context)
+{
+	//extract
+	void* addr         = (void*)si->si_addr;
+	fprintf(stderr, "Expected failure\n");
+	exit(1);
+}
+
+/*******************  FUNCTION  *********************/
+TEST(TestGlobalHandler, handler_stacking)
+{
+	GlobalHandler * handler = new GlobalHandler;
+	setGlobalHandler(handler);
+
+	//set preexisting handler
+	struct sigaction sa; 
+	sa.sa_flags = SA_SIGINFO;
+	sa.sa_sigaction = failure_handler;
+	sigfillset(&sa.sa_mask);
+	sigaction(SIGSEGV, &sa, NULL);
+
+	//generate fa
+	ASSERT_DEATH(*(char*)0x2 = 'a', "Expected failure");
+
+	//set ummap handler
+	setupSegfaultHandler();
+	ASSERT_DEATH(*(char*)0x2 = 'a', "Expected failure");
+
+	//set ummap handler
+	unsetSegfaultHandler();
+	ASSERT_DEATH(*(char*)0x2 = 'a', "Expected failure");
+
+	//clear
+	signal(SIGSEGV, SIG_DFL);
+	clearGlobalHandler();
+}
+
+/*******************  FUNCTION  *********************/
 TEST(TestGlobalHandler, basic_read_workflow)
 {
 	//setup global
@@ -194,3 +232,18 @@ TEST(TestGlobalHandler, mmap_and_policy)
 	ASSERT_EQ(0, handler.umunmap(ptr1));
 }
 
+
+/*******************  FUNCTION  *********************/
+TEST(TestGlobalHandler, deleteAllMappings)
+{
+	//setup global
+	GlobalHandler handler;
+	
+	//mapping
+	DummyDriver * driver = new DummyDriver(32);
+	Mapping * mapping = new Mapping(8 * UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, driver);
+	handler.registerMapping(mapping);
+
+	//call
+	handler.deleteAllMappings();
+}
