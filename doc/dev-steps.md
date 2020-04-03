@@ -17,7 +17,7 @@ cd build
 ../configure --enable-debug --enable-coverage
 make -j8
 make test
-../dev/gen-coverage
+../dev/gen-coverage.sh
 ```
 
 Generating doxgen
