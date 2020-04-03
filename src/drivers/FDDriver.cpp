@@ -23,7 +23,7 @@ FDDriver::FDDriver(int fd)
 {
 	assert(fd > 0);
 	int dupFD = ::dup(fd);
-	assumeArg(dupFD > 0, "Fail to dup() the file descriptor : %1").arg(strerror(errno)).end();
+	assumeArg(dupFD > 0, "Fail to dup() the file descriptor : %1").argStrErrno().end();
 	this->fd = dupFD;
 }
 

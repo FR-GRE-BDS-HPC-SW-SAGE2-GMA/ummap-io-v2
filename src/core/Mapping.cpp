@@ -69,7 +69,7 @@ Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, MappingP
 	//with distance exactly modulo. With an odd number there is less chance to fall in
 	//those multiples
 	this->segmentMutexesCnt = (OS::cpuNumber() * 4) + 1;
-	if (this->segmentMutexesCnt > this->segments)
+	if (static_cast<size_t>(this->segmentMutexesCnt) > this->segments)
 		this->segmentMutexesCnt = this->segments;
 	this->segmentMutexes = new std::mutex[this->segmentMutexesCnt];
 }
@@ -321,7 +321,7 @@ void Mapping::flush(size_t offset, size_t size, bool unmap, bool lock)
 				ssize_t res = this->driver->pwrite(segmentPtr, readWriteSize(curOffset), this->storageOffset + curOffset);
 
 				//errors
-				assumeArg(res != -1, "Fail to pwrite : %1").arg(strerror(errno)).end();
+				assumeArg(res != -1, "Fail to pwrite : %1").argStrErrno().end();
 				assumeArg(res >= 0, "Fail to fully write the segment, got : %1").arg(res).end();
 
 				//update status

@@ -16,6 +16,9 @@ namespace ummapio
 {
 
 /*********************  CLASS  **********************/
+/**
+ * Unified Ressource Identifer to build object with a simple semantic.
+**/
 class URI
 {
 	public:
@@ -34,9 +37,13 @@ class URI
 		void parse(const std::string & uri);
 		void reset(void);
 	private:
+		/** Full address **/
 		std::string uri;
+		/** Type of object to build (eg: file://path will have type 'file') **/
 		std::string type;
+		/** Path part of the URI (eg! file://path will have path saying 'path') **/
 		std::string path;
+		/** Map of parameters (eg: file://path?param1=value1&param2=value2) **/
 		std::map<std::string, std::string> params;
 };
 

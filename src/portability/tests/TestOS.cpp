@@ -17,7 +17,7 @@ TEST(TestOS, mmapProtFull)
 	const size_t size = 10*UMMAP_PAGE_SIZE;
 	char * ptr = (char*)OS::mmapProtFull(size);
 	ASSERT_NE(ptr, nullptr);
-	for (int i = 0 ; i < size ; i++)
+	for (size_t i = 0 ; i < size ; i++)
 		ASSERT_EQ(0, ptr[i]) << "Index: " << i;
 	OS::munmap(ptr, size);
 }
@@ -49,7 +49,7 @@ TEST(TestOS, mremapForced)
 	ASSERT_DEATH(ptr[0] = 'a', "");
 
 	//check access
-	for (int i = 0 ; i < size ; i++)
+	for (size_t i = 0 ; i < size ; i++)
 		ASSERT_EQ(0, newPtrExpect[i]) << "Index: " << i;
 
 	OS::munmap(newPtrExpect, size);
@@ -67,7 +67,7 @@ TEST(TestOS, mprotect_read_only)
 	OS::mprotect(ptr, size, true, false);
 
 	//check access
-	for (int i = 0 ; i < size ; i++)
+	for (size_t i = 0 ; i < size ; i++)
 		ASSERT_EQ(0, ptr[i]) << "Index: " << i;
 
 	//not access to old one
@@ -86,7 +86,7 @@ TEST(TestOS, mprotect_read_write)
 	OS::mprotect(ptr, size, true, true);
 
 	//check access
-	for (int i = 0 ; i < size ; i++) {
+	for (size_t i = 0 ; i < size ; i++) {
 		ASSERT_EQ(0, ptr[i]) << "Index: " << i;
 		ptr[0] = 'a';
 	}

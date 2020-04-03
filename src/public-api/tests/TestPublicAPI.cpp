@@ -210,7 +210,7 @@ TEST_F(TestPublicAPI, lbm_bugguy_case_1)
 	void * ptr1 = ummap(size, 1024*1024, 0, UMMAP_PROT_RW, ummap_driver_create_dummy(64), NULL, "none");
 
 	//touch
-	#pragma parallel
+	#pragma omp parallel
 	for (size_t i = 0 ; i < size ; i++)
 		((char*)ptr1)[i] = 34;
 

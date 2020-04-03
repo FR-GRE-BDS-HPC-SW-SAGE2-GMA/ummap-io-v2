@@ -87,7 +87,7 @@ ummap_driver_t * ummap_driver_create_fopen(const char * file_path, const char * 
 	FILE * fp = fopen(file_path, mode);
 	assumeArg(fp != NULL, "Fail to open file '%1': %2")
 		.arg(file_path)
-		.arg(strerror(errno))
+		.argStrErrno()
 		.end();
 	
 	//create driver

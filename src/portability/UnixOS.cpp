@@ -32,7 +32,7 @@ void * UnixOS::mmapProtNone(size_t size)
 	void * ptr = ::mmap(NULL, size, PROT_NONE, MAP_ANON | MAP_PRIVATE, 0, 0);
 
 	//post check
-	assumeArg(ptr != MAP_FAILED, "Fail to call mmap with size=%1 : %2").arg(size).arg(strerror(errno)).end();
+	assumeArg(ptr != MAP_FAILED, "Fail to call mmap with size=%1 : %2").arg(size).argStrErrno().end();
 
 	//ok
 	return ptr;
@@ -49,7 +49,7 @@ void * UnixOS::mmapProtFull(size_t size)
 	void * ptr = ::mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, 0, 0);
 
 	//post check
-	assumeArg(ptr != MAP_FAILED, "Fail to call mmap with size=%1 : %2").arg(size).arg(strerror(errno)).end();
+	assumeArg(ptr != MAP_FAILED, "Fail to call mmap with size=%1 : %2").arg(size).argStrErrno().end();
 
 	//ok
 	return ptr;
@@ -70,7 +70,7 @@ void UnixOS::munmap(void * ptr, size_t size)
 	assumeArg(status == 0, "Fail to call munmap with ptr=%1, size=%2 : %3")
 		.arg(ptr)
 		.arg(size)
-		.arg(strerror(errno))
+		.argStrErrno()
 		.end();
 }
 
@@ -91,7 +91,7 @@ void UnixOS::mremapForced(void * oldPtr, size_t size, void * newPtr)
 
 	//move
 	void * res = mremap(oldPtr, size, size, MREMAP_FIXED | MREMAP_MAYMOVE, newPtr);
-	assumeArg(res != MAP_FAILED, "Fail to call mremap : %1").arg(strerror(errno)).end();
+	assumeArg(res != MAP_FAILED, "Fail to call mremap : %1").argStrErrno().end();
 	assume(res == newPtr, "Fail to mremap the segment to a given address, got a different one !");
 }
 
@@ -127,7 +127,7 @@ int UnixOS::cpuNumber(void)
 
 	//open /proc/cpuinfo
 	FILE * fp = fopen("/proc/cpuinfo", "r");
-	assumeArg(fp != NULL, "Fail to open /proc/cpuinfo : %1").arg(strerror(errno)).end();
+	assumeArg(fp != NULL, "Fail to open /proc/cpuinfo : %1").argStrErrno().end();
 
 	//read until end
 	char buffer[4096];
@@ -159,5 +159,5 @@ void UnixOS::madviseDontNeed(void * ptr, size_t size)
 void UnixOS::removeFile(const std::string & path)
 {
 	int res = unlink(path.c_str());
-	assumeArg(res == 0, "Fail to remove file %s : %s").arg(path).arg(strerror(errno));
+	assumeArg(res == 0, "Fail to remove file %s : %s").arg(path).argStrErrno().end();
 }

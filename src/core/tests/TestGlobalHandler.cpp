@@ -36,7 +36,6 @@ TEST(TestGlobalHandler, setup)
 void failure_handler(int sig, siginfo_t *si, void *context)
 {
 	//extract
-	void* addr         = (void*)si->si_addr;
 	fprintf(stderr, "Expected failure\n");
 	exit(1);
 }
@@ -209,7 +208,7 @@ TEST(TestGlobalHandler, mmap_and_unmap)
 
 	//map 2
 	void * ptr1 = handler.ummap(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, new DummyDriver(16), NULL, "none");
-	void * ptr2 = handler.ummap(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, new DummyDriver(16), NULL, "none");
+	handler.ummap(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, new DummyDriver(16), NULL, "none");
 
 	//destroy 1
 	ASSERT_EQ(0, handler.umunmap(ptr1));
@@ -226,7 +225,7 @@ TEST(TestGlobalHandler, mmap_and_policy)
 
 	//map 2
 	void * ptr1 = handler.ummap(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, new DummyDriver(16), NULL, "global");
-	void * ptr2 = handler.ummap(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, new DummyDriver(16), NULL, "global");
+	handler.ummap(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, new DummyDriver(16), NULL, "global");
 
 	//destroy 1
 	ASSERT_EQ(0, handler.umunmap(ptr1));

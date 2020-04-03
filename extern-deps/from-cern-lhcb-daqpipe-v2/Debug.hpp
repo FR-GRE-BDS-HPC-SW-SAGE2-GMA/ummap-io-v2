@@ -160,8 +160,33 @@ inline Debug fatal(const char * format)   {return Debug(format,MESSAGE_FATAL);  
 #endif
 
 /********************  MACROS  **********************/
+/**
+ * Check the given condition and print message and abort if it is
+ * not true. In other word this is similar to assert to with
+ * an explicit message for final user and stay independently of NDEBUG.
+ * @param check Condition to be checked.
+ * @param message Message to print if condition is not valid.
+**/
 #define assume(check,message) do { if (!(check)) DAQ_FATAL(message); } while(0)
-#define assumeArg(check,message) if (!(check)) DAQ_FATAL_ARG(message)
+/**
+ * Check the given condition and print message and abort if it is
+ * not true. In other word this is similar to assert to with
+ * an explicit message for final user and stay independently of NDEBUG.
+ * This variant provide a format which can be replaced by latter
+ * calls to .arg().
+ *
+ * \b Remark:
+ * Do not format to call .end() to emit the message.
+ * 
+ * \b Usage:
+ * @code
+ * assumeArg(fp != NULL, "Fail to open file : %1 with 2%").arg(file).argStrErrno().end()
+ * @endcode
+ * 
+ * @param check Condition to be checked.
+ * @param format Message to print if condition is not valid.
+**/
+#define assumeArg(check,format) if (!(check)) DAQ_FATAL_ARG(format)
 
 /********************  MACROS  **********************/
 #define DAQ_TO_STRING(x) #x
