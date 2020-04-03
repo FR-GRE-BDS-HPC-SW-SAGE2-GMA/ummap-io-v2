@@ -29,10 +29,10 @@ class FifoPolicy : public Policy
 	public:
 		FifoPolicy(size_t maxMemory, bool local);
 		virtual ~FifoPolicy(void);
-		virtual void allocateElementStorage(Mapping * mapping, size_t segmentCount);
-		virtual void notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool mapped, bool dirty);
-		virtual void notifyEvict(Mapping * mapping, size_t index);
-		virtual void freeElementStorage(Mapping * mapping);
+		virtual void allocateElementStorage(Mapping * mapping, size_t segmentCount) override;
+		virtual void notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool mapped, bool dirty) override;
+		virtual void notifyEvict(Mapping * mapping, size_t index) override;
+		virtual void freeElementStorage(Mapping * mapping) override;
 	protected:
 		ListElement root;
 		std::mutex rootLock;

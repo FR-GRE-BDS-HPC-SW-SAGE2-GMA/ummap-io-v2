@@ -20,10 +20,10 @@ class DummyDriver : public Driver
 {
 	public:
 		DummyDriver(char value = 0);
-		virtual ~DummyDriver(void);
-		virtual ssize_t pwrite(const void * buffer, size_t size, size_t offset);
-		virtual ssize_t pread(void * buffer, size_t size, size_t offset);
-		virtual void sync(size_t offset, size_t size);
+		virtual ~DummyDriver(void) override;
+		virtual ssize_t pwrite(const void * buffer, size_t size, size_t offset) override;
+		virtual ssize_t pread(void * buffer, size_t size, size_t offset) override;
+		virtual void sync(size_t offset, size_t size) override;
 	private:
 		char value;
 };

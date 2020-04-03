@@ -25,7 +25,7 @@ TEST(TestMemoryDriver, pread)
 	MemoryDriver driver(1024*1024, 32);
 	char buffer[1024];
 	driver.pread(buffer, sizeof(buffer), 0);
-	for (int i = 0 ; i < sizeof(buffer) ; i++)
+	for (size_t i = 0 ; i < sizeof(buffer) ; i++)
 		ASSERT_EQ(32, buffer[i]);
 }
 
@@ -43,7 +43,7 @@ TEST(TestMemoryDriver, pwrite)
 
 	//check
 	const char * internalBuffer = driver.getBuffer();
-	for (int i = 0 ; i < sizeof(buffer) ; i++)
+	for (size_t i = 0 ; i < sizeof(buffer) ; i++)
 		ASSERT_EQ(48, internalBuffer[i]);
 }
 

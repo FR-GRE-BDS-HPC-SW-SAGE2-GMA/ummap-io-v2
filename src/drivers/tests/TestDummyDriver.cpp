@@ -35,7 +35,7 @@ TEST(TestDummyDriver, pwrite)
 	ASSERT_EQ(sizeof(buffer), res);
 
 	//check content
-	for (int i = 0 ; i < sizeof(buffer) ; i++)
+	for (size_t i = 0 ; i < sizeof(buffer) ; i++)
 		ASSERT_EQ(0, buffer[i]) << "Index: " << i;
 }
 
@@ -54,6 +54,6 @@ TEST(TestDummyDriver, pread)
 	ASSERT_EQ(sizeof(buffer), res);
 
 	//check content
-	for (int i = 0 ; i < sizeof(buffer) ; i++)
+	for (size_t i = 0 ; i < sizeof(buffer) ; i++)
 		ASSERT_EQ(16, buffer[i]) << "Index: " << i;
 }

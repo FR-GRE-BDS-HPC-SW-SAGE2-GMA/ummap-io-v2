@@ -49,6 +49,6 @@ TEST(TestFDDriver, pwrite_pread)
 	ssize_t res2 = driver.pread(buffer2, sizeof(buffer2),0);
 	ASSERT_EQ(res2, sizeof(buffer2));
 
-	for (int i = 0 ; i < sizeof(buffer2) ; i++)
+	for (size_t i = 0 ; i < sizeof(buffer2) ; i++)
 		ASSERT_EQ(10, buffer2[i]) << "Index : " << i;
 }

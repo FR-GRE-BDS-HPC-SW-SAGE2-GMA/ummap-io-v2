@@ -20,9 +20,9 @@ class FDDriver : public Driver
 	public:
 		FDDriver(int fd);
 		~FDDriver(void);
-		virtual ssize_t pwrite(const void * buffer, size_t size, size_t offset);
-		virtual ssize_t pread(void * buffer, size_t size, size_t offset);
-		virtual void sync(size_t offset, size_t size);
+		virtual ssize_t pwrite(const void * buffer, size_t size, size_t offset) override;
+		virtual ssize_t pread(void * buffer, size_t size, size_t offset) override;
+		virtual void sync(size_t offset, size_t size) override;
 	private:
 		int fd;
 };
