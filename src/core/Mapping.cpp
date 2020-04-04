@@ -302,7 +302,7 @@ void Mapping::flush(size_t offset, size_t size, bool unmap, bool lock)
 		if (lock)
 			for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
 				if (toLock[i])
-					this->segmentMutexes[i % this->segmentMutexesCnt].lock();
+					this->segmentMutexes[i].lock();
 
 		//mprotect the whole considered segment
 		OS::mprotect(this->baseAddress + offset, size, true, false);
