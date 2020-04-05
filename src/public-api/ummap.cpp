@@ -21,19 +21,34 @@
 /***************** USING NAMESPACE ******************/
 using namespace ummapio;
 
+/*******************  GLOBALS  **********************/
+static int gblCntInit = 0;
+
 /*******************  FUNCTION  *********************/
 void ummap_init(void)
 {
-	ummapio::GlobalHandler * handler = new ummapio::GlobalHandler();
-	ummapio::setGlobalHandler(handler);
-	ummapio::setupSegfaultHandler();
+	//if not already init
+	if (gblCntInit == 0) {
+		ummapio::GlobalHandler * handler = new ummapio::GlobalHandler();
+		ummapio::setGlobalHandler(handler);
+		ummapio::setupSegfaultHandler();
+	}
+
+	//incr
+	gblCntInit++;
 }
 
 /*******************  FUNCTION  *********************/
 void ummap_finalize(void)
 {
-	ummapio::unsetSegfaultHandler();
-	ummapio::clearGlobalHandler();
+	//decr
+	gblCntInit--;
+
+	//destroy
+	if (gblCntInit == 0) {
+		ummapio::unsetSegfaultHandler();
+		ummapio::clearGlobalHandler();
+	}
 }
 
 /*******************  FUNCTION  *********************/

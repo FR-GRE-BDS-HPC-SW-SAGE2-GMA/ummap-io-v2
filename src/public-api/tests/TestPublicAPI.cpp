@@ -34,11 +34,12 @@ TEST_F(TestPublicAPI, init_finalize)
 	//just setup/teardown
 }
 
+
 /*******************  FUNCTION  *********************/
-TEST_F(TestPublicAPI, reinit_failure)
+TEST_F(TestPublicAPI, nested_init)
 {
-	//init again
-	ASSERT_DEATH(ummap_init(), "re-init");
+	ummap_init();
+	ummap_finalize();
 }
 
 /*******************  FUNCTION  *********************/
