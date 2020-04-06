@@ -218,7 +218,7 @@ void GlobalHandler::flush(void * ptr, size_t size)
 		"Invalid flush size, not fit in ummap mapping !");
 
 	//apply
-	mapping->flush(offset, size);
+	mapping->sync(offset, size);
 }
 
 /*******************  FUNCTION  *********************/

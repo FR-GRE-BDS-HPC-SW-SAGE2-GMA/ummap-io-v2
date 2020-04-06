@@ -45,8 +45,8 @@ class Mapping
 		Mapping(size_t size, size_t segmentSize, size_t storageOffset, MappingProtection protection, Driver * driver, Policy * localPolicy = NULL, Policy * globalPolicy = NULL);
 		virtual ~Mapping(void);
 		void onSegmentationFault(void * address, bool isWrite);
-		void flush(void);
-		void flush(size_t offset, size_t size, bool unmap = false, bool lock = true);
+		void sync(void);
+		void sync(size_t offset, size_t size, bool unmap = false, bool lock = true);
 		void prefetch(size_t offset, size_t size);
 		virtual void evict(Policy * sourcePolicy, size_t segmentId);
 		void * getAddress(void);

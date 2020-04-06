@@ -81,9 +81,6 @@ Mapping::~Mapping(void)
 	for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
 		this->segmentMutexes[i].lock();
 
-	//flush
-	this->flush(0, this->getAlignedSize(), false, false);
-
 	//unmap
 	OS::munmap(this->baseAddress, this->getAlignedSize());
 
@@ -269,9 +266,9 @@ const bool * Mapping::getMutexRange(size_t offset, size_t size) const
 }
 
 /*******************  FUNCTION  *********************/
-void Mapping::flush(void)
+void Mapping::sync(void)
 {
-	this->flush(0, getSize());
+	this->sync(0, getSize());
 }
 
 /*******************  FUNCTION  *********************/
@@ -284,7 +281,7 @@ size_t Mapping::readWriteSize(size_t offset)
 }
 
 /*******************  FUNCTION  *********************/
-void Mapping::flush(size_t offset, size_t size, bool unmap, bool lock)
+void Mapping::sync(size_t offset, size_t size, bool unmap, bool lock)
 {
 	//check
 	assumeArg(offset < this->getSize(), "Offset (%1) is not in valid range !").arg(offset).end();
@@ -373,7 +370,7 @@ void Mapping::evict(Policy * sourcePolicy, size_t segmentId)
 			globalPolicy->notifyEvict(this, segmentId);
 	
 		//flush memory
-		flush(segmentId * segmentSize, segmentSize, true, false);
+		sync(segmentId * segmentSize, segmentSize, true, false);
 	}
 }
 
