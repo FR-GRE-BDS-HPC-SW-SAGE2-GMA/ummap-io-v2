@@ -176,7 +176,7 @@ ummap_policy_t * umamp_policy_create_fifo(size_t max_size, bool local)
 }
 
 /*******************  FUNCTION  *********************/
-void ummap_flush(void * ptr, size_t size)
+void ummap_sync(void * ptr, size_t size)
 {
 	getGlobalhandler()->flush(ptr, size);
 }
