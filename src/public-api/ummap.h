@@ -44,11 +44,6 @@ void ummap_sync(void * ptr, size_t size);
 void ummap_skip_first_read(void * ptr);
 
 /*******************  FUNCTION  *********************/
-void ummap_uri_set_variable(const char * name, const char * value);
-void ummap_uri_set_variable_int(const char * name, int value);
-void ummap_uri_set_variable_size_t(const char * name, size_t value);
-
-/*******************  FUNCTION  *********************/
 //drivers
 ummap_driver_t * ummap_driver_create_uri(const char * uri);
 ummap_driver_t * ummap_driver_create_fopen(const char * file_path, const char * mode);
@@ -68,6 +63,12 @@ void ummap_policy_group_destroy(const char * name);
 ummap_policy_t * umamp_policy_create_uri(const char * uri, bool local);
 ummap_policy_t * umamp_policy_create_fifo(size_t max_size, bool local);
 void ummap_policy_destroy(ummap_policy_t * policy);
+
+/*******************  FUNCTION  *********************/
+//uri variables
+void ummap_uri_set_variable(const char * name, const char * value);
+void ummap_uri_set_variable_int(const char * name, int value);
+void ummap_uri_set_variable_size_t(const char * name, size_t value);
 
 #ifdef __cplusplus
 }
