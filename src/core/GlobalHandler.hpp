@@ -12,6 +12,7 @@
 #include <signal.h>
 #include "MappingRegistry.hpp"
 #include "PolicyRegistry.hpp"
+#include "UriHandler.hpp"
 
 /********************  NAMESPACE  *******************/
 namespace ummapio
@@ -41,9 +42,11 @@ class GlobalHandler
 		void unregisterMapping(Mapping * mapping);
 		bool onSegFault(void * addr, bool isWrite);
 		void deleteAllMappings(void);
+		UriHandler & getUriHandler(void);
 	private:
 		MappingRegistry mappingRegistry;
 		PolicyRegistry policyRegistry;
+		UriHandler uriHandler;
 };
 
 /*******************  FUNCTION  *********************/

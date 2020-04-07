@@ -11,6 +11,7 @@ set(CORE_SRC Driver.cpp
 			 MappingRegistry.cpp
 			 GlobalHandler.cpp
 			 PolicyRegistry.cpp
+			 UriHandler.cpp
 			 Listings.cpp)
 
 ######################################################

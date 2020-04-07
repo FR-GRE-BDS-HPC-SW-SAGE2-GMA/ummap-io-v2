@@ -183,6 +183,12 @@ void GlobalHandler::skipFirstRead(void * ptr)
 }
 
 /*******************  FUNCTION  *********************/
+UriHandler & GlobalHandler::getUriHandler(void)
+{
+	return this->uriHandler;
+}
+
+/*******************  FUNCTION  *********************/
 void GlobalHandler::flush(void * ptr, size_t size)
 {
 	//get mapping

@@ -184,39 +184,15 @@ void ummap_sync(void * ptr, size_t size)
 /*******************  FUNCTION  *********************/
 ummap_driver_t * ummap_driver_create_uri(const char * uri)
 {
-	//check
-	assert(uri != NULL);
-	URI parser(uri);
-
-	//cases
-	std::string type = parser.getType();
-	if (type == "file") {
-		return ummap_driver_create_fopen(parser.getPath().c_str(), parser.getParam("mode").c_str());
-	} else if (type == "mem") {
-		return ummap_driver_create_memory(atol(parser.getPath().c_str()));
-	} else if (type == "dummy") {
-		return ummap_driver_create_dummy(atol(parser.getPath().c_str()));
-	} else {
-		UMMAP_FATAL_ARG("Invalid ressource type to build driver : %1").arg(uri).end();
-		return NULL;
-	}
+	Driver * driver = getGlobalhandler()->getUriHandler().buildDriver(uri);
+	return (ummap_driver_t*)driver;
 }
 
 /*******************  FUNCTION  *********************/
 ummap_policy_t * umamp_policy_create_uri(const char * uri, bool local)
 {
-	//check
-	assert(uri != NULL);
-	URI parser(uri);
-
-	//cases
-	std::string type = parser.getType();
-	if (type == "fifo") {
-		return umamp_policy_create_fifo(atol(parser.getPath().c_str()), local);
-	} else {
-		UMMAP_FATAL_ARG("Invalid ressource type to build policy : %1").arg(uri).end();
-		return NULL;
-	}
+	Policy * policy = getGlobalhandler()->getUriHandler().buildPolicy(uri, local);
+	return (ummap_policy_t*)policy;
 }
 
 /*******************  FUNCTION  *********************/
@@ -230,4 +206,22 @@ void ummap_policy_destroy(ummap_policy_t * policy)
 	
 	//destroy
 	delete pol;
+}
+
+/*******************  FUNCTION  *********************/
+void ummap_uri_set_variable(const char * name, const char * value)
+{
+	getGlobalhandler()->getUriHandler().registerVariable(name, value);
+}
+
+/*******************  FUNCTION  *********************/
+void ummap_uri_set_variable_int(const char * name, int value)
+{
+	getGlobalhandler()->getUriHandler().registerVariable(name, value);
+}
+
+/*******************  FUNCTION  *********************/
+void ummap_uri_set_variable_size_t(const char * name, size_t value)
+{
+	getGlobalhandler()->getUriHandler().registerVariable(name, value);
 }
