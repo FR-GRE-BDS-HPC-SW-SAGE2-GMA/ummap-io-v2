@@ -15,6 +15,14 @@ set(UMMAP_PORTABILITY_SPINLOCK_PTHREAD OFF)
 set(UMMAP_PORTABILITY_SPINLOCK_DUMMY OFF)
 set(UMMAP_PORTABILITY_SPINLOCK_APPLE OFF)
 
+if(MERO_FOUND)
+	# Compiler/Linker options for MERO example
+	# Note: clovis API files do not compile with -std=c99 option
+	set(MERO_COMPILE_FLAGS "-D_REENTRANT -D_GNU_SOURCE -DM0_INTERNAL='' -DM0_EXTERN=extern -fno-common -I${MERO_INCLUDE_DIRS}")
+	set(MERO_COMPILE_FLAGS "${MERO_COMPILE_FLAGS}  -Wall -Wno-attributes -fno-strict-aliasing -rdynamic")
+	set(MERO_LINK_FLAGS "-lpthread -lrt -lm -lgf_complete -lyaml -luuid -lmero")
+endif(MERO_FOUND)
+
 ######################################################
 #portabilty tricks
 if (WITH_OS STREQUAL "Unix")
@@ -49,8 +57,13 @@ set(UMMAP_INTERNAL_CODE
 	$<TARGET_OBJECTS:ummap-portability>
 )
 
+if(MERO_FOUND)
+	set(UMMAP_INTERNAL_CODE ${UMMAP_INTERNAL_CODE} $<TARGET_OBJECTS:clovis_api>)
+endif(MERO_FOUND)
+
 ######################################################
 add_library(ummap-io SHARED ${UMMAP_INTERNAL_CODE})
+set_target_properties(ummap-io PROPERTIES LINK_FLAGS "${MERO_LINK_FLAGS}")
 set_target_properties(ummap-io PROPERTIES VERSION 0.0.0 SOVERSION 0)
 install(TARGETS ummap-io DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
