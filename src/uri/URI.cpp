@@ -7,7 +7,7 @@
 /********************  HEADERS  *********************/
 #include <regex>
 #include <iostream>
-#include "Debug.hpp"
+#include "../common/Debug.hpp"
 #include "URI.hpp"
 
 /********************  CONSTS  **********************/

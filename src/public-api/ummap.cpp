@@ -10,7 +10,6 @@
 #include <cstring>
 #include <cerrno>
 #include "../common/Debug.hpp"
-#include "../common/URI.hpp"
 #include "../core/GlobalHandler.hpp"
 #include "../drivers/FDDriver.hpp"
 #include "../drivers/MemoryDriver.hpp"

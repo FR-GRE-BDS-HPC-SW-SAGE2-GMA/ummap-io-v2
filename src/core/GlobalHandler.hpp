@@ -12,7 +12,7 @@
 #include <signal.h>
 #include "MappingRegistry.hpp"
 #include "PolicyRegistry.hpp"
-#include "UriHandler.hpp"
+#include "../uri/UriHandler.hpp"
 
 /********************  NAMESPACE  *******************/
 namespace ummapio

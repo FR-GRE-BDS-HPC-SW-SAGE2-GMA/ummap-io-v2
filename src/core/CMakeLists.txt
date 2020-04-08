@@ -10,9 +10,7 @@ set(CORE_SRC Driver.cpp
 			 Policy.cpp
 			 MappingRegistry.cpp
 			 GlobalHandler.cpp
-			 PolicyRegistry.cpp
-			 UriHandler.cpp
-			 Listings.cpp)
+			 PolicyRegistry.cpp)
 
 ######################################################
 add_library(ummap-core OBJECT ${CORE_SRC})

@@ -9,7 +9,7 @@
 include_directories(${GTEST_INCLUDE_DIRS} ${GMOCK_INCLUDE_DIRS})
 
 ######################################################
-set(TEST_NAMES TestListElement TestURI)
+set(TEST_NAMES TestListElement)
 
 ######################################################
 FOREACH(test_name ${TEST_NAMES})

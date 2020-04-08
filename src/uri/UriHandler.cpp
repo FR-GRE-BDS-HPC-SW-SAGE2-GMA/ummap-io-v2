@@ -8,11 +8,11 @@
 #include <cstdio>
 #include <cassert>
 #include "../common/Debug.hpp"
-#include "../common/URI.hpp"
 #include "../drivers/FDDriver.hpp"
 #include "../drivers/MemoryDriver.hpp"
 #include "../drivers/DummyDriver.hpp"
 #include "../policies/FifoPolicy.hpp"
+#include "URI.hpp"
 #include "UriHandler.hpp"
 
 /***************** USING NAMESPACE ******************/
