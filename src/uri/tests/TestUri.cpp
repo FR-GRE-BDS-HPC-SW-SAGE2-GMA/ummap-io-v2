@@ -70,6 +70,15 @@ TEST(TestURI, parse_epxected_uris)
 	Uri uri_dummy("dummy://16");
 }
 
+TEST(TestURI, getParam_multiple)
+{
+	Uri uri("mero://auto?listing=listing.txt&name=test&last=ok");
+
+	ASSERT_EQ("listing.txt", uri.getParam("listing"));
+	ASSERT_EQ("test", uri.getParam("name"));
+	ASSERT_EQ("ok", uri.getParam("last"));
+}
+
 TEST(TestURI, getParam)
 {
 	Uri uri("file://fname?mode=w+");

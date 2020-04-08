@@ -12,6 +12,7 @@
 #include "../drivers/MemoryDriver.hpp"
 #include "../drivers/DummyDriver.hpp"
 #include "../policies/FifoPolicy.hpp"
+#include "MeroRessource.hpp"
 #include "Uri.hpp"
 #include "UriHandler.hpp"
 
@@ -79,6 +80,8 @@ Driver * UriHandler::buildDriver(const std::string & uri)
 	} else if (type == "dummy") {
 		size_t value = atol(parser.getPath().c_str());
 		return new DummyDriver(value);
+	} else if (type == "mero") {
+		return buildDriverMero(parser);
 	} else {
 		UMMAP_FATAL_ARG("Invalid ressource type to build driver : %1").arg(uri).end();
 		return NULL;
@@ -147,4 +150,44 @@ Driver * UriHandler::buildDriverFOpen(const std::string & fname, const std::stri
 
 	//return
 	return res;
+}
+
+/*******************  FUNCTION  *********************/
+//mero://1234:1234
+Driver * UriHandler::buildDriverMero(const Uri & uri)
+{
+	//check
+	assert(uri.getType() == "mero");
+
+	//id
+	ObjectId id;
+	const std::string & path = uri.getPath();
+	if (path == "auto") {
+		const std::string & listing = uri.getParam("listing");
+		const std::string & name = uri.getParam("name");
+		id = this->objectIdListings.getObjectId(listing, name);
+	} else if (sscanf(path.c_str(), "%lx:%lx", &id.low, &id.high) == 2) {
+		//nothing more to do
+	} else {
+		UMMAP_FATAL_ARG("Invalid object ID in mero URI : %1")
+			.arg(uri.getURI())
+			.end();
+		return NULL;
+	}
+
+	//init mero
+	this->ressourceHandler.checkRessource<MeroRessource>("mero");
+
+	//build driver
+	//TODO do mero real
+	#ifdef HAVE_MERO
+	#else
+		//warn
+		UMMAP_WARNING("Mero is not available, using fake fopen mode for tests");
+		
+		//replacement
+		char fname[1024];
+		sprintf(fname, "%lx:%lx", id.low, id.high);
+		return buildDriverFOpen(fname, "w+");
+	#endif
 }

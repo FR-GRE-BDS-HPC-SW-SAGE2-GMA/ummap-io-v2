@@ -13,6 +13,7 @@
 #include <mutex>
 #include "../core/Driver.hpp"
 #include "../core/Policy.hpp"
+#include "Uri.hpp"
 #include "Listings.hpp"
 #include "RessourceHandler.hpp"
 
@@ -34,6 +35,7 @@ class UriHandler
 		std::string replaceVariables(std::string value);
 	private:
 		Driver * buildDriverFOpen(const std::string & fname, const std::string & mode);
+		Driver * buildDriverMero(const Uri & uri);
 	private:
 		std::mutex variablesMutes;
 		std::map<std::string, std::string> variables;

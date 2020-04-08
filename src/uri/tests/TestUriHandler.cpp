@@ -46,6 +46,14 @@ TEST(TestUriHandler, buildDriver)
 	//dummy
 	driver = handler.buildDriver("dummy://0");
 	delete driver;
+
+	//mero-1 
+	driver = handler.buildDriver("mero://123:456");
+	delete driver;
+
+	//mero-2
+	driver = handler.buildDriver("mero://auto?listing=listing.txt&name=test");
+	delete driver;
 }
 
 /*******************  FUNCTION  *********************/

@@ -14,7 +14,7 @@
 /**
  * Regular expression to check correctness and extract parts.
 **/
-const char * cst_uri_regexp = "([a-zA-Z0-9]+)://([a-zA-Z0-9_/.:-]+)([?]([a-zA-Z0-9]+=[a-zA-Z0-9_/+-]+)?(&[a-zA-Z0-9]+=[a-zA-Z0-9_/+-]+)*)?";
+const char * cst_uri_regexp = "^([a-zA-Z0-9]+)://([a-zA-Z0-9_/.:-]+)([?]([a-zA-Z0-9]+=[a-zA-Z0-9._/+-]+)?(&[a-zA-Z0-9]+=[a-zA-Z0-9._/+-]+)*)?$";
 
 /***************** USING NAMESPACE ******************/
 using namespace ummapio;
@@ -71,38 +71,41 @@ void Uri::parse(const std::string & uri)
 	std::smatch matches;
 
 	//apply regexp
-	if(std::regex_search(uri, matches, reg)) {
+	if(std::regex_match(uri, matches, reg)) {
 		this->uri = uri;
 		this->type = matches[1];
 		this->path = matches[2];
 		//has params
 		if (matches[3] != "")
-			//loop on params
-			for (size_t i = 4 ; i < matches.size() ; i++) {
-				//split param=value
-				std::string opt = matches[i];
-				size_t sep = opt.find('=');
-				//has param=value
-				if (sep != std::string::npos)
-				{
-					//extract
-					std::string name;
-					if (opt[0] == '&' || opt[0] == '?')
-						name = opt.substr(1,sep-1);
-					else
-						name = opt.substr(0,sep);
+		{
+			//vars
+			std::string buf;
+			std::string name;
+			std::string args = matches[3];
+			
+			//for last loop
+			args += '&';
 
-					//extract
-					std::string value = opt.substr(sep+1, std::string::npos);
-
+			//loop
+			for (int i = 1 ; i < args.size() ; i++) {
+				if (args[i] == '&') {
 					//insert
-					this->params[name] = value;
+					this->params[name] = buf;
 
 					//debug
-					//std::cout << "param[" << i << "] = " << matches[i] << std::endl;
-					//std::cout << name << "=" << value << std::endl;
+					//std::cout << name << "=" << buf << std::endl;
+
+					//reset
+					buf.clear();
+					name.clear();
+				} else if (args[i] == '=') {
+					name = buf;
+					buf.clear();
+				} else {
+					buf += args[i];
 				}
 			}
+		}
 	} else {
 		UMMAP_FATAL_ARG("Unrecongnized ummap URI format : %1").arg(uri).end();
 	}
