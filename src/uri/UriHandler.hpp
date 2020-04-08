@@ -14,6 +14,7 @@
 #include "../core/Driver.hpp"
 #include "../core/Policy.hpp"
 #include "Listings.hpp"
+#include "RessourceHandler.hpp"
 
 /********************  NAMESPACE  *******************/
 namespace ummapio
@@ -37,6 +38,7 @@ class UriHandler
 		std::mutex variablesMutes;
 		std::map<std::string, std::string> variables;
 		Listings objectIdListings;
+		RessourceHandler ressourceHandler;
 };
 
 }
