@@ -80,7 +80,7 @@ Driver * UriHandler::buildDriver(const std::string & uri)
 	} else if (type == "dummy") {
 		size_t value = atol(parser.getPath().c_str());
 		return new DummyDriver(value);
-	} else if (type == "mero") {
+	} else if (type == "mero" || type == "merofile" ) {
 		return buildDriverMero(parser);
 	} else {
 		UMMAP_FATAL_ARG("Invalid ressource type to build driver : %1").arg(uri).end();
@@ -157,7 +157,7 @@ Driver * UriHandler::buildDriverFOpen(const std::string & fname, const std::stri
 Driver * UriHandler::buildDriverMero(const Uri & uri)
 {
 	//check
-	assert(uri.getType() == "mero");
+	assert(uri.getType() == "mero" || uri.getType() == "merofile");
 
 	//id
 	ObjectId id;
@@ -179,15 +179,21 @@ Driver * UriHandler::buildDriverMero(const Uri & uri)
 	this->ressourceHandler.checkRessource<MeroRessource>("mero");
 
 	//build driver
-	//TODO do mero real
 	#ifdef HAVE_MERO
+		//TODO do mero real
 	#else
-		//warn
-		UMMAP_WARNING("Mero is not available, using fake fopen mode for tests");
-		
-		//replacement
-		char fname[1024];
-		sprintf(fname, "%lx:%lx", id.low, id.high);
-		return buildDriverFOpen(fname, "w+");
+		if (uri.getType() == "merofile")
+		{
+			//warn
+			UMMAP_WARNING("Mero is not available, using fake fopen mode for tests");
+
+			//replacement
+			char fname[1024];
+			sprintf(fname, "%lx:%lx", id.low, id.high);
+			return buildDriverFOpen(fname, "w+");
+		} else {
+			UMMAP_FATAL_ARG("Mero is not available, cannot use uri : %1").arg(uri.getURI()).end();
+			return NULL;
+		}
 	#endif
 }
