@@ -12,7 +12,7 @@
 #include "../drivers/MemoryDriver.hpp"
 #include "../drivers/DummyDriver.hpp"
 #include "../policies/FifoPolicy.hpp"
-#include "URI.hpp"
+#include "Uri.hpp"
 #include "UriHandler.hpp"
 
 /***************** USING NAMESPACE ******************/
@@ -67,7 +67,7 @@ Driver * UriHandler::buildDriver(const std::string & uri)
 	std::string realUri = this->replaceVariables(uri);
 
 	//parse
-	URI parser(uri);
+	Uri parser(uri);
 
 	//cases
 	std::string type = parser.getType();
@@ -95,7 +95,7 @@ Policy * UriHandler::buildPolicy(const std::string & uri, bool local)
 	std::string realUri = this->replaceVariables(uri);
 
 	//parse
-	URI parser(uri);
+	Uri parser(uri);
 
 	//cases
 	std::string type = parser.getType();

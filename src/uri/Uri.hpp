@@ -19,11 +19,11 @@ namespace ummapio
 /**
  * Unified Ressource Identifer to build object with a simple semantic.
 **/
-class URI
+class Uri
 {
 	public:
-		URI(const std::string & uri);
-		~URI(void);
+		Uri(const std::string & uri);
+		~Uri(void);
 		const std::string & getURI(void) const;
 		const std::string & getType(void) const;
 		const std::string & getPath(void) const;
