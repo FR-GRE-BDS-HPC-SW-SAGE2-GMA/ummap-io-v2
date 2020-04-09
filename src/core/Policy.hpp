@@ -11,6 +11,7 @@
 //std
 #include <cstdlib>
 #include <list>
+#include <string>
 //local
 #include "portability/Spinlock.hpp"
 
@@ -40,6 +41,8 @@ class Policy
 		virtual void notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool mapped, bool dirty) = 0;
 		virtual void notifyEvict(Mapping * mapping, size_t index) = 0;
 		virtual void freeElementStorage(Mapping * mapping) = 0;
+		void setUri(const std::string & uri);
+		const std::string & getUri(void) const;
 	protected:
 		void registerMapping(Mapping * mapping, void * storage, size_t elementCount, size_t elementSize);
 		void unregisterMapping(Mapping * mapping);
@@ -51,6 +54,7 @@ class Policy
 		size_t maxMemory;
 		std::list<PolicyStorage> storageRegistry;
 		Spinlock storageRegistryLock;
+		std::string uri;
 };
 
 }

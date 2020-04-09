@@ -8,8 +8,14 @@
 #define UMMAP_MAPPING_REGISTRY_HPP
 
 /********************  HEADERS  *********************/
+//config
+#include "config.h"
 //std
 #include <list>
+//htopml
+#ifdef HAVE_HTOPML
+#include <htopml/JsonState.h>
+#endif
 //local
 #include "portability/Spinlock.hpp"
 #include "Mapping.hpp"
@@ -37,6 +43,10 @@ class MappingRegistry
 		void deleteAllMappings(void);
 		bool isEmpty(void);
 		Mapping * getMapping(void * addr);
+	public:
+		#ifdef HAVE_HTOPML
+		friend void convertToJson(htopml::JsonState & json,const MappingRegistry & value);
+		#endif
 	private:
 		bool contain(Mapping * mapping);
 	private:

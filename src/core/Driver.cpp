@@ -48,3 +48,15 @@ bool Driver::hasAutoclean(void) const
 {
 	return this->autoclean;
 }
+
+/*******************  FUNCTION  *********************/
+void Driver::setUri(const std::string & uri)
+{
+	this->uri = uri;
+}
+
+/*******************  FUNCTION  *********************/
+const std::string & Driver::getUri(void) const
+{
+	return this->uri;
+}

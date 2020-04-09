@@ -386,3 +386,41 @@ size_t Mapping::getSegmentSize(void) const
 {
 	return this->segmentSize;
 }
+
+
+/*******************  FUNCTION  *********************/
+#ifdef HAVE_HTOPML
+void ummapio::convertToJson(htopml::JsonState & json,const SegmentStatus & value)
+{
+	json.openStruct();
+		json.printField("time", value.time);
+		json.printField("mapped", value.mapped);
+		json.printField("dirty", value.dirty);
+		json.printField("needRead", value.needRead);
+	json.closeStruct();
+}
+
+/*******************  FUNCTION  *********************/
+void ummapio::convertToJson(htopml::JsonState & json,const Mapping & value)
+{
+	json.openStruct();
+		json.printField("size", value.size);
+		json.printField("segments", value.segments);
+		json.printField("segmentSize", value.segmentSize);
+		json.printField("offset", value.storageOffset);
+		json.printField("driverUri", value.driver->getUri());
+		if (value.localPolicy == NULL)
+			json.printField("localPolicyUri", "none://");
+		else
+			json.printField("localPolicyUri", value.localPolicy->getUri());
+		if (value.globalPolicy == NULL)
+			json.printField("globalPolicyUri", "none://");
+		else
+			json.printField("globalPolicyUri", value.globalPolicy->getUri());
+		json.openFieldArray("status");
+		for (int i = 0 ; i < value.segments ; i++)
+			json.printValue(value.segmentStatus[i]);
+		json.closeFieldArray("status");
+	json.closeStruct();
+}
+#endif //HAVE_HTOPML

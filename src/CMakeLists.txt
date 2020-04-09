@@ -27,6 +27,16 @@ if (WITH_OS STREQUAL "Unix")
 endif()
 
 ######################################################
+set(OPTIONAL_EXTRA)
+set(UMMAP_EXTERN_LIBS)
+if (HTOPML_FOUND)
+	set(OPTIONAL_EXTRA $<TARGET_OBJECTS:ummap-htopml>)
+	set(HAVE_HTOPML yes)
+	include_directories(${HTOPML_INCLUDE_DIRS})
+	list(APPEND UMMAP_EXTERN_LIBS ${HTOPML_LIBRARY})
+endif (HTOPML_FOUND)
+
+######################################################
 #setup config file
 configure_file(config.h.in "${CMAKE_CURRENT_BINARY_DIR}/config.h" @ONLY)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -48,11 +58,15 @@ set(UMMAP_INTERNAL_CODE
 	$<TARGET_OBJECTS:ummap-uri>
 	#we should keep an eye on portability of this
 	$<TARGET_OBJECTS:ummap-portability>
+	#optional
+	${OPTIONAL_EXTRA}
 )
 
 ######################################################
 add_library(ummap-io SHARED ${UMMAP_INTERNAL_CODE})
 set_target_properties(ummap-io PROPERTIES VERSION 0.0.0 SOVERSION 0)
+target_link_libraries(ummap-io Threads::Threads)
+target_link_libraries(ummap-io ${UMMAP_EXTERN_LIBS})
 install(TARGETS ummap-io DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 ######################################################
@@ -63,3 +77,8 @@ add_subdirectory(portability)
 add_subdirectory(policies)
 add_subdirectory(uri)
 add_subdirectory(public-api)
+
+######################################################
+if (HTOPML_FOUND)
+	add_subdirectory(htopml)
+endif (HTOPML_FOUND)

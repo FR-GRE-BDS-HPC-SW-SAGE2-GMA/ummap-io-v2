@@ -10,6 +10,7 @@
 /********************  HEADERS  *********************/
 //std
 #include <cstdlib>
+#include <string>
 
 /********************  NAMESPACE  *******************/
 namespace ummapio
@@ -49,8 +50,11 @@ class Driver
 		virtual void sync(size_t offset, size_t size) = 0;
 		void setAutoclean(bool status = true);
 		bool hasAutoclean(void) const;
+		void setUri(const std::string & uri);
+		const std::string & getUri(void) const;
 	private:
 		bool autoclean;
+		std::string uri;
 };
 
 }

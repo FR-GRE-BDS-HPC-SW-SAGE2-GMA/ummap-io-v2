@@ -1,0 +1,30 @@
+.unmapped, .mapped, .dirty {
+	display: block;
+	width: 10px;
+	height: 10px;
+	float: left;
+}
+
+.unmapped {
+	background-color: gray;
+	border: 1px solid darkgray;
+}
+
+.mapped {
+	background-color: green;
+	border: 1px solid darkgreen;
+}
+
+.dirty {
+	background-color: red;
+	border: 1px solid darkred;
+}
+
+.blocked {
+	height:auto;
+	overflow: hidden;
+}
+
+.property {
+	font-weight: bold;
+}

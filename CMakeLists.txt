@@ -26,6 +26,8 @@ include(${CMAKE_SOURCE_DIR}/cmake/unittest-macros.cmake)
 ######################################################
 include(GNUInstallDirs)
 find_package(OpenMP REQUIRED)
+find_package(Threads REQUIRED)
+find_package(Htopml QUIET)
 
 ######################################################
 # setup

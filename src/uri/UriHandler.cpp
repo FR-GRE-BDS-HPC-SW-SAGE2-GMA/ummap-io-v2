@@ -73,20 +73,27 @@ Driver * UriHandler::buildDriver(const std::string & uri)
 
 	//cases
 	std::string type = parser.getType();
+	Driver * driver = NULL;
 	if (type == "file") {
-		return this->buildDriverFOpen(parser.getPath(), parser.getParam("mode", "w+"));
+		driver = this->buildDriverFOpen(parser.getPath(), parser.getParam("mode", "w+"));
 	} else if (type == "mem") {
 		size_t memsize = fromHumanMemSize(parser.getPath());
-		return new MemoryDriver(memsize);
+		driver = new MemoryDriver(memsize);
 	} else if (type == "dummy") {
 		size_t value = atol(parser.getPath().c_str());
-		return new DummyDriver(value);
+		driver = new DummyDriver(value);
 	} else if (type == "mero" || type == "merofile" ) {
-		return buildDriverMero(parser);
+		driver = buildDriverMero(parser);
 	} else {
 		UMMAP_FATAL_ARG("Invalid ressource type to build driver : %1").arg(uri).end();
 		return NULL;
 	}
+
+	//attach uri for debugging
+	driver->setUri(uri);
+
+	//return
+	return driver;
 }
 
 /*******************  FUNCTION  *********************/

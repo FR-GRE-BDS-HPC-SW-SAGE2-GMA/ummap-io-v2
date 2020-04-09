@@ -8,9 +8,15 @@
 #define UMMAP_MAPPING_HPP
 
 /********************  HEADERS  *********************/
+//config
+#include "config.h"
 //std
 #include <cstdlib>
 #include <mutex>
+//htopml
+#ifdef HAVE_HTOPML
+#include <htopml/JsonState.h>
+#endif
 //internal
 #include "Policy.hpp"
 #include "Driver.hpp"
@@ -55,6 +61,10 @@ class Mapping
 		size_t getSize(void) const;
 		size_t getAlignedSize(void) const;
 		size_t getSegmentSize(void) const;
+	public:
+		#ifdef HAVE_HTOPML
+		friend void convertToJson(htopml::JsonState & json,const Mapping & value);
+		#endif
 	private:
 		void loadAndSwapSegment(size_t offset, bool writeAccess);
 		const bool * getMutexRange(size_t offset, size_t size) const;
@@ -73,6 +83,11 @@ class Mapping
 		std::mutex * segmentMutexes;
 		int segmentMutexesCnt;
 };
+
+/*******************  FUNCTION  *********************/
+#ifdef HAVE_HTOPML
+void convertToJson(htopml::JsonState & json,const SegmentStatus & value);
+#endif //HAVE_HTOPML
 
 }
 

@@ -111,3 +111,15 @@ void Policy::unregisterMapping(Mapping * mapping)
 		};
 	}
 }
+
+/*******************  FUNCTION  *********************/
+void Policy::setUri(const std::string & uri)
+{
+	this->uri = uri;
+}
+
+/*******************  FUNCTION  *********************/
+const std::string & Policy::getUri(void) const
+{
+	return this->uri;
+}
