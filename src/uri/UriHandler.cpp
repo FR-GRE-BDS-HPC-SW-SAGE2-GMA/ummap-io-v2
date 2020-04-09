@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <cassert>
 #include "../common/Debug.hpp"
+#include "../common/HumanUnits.hpp"
 #include "../drivers/FDDriver.hpp"
 #include "../drivers/MemoryDriver.hpp"
 #include "../drivers/DummyDriver.hpp"
@@ -75,7 +76,7 @@ Driver * UriHandler::buildDriver(const std::string & uri)
 	if (type == "file") {
 		return this->buildDriverFOpen(parser.getPath(), parser.getParam("mode", "w+"));
 	} else if (type == "mem") {
-		size_t memsize = atol(parser.getPath().c_str());
+		size_t memsize = fromHumanMemSize(parser.getPath());
 		return new MemoryDriver(memsize);
 	} else if (type == "dummy") {
 		size_t value = atol(parser.getPath().c_str());
@@ -103,7 +104,7 @@ Policy * UriHandler::buildPolicy(const std::string & uri, bool local)
 	//cases
 	std::string type = parser.getType();
 	if (type == "fifo") {
-		size_t memsize = atol(parser.getPath().c_str());
+		size_t memsize = fromHumanMemSize(parser.getPath());
 		return new FifoPolicy(memsize, local);
 	} else {
 		UMMAP_FATAL_ARG("Invalid ressource type to build policy : %1").arg(uri).end();

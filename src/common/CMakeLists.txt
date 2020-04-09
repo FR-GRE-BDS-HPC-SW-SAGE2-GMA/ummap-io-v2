@@ -5,7 +5,7 @@
 ######################################################
 
 ######################################################
-set(COMMON_SRC ListElement.cpp)
+set(COMMON_SRC ListElement.cpp HumanUnits.cpp)
 
 ######################################################
 add_library(ummap-common OBJECT ${COMMON_SRC})
