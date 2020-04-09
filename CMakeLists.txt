@@ -40,3 +40,4 @@ endif(ENABLE_COVERAGE)
 ######################################################
 add_subdirectory(extern-deps)
 add_subdirectory(src)
+add_subdirectory(examples)
