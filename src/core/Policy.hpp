@@ -12,8 +12,7 @@
 #include <cstdlib>
 #include <list>
 #include <string>
-//local
-#include "portability/Spinlock.hpp"
+#include <mutex>
 
 /********************  NAMESPACE  *******************/
 namespace ummapio
@@ -43,6 +42,8 @@ class Policy
 		virtual void freeElementStorage(Mapping * mapping) = 0;
 		void setUri(const std::string & uri);
 		const std::string & getUri(void) const;
+		void forceUsingGroupMutex(std::recursive_mutex * mutex);
+		std::recursive_mutex * getLocalMutex(void);
 	protected:
 		void registerMapping(Mapping * mapping, void * storage, size_t elementCount, size_t elementSize);
 		void unregisterMapping(Mapping * mapping);
@@ -53,7 +54,8 @@ class Policy
 		bool local;
 		size_t maxMemory;
 		std::list<PolicyStorage> storageRegistry;
-		Spinlock storageRegistryLock;
+		std::recursive_mutex * mutexPtr;
+		std::recursive_mutex localMutex;
 		std::string uri;
 };
 

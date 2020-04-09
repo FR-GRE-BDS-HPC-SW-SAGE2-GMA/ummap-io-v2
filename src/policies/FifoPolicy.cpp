@@ -43,7 +43,7 @@ void FifoPolicy::freeElementStorage(Mapping * mapping)
 	//CRITICAL SECTION
 	{
 		//lock
-		std::lock_guard<std::mutex> lockGuard(this->rootLock);
+		std::lock_guard<std::recursive_mutex> lockGuard(*this->mutexPtr);
 
 		//get
 		//@TODO get & unregister
@@ -67,20 +67,20 @@ void FifoPolicy::freeElementStorage(Mapping * mapping)
 /*******************  FUNCTION  *********************/
 void FifoPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool mapped, bool dirty)
 {
-	//get storage
-	PolicyStorage storage = this->getStorageInfo(mapping);
-
-	//get element
-	ListElement * elements = static_cast<ListElement*>(storage.elements);
-	ListElement & cur = elements[index];
-
-	//check if is new touch
-	bool isFirstAccess = cur.isAlone();
-
 	//CRITICAL SECTION
 	{
 		//take lock
-		std::lock_guard<std::mutex> lockGuard(this->rootLock);
+		std::lock_guard<std::recursive_mutex> lockGuard(*this->mutexPtr);
+
+		//get storage
+		PolicyStorage storage = this->getStorageInfo(mapping);
+
+		//get element
+		ListElement * elements = static_cast<ListElement*>(storage.elements);
+		ListElement & cur = elements[index];
+
+		//check if is new touch
+		bool isFirstAccess = cur.isAlone();
 
 		//remove from list
 		cur.removeFromList();
@@ -115,18 +115,18 @@ void FifoPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool
 /*******************  FUNCTION  *********************/
 void FifoPolicy::notifyEvict(Mapping * mapping, size_t index)
 {
-	//get storage infos
-	PolicyStorage storage = getStorageInfo(mapping);
-
-	//get element
-	ListElement * elements = static_cast<ListElement*>(storage.elements);
-	ListElement & cur = elements[index];
-
 	//evict
 	//CRITICAL SECTION
 	{
 		//take lock
-		std::lock_guard<std::mutex> lockGuard(this->rootLock);
+		std::lock_guard<std::recursive_mutex> lockGuard(*this->mutexPtr);
+
+		//get storage infos
+		PolicyStorage storage = getStorageInfo(mapping);
+
+		//get element
+		ListElement * elements = static_cast<ListElement*>(storage.elements);
+		ListElement & cur = elements[index];
 
 		//check
 		assert(cur.isInList());

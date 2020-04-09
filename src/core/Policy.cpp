@@ -21,12 +21,25 @@ Policy::Policy(size_t maxMemory, bool local)
 {
 	this->maxMemory = maxMemory;
 	this->local = local;
+	this->mutexPtr = &this->localMutex;
 }
 
 /*******************  FUNCTION  *********************/
 Policy::~Policy(void)
 {
 
+}
+
+/*******************  FUNCTION  *********************/
+void Policy::forceUsingGroupMutex(std::recursive_mutex * mutex)
+{
+	this->mutexPtr = mutex;
+}
+
+/*******************  FUNCTION  *********************/
+std::recursive_mutex * Policy::getLocalMutex(void)
+{
+	return &this->localMutex;
 }
 
 /*******************  FUNCTION  *********************/
@@ -42,7 +55,7 @@ void Policy::registerMapping(Mapping * mapping, void * storage, size_t elementCo
 
 	//register, CRITICAL SECTION
 	{
-		std::lock_guard<Spinlock> lockGuard(this->storageRegistryLock);
+		std::lock_guard<std::recursive_mutex> lockGuard(*this->mutexPtr);
 		this->storageRegistry.push_back(entry);
 	}
 }
@@ -56,24 +69,32 @@ bool Policy::contains(PolicyStorage & storage, void * entry)
 /*******************  FUNCTION  *********************/
 PolicyStorage Policy::getStorageInfo(void * entry)
 {
-	//start CRITICAL SECTION
-	std::lock_guard<Spinlock> lockGuard(this->storageRegistryLock);
+	//vars
+	PolicyStorage res = {0,0,0};
+
+	//lock
+	std::lock_guard<std::recursive_mutex> lockGuard(*this->mutexPtr);
 
 	//loop to search
 	for (auto it : this->storageRegistry) {
 		if (contains(it, entry))
-			return it;
+			res = it;
 	}
 
 	//not found
-	UMMAP_FATAL("Fail to found policy storage entry !");
-	PolicyStorage res = {0,0,0};
+	if (res.mapping == NULL)
+		UMMAP_FATAL("Fail to found policy storage entry !");
+	
+	//ret
 	return res;
 }
 
 /*******************  FUNCTION  *********************/
 PolicyStorage Policy::getStorageInfo(Mapping * mapping)
 {
+	//var
+	PolicyStorage res = {0,0,0};
+
 	if (local) {
 		assume(this->storageRegistry.size() == 1, "Invalid local list with multiple mapping registered !");
 		PolicyStorage res = this->storageRegistry.front();
@@ -81,18 +102,20 @@ PolicyStorage Policy::getStorageInfo(Mapping * mapping)
 		return res;
 	} else {
 		//start CRITICAL SECTION
-		std::lock_guard<Spinlock> lockGuard(this->storageRegistryLock);
+		std::lock_guard<std::recursive_mutex> lockGuard(*this->mutexPtr);
 
 		//loop to search
 		for (auto it : this->storageRegistry) {
 			if (it.mapping == mapping)
-				return it;
+				res = it;
 		}
 	}
 
 	//not found
-	UMMAP_FATAL("Fail to found policy of given mapping !");
-	PolicyStorage res = {0,0,0};
+	if (res.mapping == NULL)
+		UMMAP_FATAL("Fail to found policy of given mapping !");
+	
+	//ret
 	return res;
 }
 
@@ -100,7 +123,7 @@ PolicyStorage Policy::getStorageInfo(Mapping * mapping)
 void Policy::unregisterMapping(Mapping * mapping)
 {
 	//start CRITICAL SECTION
-	std::lock_guard<Spinlock> lockGuard(this->storageRegistryLock);
+	std::lock_guard<std::recursive_mutex> lockGuard(*this->mutexPtr);
 
 	//loop
 	for (auto it = storageRegistry.begin() ; it != storageRegistry.end() ; ++it) {

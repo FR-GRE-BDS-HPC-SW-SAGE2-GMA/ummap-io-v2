@@ -33,6 +33,10 @@ Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, MappingP
 	assumeArg(mapSize % UMMAP_PAGE_SIZE == 0, "Size should be multiple of page size (%1), got '%2'").arg(UMMAP_PAGE_SIZE).arg(size).end();
 	assumeArg(mapSize % segmentSize == 0, "Size should be multiple of segment size (%1), got '%2'").arg(segmentSize).arg(size).end();
 
+	//warning
+	if (localPolicy != NULL && globalPolicy != NULL)
+		localPolicy->forceUsingGroupMutex(globalPolicy->getLocalMutex());
+
 	//set
 	this->driver = driver;
 	this->localPolicy = localPolicy;
@@ -77,10 +81,6 @@ Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, MappingP
 /*******************  FUNCTION  *********************/
 Mapping::~Mapping(void)
 {
-	//take all locks
-	for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
-		this->segmentMutexes[i].lock();
-
 	//unmap
 	OS::munmap(this->baseAddress, this->getAlignedSize());
 
