@@ -168,7 +168,7 @@ void ummap_policy_group_destroy(const char * name)
 }
 
 /*******************  FUNCTION  *********************/
-ummap_policy_t * umamp_policy_create_fifo(size_t max_size, bool local)
+ummap_policy_t * ummap_policy_create_fifo(size_t max_size, bool local)
 {
 	Policy * policy = new FifoPolicy(max_size, local);
 	return (ummap_policy_t*)policy;
@@ -188,7 +188,7 @@ ummap_driver_t * ummap_driver_create_uri(const char * uri)
 }
 
 /*******************  FUNCTION  *********************/
-ummap_policy_t * umamp_policy_create_uri(const char * uri, bool local)
+ummap_policy_t * ummap_policy_create_uri(const char * uri, bool local)
 {
 	Policy * policy = getGlobalhandler()->getUriHandler().buildPolicy(uri, local);
 	return (ummap_policy_t*)policy;

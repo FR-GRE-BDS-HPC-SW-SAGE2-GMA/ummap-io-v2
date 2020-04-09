@@ -110,13 +110,21 @@ Policy * UriHandler::buildPolicy(const std::string & uri, bool local)
 
 	//cases
 	std::string type = parser.getType();
+	Policy * policy = NULL;
 	if (type == "fifo") {
 		size_t memsize = fromHumanMemSize(parser.getPath());
-		return new FifoPolicy(memsize, local);
+		policy = new FifoPolicy(memsize, local);
+	} else if (type == "none") {
+		policy = NULL;
 	} else {
 		UMMAP_FATAL_ARG("Invalid ressource type to build policy : %1").arg(uri).end();
-		return NULL;
 	}
+
+	//set
+	policy->setUri(uri);
+
+	//ret
+	return policy;
 }
 
 /*******************  FUNCTION  *********************/

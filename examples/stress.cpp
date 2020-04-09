@@ -41,7 +41,7 @@ int main(int argc, char ** argv)
 
 	//create global policy
 	int threads = omp_get_max_threads();
-	ummap_policy_t * global_policy = umamp_policy_create_fifo(threads * 4096 * 2, false);
+	ummap_policy_t * global_policy = ummap_policy_create_fifo(threads * 4096 * 2, false);
 	ummap_policy_group_register("global", global_policy);
 
 	//threads
@@ -50,7 +50,7 @@ int main(int argc, char ** argv)
 		//map
 		printf(" - Mapping...\n");
 		ummap_driver_t * driver = ummap_driver_create_uri(driver_uri);
-		ummap_policy_t * policy = umamp_policy_create_fifo(4096 * 4, false);
+		ummap_policy_t * policy = ummap_policy_create_fifo(4096 * 4, false);
 		char * ptr = (char*)ummap(size, segment_size, 0, UMMAP_PROT_RW, driver, policy, "global");
 
 		//write

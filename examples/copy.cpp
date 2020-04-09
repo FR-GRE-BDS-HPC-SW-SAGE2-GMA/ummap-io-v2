@@ -42,13 +42,13 @@ int main(int argc, char ** argv)
 	//map in
 	printf(" - Mapping in...\n");
 	ummap_driver_t * driver_in = ummap_driver_create_uri(driver_uri_in);
-	ummap_policy_t * policy_in = ummmap_policy_create_uri(policy_uri, true);
+	ummap_policy_t * policy_in = ummap_policy_create_uri(policy_uri, true);
 	char * in = (char*)ummap(size, segment_size, 0, UMMAP_PROT_READ, driver_in, policy_in, "none");
 
 	//map in
 	printf(" - Mapping in...\n");
 	ummap_driver_t * driver_out = ummap_driver_create_uri(driver_uri_out);
-	ummap_policy_t * policy_out = ummmap_policy_create_uri(policy_uri, true);
+	ummap_policy_t * policy_out = ummap_policy_create_uri(policy_uri, true);
 	char * out = (char*)ummap(size, segment_size, 0, UMMAP_PROT_RW, driver_out, policy_out, "none");
 
 	//write

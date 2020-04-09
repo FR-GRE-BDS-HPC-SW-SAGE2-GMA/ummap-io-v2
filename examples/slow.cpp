@@ -41,7 +41,7 @@ int main(int argc, char ** argv)
 	//map
 	printf(" - Mapping...\n");
 	ummap_driver_t * driver = ummap_driver_create_uri(driver_uri);
-	ummap_policy_t * policy = ummmap_policy_create_uri(policy_uri, true);
+	ummap_policy_t * policy = ummap_policy_create_uri(policy_uri, true);
 	char * ptr = (char*)ummap(size, segment_size, 0, UMMAP_PROT_RW, driver, policy, "none");
 
 	//5 memset

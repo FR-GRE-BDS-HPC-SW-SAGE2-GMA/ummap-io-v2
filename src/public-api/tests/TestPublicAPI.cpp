@@ -189,8 +189,8 @@ TEST_F(TestPublicAPI, autoclean_driver)
 TEST_F(TestPublicAPI, policy_group)
 {
 	//setup policies
-	ummap_policy_t * globalPolicy = umamp_policy_create_fifo(4*4096, false);
-	ummap_policy_t * localPolicy = umamp_policy_create_fifo(4*4096, true);
+	ummap_policy_t * globalPolicy = ummap_policy_create_fifo(4*4096, false);
+	ummap_policy_t * localPolicy = ummap_policy_create_fifo(4*4096, true);
 
 	//reg global
 	ummap_policy_group_register("global", globalPolicy);
@@ -253,6 +253,6 @@ TEST_F(TestPublicAPI, create_policy_uri)
 	ummap_policy_t * policy;
 	
 	//fifo
-	policy = umamp_policy_create_uri("fifo://4096", true);
+	policy = ummap_policy_create_uri("fifo://4096", true);
 	ummap_policy_destroy(policy);
 }
