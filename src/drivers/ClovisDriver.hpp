@@ -11,12 +11,11 @@
 #include "../core/Driver.hpp"
 
 extern "C" {
-#include "clovis_api.h"
+#include "../public-api/clovis_api.h"
 }
 
 /* This value is fixed based on the HW that you run, 
- * 50 for VM execution and 25 for prototype execution has been tested OK
- * 
+ * 50 for VM execution and 25 for Juelich prototype execution has been tested OK
  * Just a bit of explanation here: 
  * Internally, MERO is splitting the write ops into data units 
  * There is an arbitrary limitation within on the number of data units
@@ -41,7 +40,7 @@ namespace ummapio
 class ClovisDriver : public Driver
 {
 	public:
-		ClovisDriver(struct m0_uint128 m_object_id);
+		ClovisDriver(struct m0_uint128 object_id, char *ressource_file, int rank);
 		virtual ~ClovisDriver(void) override;
 		virtual ssize_t pwrite(const void * buffer, size_t size, size_t offset) override;
 		virtual ssize_t pread(void * buffer, size_t size, size_t offset) override;
@@ -51,5 +50,15 @@ class ClovisDriver : public Driver
 };
 
 }
+
+
+inline std::ostream&
+operator<<(std::ostream& out, struct m0_uint128 object_id)
+{
+  out << object_id.u_hi << ":" << object_id.u_lo;
+  out << std::flush;
+  return out;
+}
+
 
 #endif //UMMAP_CLOVIS_DRIVER_HPP
