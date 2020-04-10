@@ -22,33 +22,11 @@ ClovisDriver::ClovisDriver(struct m0_uint128 object_id, char *ressource_file, in
 
 	m_object_id.u_lo = object_id.u_lo;
 	m_object_id.u_hi = object_id.u_hi;
-
-	if (!clovis_instance) {
-		assert(false && "Clovis not Initialized !!!");
-		/*
-		int ret = c0appz_init(rank , ressource_file);
-		cout << "[Success] Initizalition of Clovis" << endl;
-		if (ret == 0) {
-		    cout << "[Success] Mero Initialized" << endl;
-		} else {
-		    cout << "[Failed] Mero not Initialized" << endl;
-		}
-
-		ret = create_object(m_object_id);
-		if (ret == 0) {
-		    cout << "[Success] Mero Object ID=" << m_object_id << " created" << endl;
-		} else if (ret == 1) {
-		    cout << "[Success] Mero Object ID=" << m_object_id << " already exist, nothing done" << endl;
-		} else {
-		    cout << "[Failed] Mero Object ID=" << m_object_id << " not created" << endl;
-		}*/
-	}
 }
 
 /*******************  FUNCTION  *********************/
 ClovisDriver::~ClovisDriver(void)
 {
-	c0appz_free();
 }
 
 /*******************  FUNCTION  *********************/
