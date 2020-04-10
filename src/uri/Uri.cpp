@@ -87,7 +87,7 @@ void Uri::parse(const std::string & uri)
 			args += '&';
 
 			//loop
-			for (int i = 1 ; i < args.size() ; i++) {
+			for (size_t i = 1 ; i < args.size() ; i++) {
 				if (args[i] == '&') {
 					//insert
 					this->params[name] = buf;

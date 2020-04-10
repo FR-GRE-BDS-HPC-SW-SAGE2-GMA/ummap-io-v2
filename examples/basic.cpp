@@ -19,7 +19,7 @@ int main(int argc, char ** argv)
 {
 	//check
 	if (argc < 5) {
-		printf("%s {file_uri} {policy_uri} {size} {segment_size} [repeat]\n", argv[0]);
+		printf("%s {file_uri} {policy_uri} {size} {segment_size}\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 
@@ -28,11 +28,6 @@ int main(int argc, char ** argv)
 	const char * policy_uri = argv[2];
 	size_t size = atol(argv[3]);
 	size_t segment_size = atol(argv[4]);
-	int repeat = 5;
-
-	//optional
-	if (argc == 6)
-		repeat = atoi(argv[5]);
 
 	//init
 	printf(" - Init...\n");
