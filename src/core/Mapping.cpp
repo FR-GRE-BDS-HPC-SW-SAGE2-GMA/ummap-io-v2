@@ -46,7 +46,11 @@ Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, MappingP
 	this->storageOffset = storageOffset;
 
 	//establish mapping
-	this->baseAddress = (char*)OS::mmapProtNone(mapSize);
+	this->baseAddress = (char*)driver->directMmap(size, storageOffset, protection & MAPPING_PROT_READ, protection & MAPPING_PROT_WRITE);
+	if (this->baseAddress == NULL)
+		this->baseAddress = (char*)OS::mmapProtNone(mapSize);
+
+	//sizes
 	this->segments = mapSize / segmentSize;
 	this->segmentSize = segmentSize;
 
@@ -82,7 +86,8 @@ Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, MappingP
 Mapping::~Mapping(void)
 {
 	//unmap
-	OS::munmap(this->baseAddress, this->getAlignedSize());
+	if (driver->directMunmap(this->baseAddress, size) == false)
+		OS::munmap(this->baseAddress, this->getAlignedSize());
 
 	//policies
 	if (this->localPolicy != NULL)

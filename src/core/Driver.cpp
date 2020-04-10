@@ -60,3 +60,15 @@ const std::string & Driver::getUri(void) const
 {
 	return this->uri;
 }
+
+/*******************  FUNCTION  *********************/
+void * Driver::directMmap(size_t size, size_t offset, bool read, bool write)
+{
+	return NULL;
+}
+
+/*******************  FUNCTION  *********************/
+bool Driver::directMunmap(void * base, size_t size)
+{
+	return false;
+}

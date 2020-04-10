@@ -48,6 +48,23 @@ class Driver
 		 * @param size Size of the segment to sync.
 		**/
 		virtual void sync(size_t offset, size_t size) = 0;
+		/**
+		 * Let the driver making the memory mapping. This is to be used
+		 * by direct access modes
+		 * @param size Define the mapping size.
+		 * @param offset Define the offset in file.
+		 * @param read Accept read accesses
+		 * @param write Accept write accesses
+		 * @return NULL if the caller has to do the mapping, an addresse otherwise.
+		**/
+		virtual void * directMmap(size_t size, size_t offset, bool read, bool write);
+		/**
+		 * Let the driver maling the memory unmaping.
+		 * @param base Base addresse of the mapping.
+		 * @param size Size of the mapping.
+		 * @return Return true if it has unmapped, false if it need to be done by the caller.
+		**/
+		virtual bool directMunmap(void * base, size_t size);
 		void setAutoclean(bool status = true);
 		bool hasAutoclean(void) const;
 		void setUri(const std::string & uri);
