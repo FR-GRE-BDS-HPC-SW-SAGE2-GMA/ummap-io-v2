@@ -64,7 +64,7 @@ class Driver
 		 * @param size Size of the mapping.
 		 * @return Return true if it has unmapped, false if it need to be done by the caller.
 		**/
-		virtual bool directMunmap(void * base, size_t size);
+		virtual bool directMunmap(void * base, size_t size, size_t offset);
 		void setAutoclean(bool status = true);
 		bool hasAutoclean(void) const;
 		void setUri(const std::string & uri);

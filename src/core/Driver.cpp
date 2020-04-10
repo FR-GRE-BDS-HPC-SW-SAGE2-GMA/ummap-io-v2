@@ -68,7 +68,7 @@ void * Driver::directMmap(size_t size, size_t offset, bool read, bool write)
 }
 
 /*******************  FUNCTION  *********************/
-bool Driver::directMunmap(void * base, size_t size)
+bool Driver::directMunmap(void * base, size_t size, size_t offset)
 {
 	return false;
 }

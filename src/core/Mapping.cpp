@@ -86,7 +86,7 @@ Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, MappingP
 Mapping::~Mapping(void)
 {
 	//unmap
-	if (driver->directMunmap(this->baseAddress, size) == false)
+	if (driver->directMunmap(this->baseAddress, size, storageOffset) == false)
 		OS::munmap(this->baseAddress, this->getAlignedSize());
 
 	//policies
