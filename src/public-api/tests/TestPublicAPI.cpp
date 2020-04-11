@@ -6,6 +6,7 @@
 
 /********************  HEADERS  *********************/
 #include <gtest/gtest.h>
+#include <sys/mman.h>
 #include "../ummap.h"
 
 /*********************  CLASS  **********************/
@@ -91,9 +92,44 @@ TEST_F(TestPublicAPI, map_driver_fopen)
 	FILE * fp = fopen(fname, "r");
 	ASSERT_NE(nullptr, fp);
 	char buffer[8*4096];
-	fread(buffer, 1, 8*4096, fp);
+	ssize_t res = fread(buffer, 1, 8*4096, fp);
+	ASSERT_EQ(8*4096, res);
 	for (int i = 0 ; i < 8*4096 ; i++)
-		ASSERT_EQ(10, buffer[i]);
+		ASSERT_EQ(10, buffer[i]) << "Index: " << i;
+	
+	//clear
+	unlink(fname);
+}
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, map_driver_dax_fopen)
+{
+	//def
+	const char * fname = "/tmp/test-ummap-fopen-driver.txt";
+	system("touch /tmp/test-ummap-fopen-driver.txt");
+	truncate(fname, 8*4096);
+
+	//map 2
+	void * ptr1 = ummap(8*4096, 4096, 0, UMMAP_PROT_RW, ummap_driver_create_dax_fopen(fname, "rw+", false), NULL, "none");
+
+	//we just write, no read pre-existing content
+	ummap_skip_first_read(ptr1);
+
+	//setup
+	memset(ptr1, 'a', 8*4096);
+
+	//unmap 1 and let the other for cleaup
+	ummap_sync(ptr1, 0);
+	umunmap(ptr1);
+
+	//check
+	FILE * fp = fopen(fname, "r");
+	ASSERT_NE(nullptr, fp);
+	char buffer[8*4096];
+	ssize_t res = fread(buffer, 1, 8*4096, fp);
+	ASSERT_EQ(8*4096, res);
+	for (int i = 0 ; i < 8*4096 ; i++)
+		ASSERT_EQ('a', buffer[i]) << "Index: " << i;
 	
 	//clear
 	unlink(fname);
@@ -109,9 +145,49 @@ TEST_F(TestPublicAPI, map_driver_fd)
 	FILE * fp = fopen(fname, "w+");
 	ASSERT_NE(nullptr, fp);
 	int fd = fileno(fp);
+	ftruncate(fd, 8*4096);
 
 	//map 2
 	void * ptr1 = ummap(8*4096, 4096, 0, UMMAP_PROT_RW, ummap_driver_create_fd(fd), NULL, "none");
+	fclose(fp);
+
+	//we just write, no read pre-existing content
+	ummap_skip_first_read(ptr1);
+
+	//setup
+	memset(ptr1, 'a', 8*4096);
+
+	//unmap 1 and let the other for cleaup
+	ummap_sync(ptr1, 0);
+	umunmap(ptr1);
+
+	//check
+	fp = fopen(fname, "r");
+	ASSERT_NE(nullptr, fp);
+	char buffer[8*4096];
+	ssize_t res = fread(buffer, 1, 8*4096, fp);
+	ASSERT_EQ(8*4096, res);
+	for (int i = 0 ; i < 8*4096 ; i++)
+		ASSERT_EQ('a', buffer[i]) << "Index: " << i;
+	
+	//clear
+	unlink(fname);
+}
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, map_driver_dax_fd)
+{
+	//def
+	const char * fname = "/tmp/test-ummap-dax-fopen-driver.txt";
+
+	//open
+	FILE * fp = fopen(fname, "w+");
+	ASSERT_NE(nullptr, fp);
+	int fd = fileno(fp);
+	ftruncate(fd, 8*4096);
+
+	//map 2
+	void * ptr1 = ummap(8*4096, 4096, 0, UMMAP_PROT_RW, ummap_driver_create_dax_fd(fd, false), NULL, "none");
 	fclose(fp);
 
 	//we just write, no read pre-existing content
@@ -128,9 +204,52 @@ TEST_F(TestPublicAPI, map_driver_fd)
 	fp = fopen(fname, "r");
 	ASSERT_NE(nullptr, fp);
 	char buffer[8*4096];
-	fread(buffer, 1, 8*4096, fp);
+	ssize_t res = fread(buffer, 1, 8*4096, fp);
+	ASSERT_EQ(8*4096, res);
 	for (int i = 0 ; i < 8*4096 ; i++)
-		ASSERT_EQ(10, buffer[i]);
+		ASSERT_EQ(10, buffer[i]) << "Index: " << i;
+	
+	//clear
+	unlink(fname);
+}
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, map_driver_dax_fd_offset)
+{
+	//def
+	const char * fname = "/tmp/test-ummap-dax-fopen-driver-offset.txt";
+
+	//open
+	FILE * fp = fopen(fname, "w+");
+	ASSERT_NE(nullptr, fp);
+	int fd = fileno(fp);
+	ftruncate(fd, 8*4096);
+
+	//map 2
+	const size_t offset = 256;
+	void * ptr1 = ummap(8*4096 - offset, 4096, offset, UMMAP_PROT_RW, ummap_driver_create_dax_fd(fd, true), NULL, "none");
+	fclose(fp);
+
+	//we just write, no read pre-existing content
+	ummap_skip_first_read(ptr1);
+
+	//setup
+	memset(ptr1, 10, 8*4096 - offset);
+
+	//unmap 1 and let the other for cleaup
+	ummap_sync(ptr1, 0);
+	umunmap(ptr1);
+
+	//check
+	fp = fopen(fname, "r");
+	ASSERT_NE(nullptr, fp);
+	char buffer[8*4096];
+	ssize_t res = fread(buffer, 1, 8*4096, fp);
+	ASSERT_EQ(8*4096, res);
+	for (int i = 0 ; i < offset ; i++)
+		ASSERT_EQ(0, buffer[i]) << "Index: " << i;
+	for (int i = offset ; i < 8*4096 ; i++)
+		ASSERT_EQ(10, buffer[i]) << "Index: " << i;
 	
 	//clear
 	unlink(fname);

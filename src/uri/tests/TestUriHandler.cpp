@@ -47,6 +47,14 @@ TEST(TestUriHandler, buildDriver)
 	driver = handler.buildDriver("dummy://0");
 	delete driver;
 
+	//mmap
+	driver = handler.buildDriver("mmap://test.raw");
+	delete driver;
+
+	//mmap
+	driver = handler.buildDriver("dax://test.raw");
+	delete driver;
+
 	//mero-1 
 	driver = handler.buildDriver("merofile://123:456");
 	delete driver;

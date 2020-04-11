@@ -24,7 +24,7 @@ class MemoryDriver : public Driver
 		virtual ~MemoryDriver(void);
 		virtual ssize_t pwrite(const void * buffer, size_t size, size_t offset) override;
 		virtual ssize_t pread(void * buffer, size_t size, size_t offset) override;
-		virtual void sync(size_t offset, size_t size) override;
+		virtual void sync(void * ptr, size_t offset, size_t size) override;
 		char * getBuffer(void);
 		size_t getSize(void) const;
 	private:

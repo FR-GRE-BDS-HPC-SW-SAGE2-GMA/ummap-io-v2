@@ -44,10 +44,11 @@ class Driver
 		virtual ssize_t pread(void * buffer, size_t size, size_t offset) = 0;
 		/**
 		 * Apply a sync operation on the given interval.
+		 * @param ptr The pointer of the segment to sync (without accounting offset which need to be added).
 		 * @param offset From where to start the sync operation.
 		 * @param size Size of the segment to sync.
 		**/
-		virtual void sync(size_t offset, size_t size) = 0;
+		virtual void sync(void *ptr, size_t offset, size_t size) = 0;
 		/**
 		 * Let the driver making the memory mapping. This is to be used
 		 * by direct access modes
@@ -65,6 +66,10 @@ class Driver
 		 * @return Return true if it has unmapped, false if it need to be done by the caller.
 		**/
 		virtual bool directMunmap(void * base, size_t size, size_t offset);
+		/**
+		 * When directly mapping do not make the ummap internal state tracking but direct msync
+		**/
+		virtual bool directMSync(void * base, size_t size, size_t offset);
 		void setAutoclean(bool status = true);
 		bool hasAutoclean(void) const;
 		void setUri(const std::string & uri);

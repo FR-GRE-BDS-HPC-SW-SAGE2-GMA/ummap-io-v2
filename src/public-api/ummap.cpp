@@ -14,6 +14,7 @@
 #include "../drivers/FDDriver.hpp"
 #include "../drivers/MemoryDriver.hpp"
 #include "../drivers/DummyDriver.hpp"
+#include "../drivers/MmapDriver.hpp"
 #include "../policies/FifoPolicy.hpp"
 #include "ummap.h"
 
@@ -60,6 +61,11 @@ void * ummap(size_t size, size_t segment_size, size_t storage_offset, ummap_mapp
 	MappingProtection prot = (MappingProtection)protection;
 	Driver * driv = (Driver*)(driver);
 	Policy * pol = (Policy*)(local_policy);
+
+	//group
+	const char * policy_group_checked = policy_group;
+	if (policy_group_checked == NULL)
+		policy_group_checked = "none";
 
 	//call & ret
 	return getGlobalhandler()->ummap(size, segment_size, storage_offset, prot, driv, pol, policy_group);
@@ -115,9 +121,36 @@ ummap_driver_t * ummap_driver_create_fopen(const char * file_path, const char * 
 }
 
 /*******************  FUNCTION  *********************/
+ummap_driver_t * ummap_driver_create_dax_fopen(const char * file_path, const char * mode, bool allowNotAligned)
+{
+	//open
+	FILE * fp = fopen(file_path, mode);
+	assumeArg(fp != NULL, "Fail to open file '%1': %2")
+		.arg(file_path)
+		.argStrErrno()
+		.end();
+	
+	//create driver
+	ummap_driver_t * res = ummap_driver_create_dax_fd(fileno(fp), allowNotAligned);
+
+	//close
+	fclose(fp);
+
+	//return
+	return res;
+}
+
+/*******************  FUNCTION  *********************/
 ummap_driver_t * ummap_driver_create_fd(int fd)
 {
 	Driver * driver = new FDDriver(fd);
+	return (ummap_driver_t*)driver;
+}
+
+/*******************  FUNCTION  *********************/
+ummap_driver_t * ummap_driver_create_dax_fd(int fd, bool allowNotAligned)
+{
+	Driver * driver = new MmapDriver(fd, allowNotAligned);
 	return (ummap_driver_t*)driver;
 }
 

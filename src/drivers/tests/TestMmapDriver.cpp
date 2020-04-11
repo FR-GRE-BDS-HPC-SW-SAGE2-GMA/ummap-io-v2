@@ -138,3 +138,39 @@ TEST(TestMmapDriver, fileMapping_not_aligned_offset)
 	fclose(fp);
 	unlink(fname);
 }
+
+/*******************  FUNCTION  *********************/
+TEST(TestMmapDriver, sync)
+{
+	//open
+	const char * fname = "/tmp/test-sync.txt";
+	const size_t size = 8*4096;
+	FILE * fp = fopen(fname, "w+");
+	ASSERT_NE(nullptr, fp);
+	ftruncate(fileno(fp), size);
+
+	//map
+	MmapDriver driver(fileno(fp), true);
+	char * ptr = (char*)driver.directMmap(size, 0, true, true);
+	fclose(fp);
+
+	//write & flush
+	memset(ptr, 'a', size);
+	driver.sync(ptr, 0, size);
+	
+	//close & unlink
+	driver.directMunmap(ptr, size, 0);
+
+	//check content
+	fp = fopen(fname, "r");
+	ASSERT_NE(nullptr, fp);
+	char buffer[size];
+	ssize_t res = fread(buffer, 1, size, fp);
+	ASSERT_EQ(size, res);
+	for (size_t i = 0 ; i < size ; i++)
+		ASSERT_EQ('a', buffer[i]) << "Index: " << i;
+	fclose(fp);
+
+	//remove
+	unlink(fname);
+}

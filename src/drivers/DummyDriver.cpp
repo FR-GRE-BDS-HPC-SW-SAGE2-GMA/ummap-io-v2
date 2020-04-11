@@ -45,7 +45,7 @@ ssize_t DummyDriver::pread(void * buffer, size_t size, size_t offset)
 }
 
 /*******************  FUNCTION  *********************/
-void DummyDriver::sync(size_t offset, size_t size)
+void DummyDriver::sync(void * ptr, size_t offset, size_t size)
 {
 	//nothing to do
 }

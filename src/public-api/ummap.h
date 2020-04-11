@@ -47,7 +47,9 @@ void ummap_skip_first_read(void * ptr);
 //drivers
 ummap_driver_t * ummap_driver_create_uri(const char * uri);
 ummap_driver_t * ummap_driver_create_fopen(const char * file_path, const char * mode);
+ummap_driver_t * ummap_driver_create_dax_fopen(const char * file_path, const char * mode, bool allowNotAligned);
 ummap_driver_t * ummap_driver_create_fd(int fd);
+ummap_driver_t * ummap_driver_create_dax_fd(int fd, bool allowNotAligned);
 ummap_driver_t * ummap_driver_create_memory(size_t size);
 ummap_driver_t * ummap_driver_create_dummy(char value);
 void ummap_driver_destroy(ummap_driver_t * driver);

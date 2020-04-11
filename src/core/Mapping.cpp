@@ -294,6 +294,11 @@ void Mapping::sync(size_t offset, size_t size, bool unmap, bool lock)
 	assumeArg(offset % segmentSize == 0, "Should get offset (%1) multiple of segment size !").arg(offset).end();
 	assumeArg(size % segmentSize == 0, "Should get size (%1) multiple of segment size !").arg(size).end();
 
+	//direct sync
+	bool res = driver->directMSync((char*)getAddress() + offset, size, storageOffset);
+	if (res)
+		return;
+
 	//what to lock
 	const bool * toLock = getMutexRange(offset, size);
 
@@ -343,6 +348,9 @@ void Mapping::sync(size_t offset, size_t size, bool unmap, bool lock)
 				status.mapped = false;
 			}
 		}
+
+		//sync
+		driver->sync(getAddress(), offset, size);
 
 		//unlock
 		if (lock)

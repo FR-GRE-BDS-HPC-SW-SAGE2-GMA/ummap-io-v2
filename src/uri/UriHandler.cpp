@@ -12,6 +12,7 @@
 #include "../drivers/FDDriver.hpp"
 #include "../drivers/MemoryDriver.hpp"
 #include "../drivers/DummyDriver.hpp"
+#include "../drivers/MmapDriver.hpp"
 #include "../policies/FifoPolicy.hpp"
 #include "MeroRessource.hpp"
 #include "Uri.hpp"
@@ -84,6 +85,8 @@ Driver * UriHandler::buildDriver(const std::string & uri)
 		driver = new DummyDriver(value);
 	} else if (type == "mero" || type == "merofile" ) {
 		driver = buildDriverMero(parser);
+	} else if (type == "mmap" || type == "dax" ) {
+		driver = this->buildDriverFOpenMmap(parser.getPath(), parser.getParam("mode", "w+"));
 	} else {
 		UMMAP_FATAL_ARG("Invalid ressource type to build driver : %1").arg(uri).end();
 		return NULL;
@@ -160,6 +163,26 @@ Driver * UriHandler::buildDriverFOpen(const std::string & fname, const std::stri
 	
 	//create driver
 	Driver * res = new FDDriver(fileno(fp));
+
+	//close
+	fclose(fp);
+
+	//return
+	return res;
+}
+
+/*******************  FUNCTION  *********************/
+Driver * UriHandler::buildDriverFOpenMmap(const std::string & fname, const std::string & mode)
+{
+	//open
+	FILE * fp = fopen(fname.c_str(), mode.c_str());
+	assumeArg(fp != NULL, "Fail to open file '%1': %2")
+		.arg(fname)
+		.argStrErrno()
+		.end();
+	
+	//create driver
+	Driver * res = new MmapDriver(fileno(fp));
 
 	//close
 	fclose(fp);

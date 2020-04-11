@@ -72,3 +72,9 @@ bool Driver::directMunmap(void * base, size_t size, size_t offset)
 {
 	return false;
 }
+
+/*******************  FUNCTION  *********************/
+bool Driver::directMSync(void * base, size_t size, size_t offset)
+{
+	return false;
+}

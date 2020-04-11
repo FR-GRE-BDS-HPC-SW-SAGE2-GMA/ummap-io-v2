@@ -55,9 +55,29 @@ ssize_t MmapDriver::pread(void * buffer, size_t size, size_t offset)
 }
 
 /*******************  FUNCTION  *********************/
-void MmapDriver::sync(size_t offset, size_t size)
+bool MmapDriver::directMSync(void * base, size_t size, size_t offset)
 {
-	//nothing to do
+	//alignement
+	size_t addrOffset = 0;
+	this->checkAndSetAlign(size, offset, addrOffset);
+
+	//apply
+	int res = msync((char*)base - addrOffset, size, MS_SYNC);
+	assumeArg(res == 0, "Fail to msync(%1, %2, MS_SYNC) : %3")
+		.arg(base)
+		.arg(offset)
+		.argStrErrno()
+		.end();
+	
+	//say to not run soft sync
+	return true;
+}
+
+/*******************  FUNCTION  *********************/
+void MmapDriver::sync(void * ptr, size_t offset, size_t size)
+{
+	//should not be called
+	assert(false);
 }
 
 /*******************  FUNCTION  *********************/
@@ -77,9 +97,9 @@ void * MmapDriver::directMmap(size_t size, size_t offset, bool read, bool write)
 	//mmap
 	void * res = NULL;
 	if (this->fd == 0) {
-		res = mmap(NULL, size, prot, MAP_ANON|MAP_PRIVATE, 0, 0);
+		res = mmap(NULL, size, prot, MAP_ANON | MAP_PRIVATE, 0, 0);
 	} else {
-		res = mmap(NULL, size, prot, MAP_PRIVATE, fd, offset);
+		res = mmap(NULL, size, prot, MAP_FILE | MAP_SHARED, fd, offset);
 	}
 
 	//check
@@ -123,6 +143,8 @@ void MmapDriver::checkAndSetAlign(size_t & size, size_t & offset, size_t & addrO
 		addrOffset = offset % UMMAP_PAGE_SIZE;
 		offset -= addrOffset;
 		size += addrOffset;
+	} else {
+		addrOffset = 0;
 	}
 
 	//align size

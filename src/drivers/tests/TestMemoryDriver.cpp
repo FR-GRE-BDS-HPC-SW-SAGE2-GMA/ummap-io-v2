@@ -51,7 +51,7 @@ TEST(TestMemoryDriver, pwrite)
 TEST(TestMemoryDriver, sync)
 {
 	MemoryDriver driver(1024*1024, 32);
-	driver.sync(0, 1024*1024);
+	driver.sync(NULL, 0, 1024*1024);
 }
 
 /*******************  FUNCTION  *********************/
