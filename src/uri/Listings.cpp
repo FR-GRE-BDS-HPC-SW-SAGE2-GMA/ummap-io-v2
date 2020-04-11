@@ -108,7 +108,7 @@ ObjectMap & Listings::loadListing(const std::string & listing)
 		if (buf != NULL) {
 			char objname[4096];
 			ObjectId obj;
-			int res = sscanf(buf, "%s\t%lx:%lx", objname, &obj.low, &obj.high);
+			int res = sscanf(buf, "%s\t%lx:%lx", objname, &obj.high, &obj.low);
 			assumeArg(res == 3, "Invalid format in listing '%1' : %2 ")
 				.arg(listing)
 				.arg(buf)
@@ -146,7 +146,7 @@ void Listings::saveListing(ObjectMap & listing, const std::string & name)
 	
 	//save all
 	for (auto it : listing) {
-		fprintf(fp, "%s\t%lx:%lx\n", it.first.c_str(), it.second.low, it.second.high);
+		fprintf(fp, "%s\t%lx:%lx\n", it.first.c_str(), it.second.high, it.second.low);
 	}
 
 	//close

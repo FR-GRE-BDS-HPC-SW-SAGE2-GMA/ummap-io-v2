@@ -69,7 +69,7 @@ Driver * UriHandler::buildDriver(const std::string & uri)
 	std::string realUri = this->replaceVariables(uri);
 
 	//parse
-	Uri parser(uri);
+	Uri parser(realUri);
 
 	//cases
 	std::string type = parser.getType();
