@@ -87,6 +87,8 @@ Driver * UriHandler::buildDriver(const std::string & uri)
 		driver = buildDriverMero(parser);
 	} else if (type == "mmap" || type == "dax" ) {
 		driver = this->buildDriverFOpenMmap(parser.getPath(), parser.getParam("mode", "w+"));
+	} else if (type == "mmapanon") {
+		driver = new MmapDriver(0, true);
 	} else {
 		UMMAP_FATAL_ARG("Invalid ressource type to build driver : %1").arg(uri).end();
 		return NULL;

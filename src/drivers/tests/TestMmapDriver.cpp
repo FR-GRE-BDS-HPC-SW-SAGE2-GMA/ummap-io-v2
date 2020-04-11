@@ -156,7 +156,7 @@ TEST(TestMmapDriver, sync)
 
 	//write & flush
 	memset(ptr, 'a', size);
-	driver.sync(ptr, 0, size);
+	driver.directMSync(ptr, 0, size);
 	
 	//close & unlink
 	driver.directMunmap(ptr, size, 0);
