@@ -76,10 +76,16 @@ ObjectId Listings::createListingAndObjectId(const std::string & listing, const s
 ObjectId Listings::createObjectId(ObjectMap & listing, const std::string & name)
 {
 	//create
-	ObjectId id = {
-		((uint64_t)std::rand() << 32) + (uint64_t)std::rand(),
-		((uint64_t)std::rand() << 32) + (uint64_t)std::rand()
-	};
+	#ifdef MERO_FOUND
+		ObjectId id;
+		int res = c0appz_generate_id(&id.high, &id.low);
+		assume(res == 0, "Failed to generate object ID !");
+	#else
+		ObjectId id = {
+			((uint64_t)std::rand() << 32) + (uint64_t)std::rand(),
+			((uint64_t)std::rand() << 32) + (uint64_t)std::rand()
+		};
+	#endif
 
 	//register
 	listing[name] = id;

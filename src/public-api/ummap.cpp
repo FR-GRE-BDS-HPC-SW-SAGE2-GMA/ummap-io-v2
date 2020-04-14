@@ -11,6 +11,7 @@
 #include <cerrno>
 #include "../common/Debug.hpp"
 #include "../core/GlobalHandler.hpp"
+#include "../uri/MeroRessource.hpp"
 #include "../drivers/FDDriver.hpp"
 #include "../drivers/MemoryDriver.hpp"
 #include "../drivers/DummyDriver.hpp"
@@ -153,9 +154,9 @@ ummap_driver_t * ummap_driver_create_fd(int fd)
 
 #ifdef MERO_FOUND
 /*******************  FUNCTION  *********************/
-ummap_driver_t * ummap_driver_create_clovis(struct m0_uint128 object_id, char * ressource_file, int rank)
+ummap_driver_t * ummap_driver_create_clovis(struct m0_uint128 object_id)
 {
-	ClovisDriver * driver = new ClovisDriver(object_id, ressource_file, rank);
+	ClovisDriver * driver = new ClovisDriver(object_id);
 	return (ummap_driver_t*)driver;
 }
 #endif
@@ -269,4 +270,10 @@ void ummap_uri_set_variable_int(const char * name, int value)
 void ummap_uri_set_variable_size_t(const char * name, size_t value)
 {
 	getGlobalhandler()->getUriHandler().registerVariable(name, value);
+}
+
+/*******************  FUNCTION  *********************/
+void ummap_config_clovis_init_options(int index, const char * ressource_file)
+{
+	MeroRessource::setRessourceInfo(index, ressource_file);
 }

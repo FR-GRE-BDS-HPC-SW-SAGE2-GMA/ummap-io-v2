@@ -17,7 +17,7 @@ using namespace std;
 
 
 /*******************  FUNCTION  *********************/
-ClovisDriver::ClovisDriver(struct m0_uint128 object_id, char *ressource_file, int rank)
+ClovisDriver::ClovisDriver(struct m0_uint128 object_id)
 {
 
 	m_object_id.u_lo = object_id.u_lo;

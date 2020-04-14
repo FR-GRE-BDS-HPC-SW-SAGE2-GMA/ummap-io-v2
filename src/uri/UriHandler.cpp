@@ -13,6 +13,9 @@
 #include "../drivers/MemoryDriver.hpp"
 #include "../drivers/DummyDriver.hpp"
 #include "../drivers/MmapDriver.hpp"
+#ifdef MERO_FOUND
+#include "../drivers/ClovisDriver.hpp"
+#endif
 #include "../policies/FifoPolicy.hpp"
 #include "MeroRessource.hpp"
 #include "Uri.hpp"
@@ -220,8 +223,9 @@ Driver * UriHandler::buildDriverMero(const Uri & uri)
 	this->ressourceHandler.checkRessource<MeroRessource>("mero");
 
 	//build driver
-	#ifdef HAVE_MERO
-		//TODO do mero real
+	#ifdef MERO_FOUND
+		m0_uint128 id = {id.high, id.low};
+		return new ClovisDriver(id);
 	#else
 		if (uri.getType() == "merofile")
 		{
@@ -230,7 +234,7 @@ Driver * UriHandler::buildDriverMero(const Uri & uri)
 
 			//replacement
 			char fname[1024];
-			sprintf(fname, "%lx:%lx", id.low, id.high);
+			sprintf(fname, "%lx:%lx", id.high, id.low);
 			return buildDriverFOpen(fname, "w+");
 		} else {
 			UMMAP_FATAL_ARG("Mero is not available, cannot use uri : %1").arg(uri.getURI()).end();
