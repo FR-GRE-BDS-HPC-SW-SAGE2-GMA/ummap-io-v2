@@ -55,7 +55,9 @@ class MappingRegistry
 };
 
 /*******************  FUNCTION  *********************/
+#ifdef HAVE_HTOPML
 void convertToJson(htopml::JsonState & json,const MappingRegistry & value);
+#endif //HAVE_HTOPML
 
 }
 

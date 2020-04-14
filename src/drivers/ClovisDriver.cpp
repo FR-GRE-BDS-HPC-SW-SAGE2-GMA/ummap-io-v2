@@ -200,7 +200,7 @@ ssize_t ClovisDriver::pread(void * buffer, size_t size, size_t offset)
 }
 
 /*******************  FUNCTION  *********************/
-void ClovisDriver::sync(size_t offset, size_t size)
+void ClovisDriver::sync(void * ptr, size_t offset, size_t size)
 {
 	cerr << "[Failed] Sync op for the Clovis driver is not implemented" << endl;
 	// Not a problem as the clovis are already synchronous 
