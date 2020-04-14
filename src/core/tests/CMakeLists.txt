@@ -17,6 +17,6 @@ set(TEST_NAMES TestMapping TestMappingRegistry TestPolicyRegistry TestPolicy Tes
 ######################################################
 FOREACH(test_name ${TEST_NAMES})
 	add_executable(${test_name} ${test_name}.cpp)
-	target_link_libraries(${test_name} ${GTEST_BOTH_LIBRARIES} ${GMOCK_BOTH_LIBRARIES} OpenMP::OpenMP_CXX ummap-io)
+	target_link_libraries(${test_name} ${GTEST_BOTH_LIBRARIES} ${GMOCK_BOTH_LIBRARIES} ${OpenMP_EXE_LINKER_FLAGS} ummap-io)
 	ummap_add_test(${test_name} ${test_name})
 ENDFOREACH(test_name)

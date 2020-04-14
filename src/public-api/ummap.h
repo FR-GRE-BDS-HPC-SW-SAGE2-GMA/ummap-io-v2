@@ -52,6 +52,10 @@ ummap_driver_t * ummap_driver_create_fd(int fd);
 ummap_driver_t * ummap_driver_create_dax_fd(int fd, bool allowNotAligned);
 ummap_driver_t * ummap_driver_create_memory(size_t size);
 ummap_driver_t * ummap_driver_create_dummy(char value);
+#ifdef MERO_FOUND
+	ummap_driver_t * ummap_driver_create_clovis(struct m0_uint128 object_id, char * ressource_file, int rank);
+#endif
+
 void ummap_driver_destroy(ummap_driver_t * driver);
 void ummap_driver_set_autoclean(ummap_driver_t * driver, bool autoclean);
 

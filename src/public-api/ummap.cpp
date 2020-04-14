@@ -15,6 +15,10 @@
 #include "../drivers/MemoryDriver.hpp"
 #include "../drivers/DummyDriver.hpp"
 #include "../drivers/MmapDriver.hpp"
+#ifdef MERO_FOUND
+	#include "../drivers/ClovisDriver.hpp"
+	#include "clovis_api.h"
+#endif
 #include "../policies/FifoPolicy.hpp"
 #include "ummap.h"
 
@@ -146,6 +150,15 @@ ummap_driver_t * ummap_driver_create_fd(int fd)
 	Driver * driver = new FDDriver(fd);
 	return (ummap_driver_t*)driver;
 }
+
+#ifdef MERO_FOUND
+/*******************  FUNCTION  *********************/
+ummap_driver_t * ummap_driver_create_clovis(struct m0_uint128 object_id, char * ressource_file, int rank)
+{
+	ClovisDriver * driver = new ClovisDriver(object_id, ressource_file, rank);
+	return (ummap_driver_t*)driver;
+}
+#endif
 
 /*******************  FUNCTION  *********************/
 ummap_driver_t * ummap_driver_create_dax_fd(int fd, bool allowNotAligned)
