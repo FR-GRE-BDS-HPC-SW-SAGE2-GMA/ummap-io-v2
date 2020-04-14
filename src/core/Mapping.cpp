@@ -431,7 +431,7 @@ void ummapio::convertToJson(htopml::JsonState & json,const Mapping & value)
 		else
 			json.printField("globalPolicyUri", value.globalPolicy->getUri());
 		json.openFieldArray("status");
-		for (int i = 0 ; i < value.segments ; i++)
+		for (size_t i = 0 ; i < value.segments ; i++)
 			json.printValue(value.segmentStatus[i]);
 		json.closeFieldArray("status");
 	json.closeStruct();

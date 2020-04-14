@@ -54,6 +54,9 @@ class MappingRegistry
 		std::list<RegistryEntry> entries;
 };
 
+/*******************  FUNCTION  *********************/
+void convertToJson(htopml::JsonState & json,const MappingRegistry & value);
+
 }
 
 #endif //UMMAP_MAPPING_REGISTRY_HPP

@@ -87,6 +87,7 @@ class Mapping
 /*******************  FUNCTION  *********************/
 #ifdef HAVE_HTOPML
 void convertToJson(htopml::JsonState & json,const SegmentStatus & value);
+void convertToJson(htopml::JsonState & json,const Mapping & value);
 #endif //HAVE_HTOPML
 
 }

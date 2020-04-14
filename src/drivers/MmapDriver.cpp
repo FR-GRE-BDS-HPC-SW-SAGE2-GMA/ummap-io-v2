@@ -45,6 +45,7 @@ ssize_t MmapDriver::pwrite(const void * buffer, size_t size, size_t offset)
 {
 	//should not be called
 	assert(false);
+	return size;
 }
 
 /*******************  FUNCTION  *********************/
@@ -52,6 +53,7 @@ ssize_t MmapDriver::pread(void * buffer, size_t size, size_t offset)
 {
 	//should not be called
 	assert(false);
+	return size;
 }
 
 /*******************  FUNCTION  *********************/
