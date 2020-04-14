@@ -49,8 +49,13 @@ set(UMMAP_INTERNAL_CODE
 	$<TARGET_OBJECTS:ummap-portability>
 )
 
+if(MERO_FOUND)
+	set(UMMAP_INTERNAL_CODE ${UMMAP_INTERNAL_CODE} $<TARGET_OBJECTS:clovis_api>)
+endif(MERO_FOUND)
+
 ######################################################
 add_library(ummap-io SHARED ${UMMAP_INTERNAL_CODE})
+set_target_properties(ummap-io PROPERTIES LINK_FLAGS "${MERO_LINK_FLAGS}")
 set_target_properties(ummap-io PROPERTIES VERSION 0.0.0 SOVERSION 0)
 install(TARGETS ummap-io DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
