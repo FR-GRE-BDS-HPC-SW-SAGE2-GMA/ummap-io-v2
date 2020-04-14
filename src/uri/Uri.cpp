@@ -7,14 +7,14 @@
 /********************  HEADERS  *********************/
 #include <regex>
 #include <iostream>
-#include "Debug.hpp"
-#include "URI.hpp"
+#include "../common/Debug.hpp"
+#include "Uri.hpp"
 
 /********************  CONSTS  **********************/
 /**
  * Regular expression to check correctness and extract parts.
 **/
-const char * cst_uri_regexp = "([a-zA-Z0-9]+)://([a-zA-Z0-9_/.:-]+)([?]([a-zA-Z0-9]+=[a-zA-Z0-9_/+-]+)?(&[a-zA-Z0-9]+=[a-zA-Z0-9_/+-]+)*)?";
+const char * cst_uri_regexp = "^([a-zA-Z0-9]+)://([a-zA-Z0-9_/.:-]+)([?]([a-zA-Z0-9]+=[a-zA-Z0-9._/+-]+)?(&[a-zA-Z0-9]+=[a-zA-Z0-9._/+-]+)*)?$";
 
 /***************** USING NAMESPACE ******************/
 using namespace ummapio;
@@ -27,7 +27,7 @@ using namespace ummapio;
  * 
  * @param uri URI to setup.
 **/
-URI::URI(const std::string & uri)
+Uri::Uri(const std::string & uri)
 {
 	this->parse(uri);
 }
@@ -36,7 +36,7 @@ URI::URI(const std::string & uri)
 /**
  * Destructor, do nothing for now.
 **/
-URI::~URI(void)
+Uri::~Uri(void)
 {
 
 }
@@ -45,7 +45,7 @@ URI::~URI(void)
 /**
  * Reset the content in case of next call to parse().
 **/
-void URI::reset(void)
+void Uri::reset(void)
 {
 	this->uri.clear();
 	this->path.clear();
@@ -61,7 +61,7 @@ void URI::reset(void)
  * 
  * @param uri The URI string to parse.
 **/
-void URI::parse(const std::string & uri)
+void Uri::parse(const std::string & uri)
 {
 	//clear
 	this->reset();
@@ -71,38 +71,41 @@ void URI::parse(const std::string & uri)
 	std::smatch matches;
 
 	//apply regexp
-	if(std::regex_search(uri, matches, reg)) {
+	if(std::regex_match(uri, matches, reg)) {
 		this->uri = uri;
 		this->type = matches[1];
 		this->path = matches[2];
 		//has params
 		if (matches[3] != "")
-			//loop on params
-			for (size_t i = 4 ; i < matches.size() ; i++) {
-				//split param=value
-				std::string opt = matches[i];
-				size_t sep = opt.find('=');
-				//has param=value
-				if (sep != std::string::npos)
-				{
-					//extract
-					std::string name;
-					if (opt[0] == '&' || opt[0] == '?')
-						name = opt.substr(1,sep-1);
-					else
-						name = opt.substr(0,sep);
+		{
+			//vars
+			std::string buf;
+			std::string name;
+			std::string args = matches[3];
+			
+			//for last loop
+			args += '&';
 
-					//extract
-					std::string value = opt.substr(sep+1, std::string::npos);
-
+			//loop
+			for (int i = 1 ; i < args.size() ; i++) {
+				if (args[i] == '&') {
 					//insert
-					this->params[name] = value;
+					this->params[name] = buf;
 
 					//debug
-					//std::cout << "param[" << i << "] = " << matches[i] << std::endl;
-					//std::cout << name << "=" << value << std::endl;
+					//std::cout << name << "=" << buf << std::endl;
+
+					//reset
+					buf.clear();
+					name.clear();
+				} else if (args[i] == '=') {
+					name = buf;
+					buf.clear();
+				} else {
+					buf += args[i];
 				}
 			}
+		}
 	} else {
 		UMMAP_FATAL_ARG("Unrecongnized ummap URI format : %1").arg(uri).end();
 	}
@@ -112,7 +115,7 @@ void URI::parse(const std::string & uri)
 /**
  * @return Return the full URI as it has been passed to parse() or constructor.
 **/
-const std::string & URI::getURI(void) const
+const std::string & Uri::getURI(void) const
 {
 	return this->uri;
 }
@@ -125,7 +128,7 @@ const std::string & URI::getURI(void) const
  * 
  * @return The type as a string.
 **/
-const std::string & URI::getType(void) const
+const std::string & Uri::getType(void) const
 {
 	return this->type;
 }
@@ -138,7 +141,7 @@ const std::string & URI::getType(void) const
  * 
  * @return The path as a string.
 **/
-const std::string & URI::getPath(void) const
+const std::string & Uri::getPath(void) const
 {
 	return this->path;
 }
@@ -154,7 +157,7 @@ const std::string & URI::getPath(void) const
  * @param name Name of the parameter to extract
  * @return Return the value of the requested parameter.
 **/
-const std::string URI::getParam(const std::string & name) const
+const std::string Uri::getParam(const std::string & name) const
 {
 	//search
 	auto it = this->params.find(name);
@@ -179,7 +182,7 @@ const std::string URI::getParam(const std::string & name) const
  * @param default Default value to return if not found.
  * @return Return the value of the given parameter or the default value if not found.
 **/
-const std::string URI::getParam(const std::string & name, const std::string & defaultValue) const
+const std::string Uri::getParam(const std::string & name, const std::string & defaultValue) const
 {
 	//search
 	auto it = this->params.find(name);
@@ -202,7 +205,7 @@ const std::string URI::getParam(const std::string & name, const std::string & de
  * @param name Name of the parameter to extract
  * @return Return the value of the requested parameter.
 **/
-int URI::getParamAsInt(const std::string & name) const
+int Uri::getParamAsInt(const std::string & name) const
 {
 	//search
 	auto it = this->params.find(name);
@@ -227,7 +230,7 @@ int URI::getParamAsInt(const std::string & name) const
  * @param default Default value to return if not found.
  * @return Return the value of the given parameter or the default value if not found.
 **/
-int URI::getParamAsInt(const std::string & name, int defaultValue) const
+int Uri::getParamAsInt(const std::string & name, int defaultValue) const
 {
 	//search
 	auto it = this->params.find(name);
@@ -250,7 +253,7 @@ int URI::getParamAsInt(const std::string & name, int defaultValue) const
  * @param name Name of the parameter to extract
  * @return Return the value of the requested parameter.
 **/
-size_t URI::getParamAsSizet(const std::string & name) const
+size_t Uri::getParamAsSizet(const std::string & name) const
 {
 	//search
 	auto it = this->params.find(name);
@@ -275,7 +278,7 @@ size_t URI::getParamAsSizet(const std::string & name) const
  * @param default Default value to return if not found.
  * @return Return the value of the given parameter or the default value if not found.
 **/
-size_t URI::getParamAsSizet(const std::string & name, size_t defaultValue) const
+size_t Uri::getParamAsSizet(const std::string & name, size_t defaultValue) const
 {
 	//search
 	auto it = this->params.find(name);

@@ -45,6 +45,7 @@ set(UMMAP_INTERNAL_CODE
 	$<TARGET_OBJECTS:ummap-drivers>
 	$<TARGET_OBJECTS:ummap-policies>
 	$<TARGET_OBJECTS:ummap-public-api>
+	$<TARGET_OBJECTS:ummap-uri>
 	#we should keep an eye on portability of this
 	$<TARGET_OBJECTS:ummap-portability>
 )
@@ -65,4 +66,5 @@ add_subdirectory(core)
 add_subdirectory(drivers)
 add_subdirectory(portability)
 add_subdirectory(policies)
+add_subdirectory(uri)
 add_subdirectory(public-api)

@@ -68,6 +68,12 @@ ummap_policy_t * umamp_policy_create_uri(const char * uri, bool local);
 ummap_policy_t * umamp_policy_create_fifo(size_t max_size, bool local);
 void ummap_policy_destroy(ummap_policy_t * policy);
 
+/*******************  FUNCTION  *********************/
+//uri variables
+void ummap_uri_set_variable(const char * name, const char * value);
+void ummap_uri_set_variable_int(const char * name, int value);
+void ummap_uri_set_variable_size_t(const char * name, size_t value);
+
 #ifdef __cplusplus
 }
 #endif

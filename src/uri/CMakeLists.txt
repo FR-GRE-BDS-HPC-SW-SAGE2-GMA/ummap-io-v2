@@ -5,16 +5,11 @@
 ######################################################
 
 ######################################################
-set(CORE_SRC Driver.cpp 
-			 Mapping.cpp
-			 Policy.cpp
-			 MappingRegistry.cpp
-			 GlobalHandler.cpp
-			 PolicyRegistry.cpp)
+set(URI_SRC Uri.cpp UriHandler.cpp Listings.cpp RessourceHandler.cpp MeroRessource.cpp)
 
 ######################################################
-add_library(ummap-core OBJECT ${CORE_SRC})
-SET_TARGET_PROPERTIES(ummap-core PROPERTIES POSITION_INDEPENDENT_CODE ON)
+add_library(ummap-uri OBJECT ${URI_SRC})
+SET_TARGET_PROPERTIES(ummap-uri PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 ######################################################
 if (ENABLE_TESTS)

@@ -9,11 +9,14 @@
 include_directories(${GTEST_INCLUDE_DIRS} ${GMOCK_INCLUDE_DIRS})
 
 ######################################################
-set(TEST_NAMES TestListElement TestHumanUnits)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+
+######################################################
+set(TEST_NAMES TestListings TestUriHandler TestUri TestRessourceHandler)
 
 ######################################################
 FOREACH(test_name ${TEST_NAMES})
 	add_executable(${test_name} ${test_name}.cpp)
-	target_link_libraries(${test_name} ${GTEST_BOTH_LIBRARIES} ${GMOCK_BOTH_LIBRARIES} ummap-io)
+	target_link_libraries(${test_name} ${GTEST_BOTH_LIBRARIES} ${GMOCK_BOTH_LIBRARIES} OpenMP::OpenMP_CXX ummap-io)
 	ummap_add_test(${test_name} ${test_name})
 ENDFOREACH(test_name)
