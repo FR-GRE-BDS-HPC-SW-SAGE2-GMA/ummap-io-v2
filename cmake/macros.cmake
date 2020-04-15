@@ -18,9 +18,9 @@ ENDMACRO(ummap_setup_internal_gmock_and_gtest)
 
 ######################################################
 MACRO(ummap_enable_gcc_coverage)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -coverage")
-	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -O0 -coverage")
-	set(CMAKE_EXE_LINKER_FLAGS_FLAGS "${CMAKE_C_FLAGS} -O0 -coverage")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 --coverage")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 --coverage")
+	set(CMAKE_EXE_LINKER_FLAGS_FLAGS "${CMAKE_EXE_LINKER_FLAGS_FLAGS} -O0 --coverage")
 ENDMACRO(ummap_enable_gcc_coverage)
 
 ######################################################

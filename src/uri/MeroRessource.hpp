@@ -23,7 +23,9 @@ class MeroRessource : public Ressource
 		virtual ~MeroRessource(void);
 		static void setRessourceInfo(int ressourceIndex, const std::string & ressourceFile);
 	private:
-		bool hasInit;
+		#ifdef MERO_FOUND
+			bool hasInit;
+		#endif
 		static std::string ressourceFile;
 		static int ressourceIndex;
 };

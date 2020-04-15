@@ -10,7 +10,9 @@
 #include <cstdlib>
 #include <ctime>
 //internal
-#include "../public-api/clovis_api.h"
+#ifdef MERO_FOUND
+	#include "../public-api/clovis_api.h"
+#endif
 #include "../common/Debug.hpp"
 #include "Listings.hpp"
 
