@@ -98,7 +98,7 @@ Driver * UriHandler::buildDriver(const std::string & uri)
 	}
 
 	//attach uri for debugging
-	driver->setUri(uri);
+	driver->setUri(realUri);
 
 	//return
 	return driver;
@@ -114,7 +114,7 @@ Policy * UriHandler::buildPolicy(const std::string & uri, bool local)
 	std::string realUri = this->replaceVariables(uri);
 
 	//parse
-	Uri parser(uri);
+	Uri parser(realUri);
 
 	//cases
 	std::string type = parser.getType();
@@ -129,7 +129,7 @@ Policy * UriHandler::buildPolicy(const std::string & uri, bool local)
 	}
 
 	//set
-	policy->setUri(uri);
+	policy->setUri(realUri);
 
 	//ret
 	return policy;
