@@ -34,6 +34,8 @@ class Uri
 		size_t getParamAsSizet(const std::string & name) const;
 		size_t getParamAsSizet(const std::string & name, const size_t defaultValue) const;
 	private:
+		void noRegexParse(const std::string & uri);
+		void regexParse(const std::string & uri);
 		void parse(const std::string & uri);
 		void reset(void);
 	private:

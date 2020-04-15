@@ -16,7 +16,40 @@ using namespace ummapio;
 static const char * cstHumanMemSizeRegex = "([0-9]+)([KMGT]?B)?";
 
 /*******************  FUNCTION  *********************/
-size_t ummapio::fromHumanMemSize(const std::string & value)
+static size_t fromHumanMemSizeNoRegexp(const std::string & value)
+{
+	//vars
+	std::string number;
+	std::string unit;
+
+	//loop
+	for (size_t i = 0 ; i < value.size() ; i++){
+		if (value[i] >= '0' && value[i] <= '9') {
+			assumeArg(unit.empty(), "Fail to match human memory size, invalid format : '%1'").arg(value).end();
+			number += value[i];
+		} else if (value[i] == 'K' || value[i] == 'M' || value[i] == 'G' || value[i] == 'T' || value[i] == 'B' ) {
+			unit += value[i];
+		} else {
+			UMMAP_FATAL_ARG("Fail to match human memory size, invalid format : '%1'").arg(value).end();
+		}
+	}
+	//apply
+	size_t res = atol(number.c_str());
+	assumeArg(res > 0, "Invalid null size : %1\n").arg(value).end();
+	if (unit == "KB")
+		res *= 1024ul;
+	else if (unit == "MB")
+		res *= 1024ul*1024ul;
+	else if (unit == "GB")
+		res *= 1024ul*1024ul*1024ul;
+	else if (unit == "TB")
+		res *= 1024ul*1024ul*1024ul*1024ul;
+
+	//ret
+	return res;
+}
+
+static size_t fromHumanMemSizeRegexp(const std::string & value)
 {
 	//var
 	size_t res = 0;
@@ -33,6 +66,7 @@ size_t ummapio::fromHumanMemSize(const std::string & value)
 
 		//apply
 		res = atol(number.c_str());
+		assumeArg(res > 0, "Invalid null size : %1\n").arg(value).end();
 		if (unit == "KB")
 			res *= 1024ul;
 		else if (unit == "MB")
@@ -47,4 +81,14 @@ size_t ummapio::fromHumanMemSize(const std::string & value)
 
 	//ret
 	return res;
+}
+
+/*******************  FUNCTION  *********************/
+size_t ummapio::fromHumanMemSize(const std::string & value)
+{
+	try {
+		return fromHumanMemSizeRegexp(value);
+	} catch (std::exception & e) {
+		return fromHumanMemSizeNoRegexp(value);
+	}
 }
