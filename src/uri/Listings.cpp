@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <ctime>
 //internal
+#include "../public-api/clovis_api.h"
 #include "../common/Debug.hpp"
 #include "Listings.hpp"
 
@@ -76,14 +77,14 @@ ObjectId Listings::createListingAndObjectId(const std::string & listing, const s
 ObjectId Listings::createObjectId(ObjectMap & listing, const std::string & name)
 {
 	//create
-	#ifdef MERO_FOUND
+	#ifdef MERO_FOUND_WITH_GENREATE_ID
 		ObjectId id;
 		int res = c0appz_generate_id(&id.high, &id.low);
 		assume(res == 0, "Failed to generate object ID !");
 	#else
 		ObjectId id = {
-			((uint64_t)std::rand() << 32) + (uint64_t)std::rand(),
-			((uint64_t)std::rand() << 32) + (uint64_t)std::rand()
+			((int64_t)std::rand() << 32) + (int64_t)std::rand(),
+			((int64_t)std::rand() << 32) + (int64_t)std::rand()
 		};
 	#endif
 

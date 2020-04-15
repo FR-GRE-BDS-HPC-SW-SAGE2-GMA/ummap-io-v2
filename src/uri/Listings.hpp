@@ -21,8 +21,8 @@ namespace ummapio
 /*********************  STRUCT  *********************/
 struct ObjectId
 {
-	uint64_t low;
-	uint64_t high;
+	int64_t low;
+	int64_t high;
 };
 
 /*********************  TYPES  **********************/

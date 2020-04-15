@@ -12,6 +12,11 @@ add_library(ummap-uri OBJECT ${URI_SRC})
 SET_TARGET_PROPERTIES(ummap-uri PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 ######################################################
+if (MERO_FOUND)
+	SET_TARGET_PROPERTIES(ummap-uri PROPERTIES COMPILE_FLAGS "${MERO_COMPILE_FLAGS}")
+endif()
+
+######################################################
 if (ENABLE_TESTS)
 	add_subdirectory(tests)
 endif (ENABLE_TESTS)

@@ -62,13 +62,16 @@ set(UMMAP_INTERNAL_CODE
 	${OPTIONAL_EXTRA}
 )
 
+######################################################
 if(MERO_FOUND)
 	set(UMMAP_INTERNAL_CODE ${UMMAP_INTERNAL_CODE} $<TARGET_OBJECTS:clovis_api>)
 endif(MERO_FOUND)
 
 ######################################################
 add_library(ummap-io SHARED ${UMMAP_INTERNAL_CODE})
-set_target_properties(ummap-io PROPERTIES LINK_FLAGS "${MERO_LINK_FLAGS}")
+if(MERO_FOUND)
+	set_target_properties(ummap-io PROPERTIES LINK_FLAGS "${MERO_LINK_FLAGS}")
+endif()
 set_target_properties(ummap-io PROPERTIES VERSION 0.0.0 SOVERSION 0)
 target_link_libraries(ummap-io ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(ummap-io ${UMMAP_EXTERN_LIBS})

@@ -39,6 +39,10 @@
 #include "clovis/clovis.h"
 #include "clovis/clovis_idx.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef DEBUG
 #define DEBUG 0
 #endif
@@ -122,5 +126,9 @@ void clovis_aio_opgrp_fini(struct clovis_aio_opgrp *grp);
 void clovis_aio_executed_cb(struct m0_clovis_op *op);
 void clovis_aio_stable_cb(struct m0_clovis_op *op);
 void clovis_aio_failed_cb(struct m0_clovis_op *op);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

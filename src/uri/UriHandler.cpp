@@ -224,8 +224,8 @@ Driver * UriHandler::buildDriverMero(const Uri & uri)
 
 	//build driver
 	#ifdef MERO_FOUND
-		m0_uint128 id = {id.high, id.low};
-		return new ClovisDriver(id);
+		m0_uint128 m0id = {id.high, id.low};
+		return new ClovisDriver(m0id);
 	#else
 		if (uri.getType() == "merofile")
 		{

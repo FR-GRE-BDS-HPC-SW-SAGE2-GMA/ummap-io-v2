@@ -6,6 +6,7 @@
 
 /********************  HEADERS  *********************/
 #include <cstdio>
+#include "../common/Debug.hpp"
 #include "MeroRessource.hpp"
 #ifdef MERO_FOUND
 	#include "../public-api/clovis_api.h"
@@ -24,7 +25,7 @@ MeroRessource::MeroRessource(void)
 	#ifdef MERO_FOUND
 		if (clovis_instance == NULL)
 		{
-			int res = c0appz_init(ressourceIndex, ressourceFile.c_str());
+			int res = c0appz_init(ressourceIndex, (char*)ressourceFile.c_str());
 			assume(res == 0, "Failed to init mero/clovis API !");
 			this->hasInit = true;
 		} else {
