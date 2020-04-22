@@ -19,4 +19,7 @@
 #cmakedefine UMMAP_PORTABILITY_SPINLOCK_APPLE
 #cmakedefine UMMAP_PORTABILITY_SPINLOCK_DUMMY
 
+//Htopml
+#cmakedefine HAVE_HTOPML
+
 #endif //UMMAP_CONFIG_HPP

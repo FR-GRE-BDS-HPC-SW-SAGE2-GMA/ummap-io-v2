@@ -139,3 +139,14 @@ bool MappingRegistry::isEmpty(void)
 		return this->entries.empty();
 	}
 }
+
+/*******************  FUNCTION  *********************/
+#ifdef HAVE_HTOPML
+void ummapio::convertToJson(htopml::JsonState & json,const MappingRegistry & value)
+{
+	json.openArray();
+	for (auto it : value.entries)
+		json.printValue(*it.mapping);
+	json.closeArray();
+}
+#endif //HAVE_HTOPML

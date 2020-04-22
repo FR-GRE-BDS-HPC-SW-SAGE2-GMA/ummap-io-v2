@@ -24,15 +24,20 @@ include(${CMAKE_SOURCE_DIR}/cmake/macros.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/unittest-macros.cmake)
 
 ######################################################
+# dependencies
 include(GNUInstallDirs)
 find_package(OpenMP REQUIRED)
+find_package(Threads REQUIRED)
+find_package(Htopml QUIET)
 find_package(Mero QUIET)
 
-
+######################################################
+# mero
 if(MERO_FOUND)
 	# Compiler/Linker options for MERO example
 	# Note: clovis API files do not compile with -std=c99 option
-	set(MERO_COMPILE_FLAGS "-D_REENTRANT -D_GNU_SOURCE -DM0_INTERNAL='' -DM0_EXTERN=extern -fno-common -I${MERO_INCLUDE_DIRS} -DMERO_FOUND")
+	add_definitions(-DMERO_FOUND)
+	set(MERO_COMPILE_FLAGS "-D_REENTRANT -D_GNU_SOURCE -DM0_INTERNAL='' -DM0_EXTERN=extern -fno-common -I${MERO_INCLUDE_DIRS}")
 	set(MERO_COMPILE_FLAGS "${MERO_COMPILE_FLAGS}  -Wall -Wno-attributes -fno-strict-aliasing -rdynamic")
 	set(MERO_LINK_FLAGS "-lpthread -lrt -lm -lgf_complete -lyaml -luuid -lmero")
 endif(MERO_FOUND)
@@ -48,9 +53,10 @@ endif(ENABLE_COVERAGE)
 ######################################################
 add_subdirectory(extern-deps)
 add_subdirectory(src)
+add_subdirectory(examples)
 add_subdirectory(bench)
 
-
+######################################################
 if (MERO_FOUND)
 	message("MERO installation has been found, the Clovis driver and associated tests are gonna be compiled")
 else (MERO_FOUND)

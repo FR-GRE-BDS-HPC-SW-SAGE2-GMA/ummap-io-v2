@@ -11,15 +11,15 @@
 #include <cerrno>
 #include "../common/Debug.hpp"
 #include "../core/GlobalHandler.hpp"
+#include "../uri/MeroRessource.hpp"
 #include "../drivers/FDDriver.hpp"
 #include "../drivers/MemoryDriver.hpp"
 #include "../drivers/DummyDriver.hpp"
-
+#include "../drivers/MmapDriver.hpp"
 #ifdef MERO_FOUND
 	#include "../drivers/ClovisDriver.hpp"
 	#include "clovis_api.h"
 #endif
-
 #include "../policies/FifoPolicy.hpp"
 #include "ummap.h"
 
@@ -66,6 +66,11 @@ void * ummap(size_t size, size_t segment_size, size_t storage_offset, ummap_mapp
 	MappingProtection prot = (MappingProtection)protection;
 	Driver * driv = (Driver*)(driver);
 	Policy * pol = (Policy*)(local_policy);
+
+	//group
+	const char * policy_group_checked = policy_group;
+	if (policy_group_checked == NULL)
+		policy_group_checked = "none";
 
 	//call & ret
 	return getGlobalhandler()->ummap(size, segment_size, storage_offset, prot, driv, pol, policy_group);
@@ -121,6 +126,26 @@ ummap_driver_t * ummap_driver_create_fopen(const char * file_path, const char * 
 }
 
 /*******************  FUNCTION  *********************/
+ummap_driver_t * ummap_driver_create_dax_fopen(const char * file_path, const char * mode, bool allowNotAligned)
+{
+	//open
+	FILE * fp = fopen(file_path, mode);
+	assumeArg(fp != NULL, "Fail to open file '%1': %2")
+		.arg(file_path)
+		.argStrErrno()
+		.end();
+	
+	//create driver
+	ummap_driver_t * res = ummap_driver_create_dax_fd(fileno(fp), allowNotAligned);
+
+	//close
+	fclose(fp);
+
+	//return
+	return res;
+}
+
+/*******************  FUNCTION  *********************/
 ummap_driver_t * ummap_driver_create_fd(int fd)
 {
 	Driver * driver = new FDDriver(fd);
@@ -129,12 +154,19 @@ ummap_driver_t * ummap_driver_create_fd(int fd)
 
 #ifdef MERO_FOUND
 /*******************  FUNCTION  *********************/
-ummap_driver_t * ummap_driver_create_clovis(struct m0_uint128 object_id, char * ressource_file, int rank)
+ummap_driver_t * ummap_driver_create_clovis(struct m0_uint128 object_id)
 {
-	ClovisDriver * driver = new ClovisDriver(object_id, ressource_file, rank);
+	ClovisDriver * driver = new ClovisDriver(object_id);
 	return (ummap_driver_t*)driver;
 }
 #endif
+
+/*******************  FUNCTION  *********************/
+ummap_driver_t * ummap_driver_create_dax_fd(int fd, bool allowNotAligned)
+{
+	Driver * driver = new MmapDriver(fd, allowNotAligned);
+	return (ummap_driver_t*)driver;
+}
 
 /*******************  FUNCTION  *********************/
 ummap_driver_t * ummap_driver_create_memory(size_t size)
@@ -183,7 +215,7 @@ void ummap_policy_group_destroy(const char * name)
 }
 
 /*******************  FUNCTION  *********************/
-ummap_policy_t * umamp_policy_create_fifo(size_t max_size, bool local)
+ummap_policy_t * ummap_policy_create_fifo(size_t max_size, bool local)
 {
 	Policy * policy = new FifoPolicy(max_size, local);
 	return (ummap_policy_t*)policy;
@@ -203,7 +235,7 @@ ummap_driver_t * ummap_driver_create_uri(const char * uri)
 }
 
 /*******************  FUNCTION  *********************/
-ummap_policy_t * umamp_policy_create_uri(const char * uri, bool local)
+ummap_policy_t * ummap_policy_create_uri(const char * uri, bool local)
 {
 	Policy * policy = getGlobalhandler()->getUriHandler().buildPolicy(uri, local);
 	return (ummap_policy_t*)policy;
@@ -238,4 +270,10 @@ void ummap_uri_set_variable_int(const char * name, int value)
 void ummap_uri_set_variable_size_t(const char * name, size_t value)
 {
 	getGlobalhandler()->getUriHandler().registerVariable(name, value);
+}
+
+/*******************  FUNCTION  *********************/
+void ummap_config_clovis_init_options(int index, const char * ressource_file)
+{
+	MeroRessource::setRessourceInfo(index, ressource_file);
 }

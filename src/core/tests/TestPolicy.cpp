@@ -40,7 +40,7 @@ TEST(TestPolicy, Constructor)
 TEST(TestPolicy, contains)
 {
 	const int size = 4096;
-	char buffer[size];
+	char * buffer = (char*)malloc(size);
 
 	PolicyStorage storage = {
 		.mapping = (Mapping *)0x1,
@@ -56,6 +56,9 @@ TEST(TestPolicy, contains)
 	//not ok
 	ASSERT_FALSE(PublicPolicy::contains(storage, buffer - 1));
 	ASSERT_FALSE(PublicPolicy::contains(storage, buffer+ size));
+
+	//free
+	free(buffer);
 }
 
 /*******************  FUNCTION  *********************/

@@ -23,7 +23,7 @@ TEST(TestListings, getObjectId_new)
 	Listings listings;
 	const std::string fname = "test-listings.txt";
 	unlink(fname.c_str());
-	ObjectId id = listings.getObjectId(fname, "test");
+	listings.getObjectId(fname, "test");
 }
 
 /*******************  FUNCTION  *********************/

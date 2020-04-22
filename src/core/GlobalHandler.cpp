@@ -5,11 +5,16 @@
 *****************************************************/
 
 /********************  HEADERS  *********************/
+//config
+#include "config.h"
 //unix
 #include <cstdint>
 #include <cassert>
 #include <signal.h>
 //local
+#ifdef HAVE_HTOPML
+#include "../htopml/HtopmlMappings.hpp"
+#endif //HAVE_HTOPML
 #include "../common/Debug.hpp"
 #include "GlobalHandler.hpp"
 
@@ -67,6 +72,9 @@ void ummapio::segfaultHandler(int sig, siginfo_t *si, void *context)
 /*******************  FUNCTION  *********************/
 GlobalHandler::GlobalHandler(void)
 {
+	#ifdef HAVE_HTOPML
+	HtopmlMappingsHttpNode::registerMapping(&mappingRegistry);
+	#endif //HAVE_HTOPML
 }
 
 /*******************  FUNCTION  *********************/

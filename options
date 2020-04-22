@@ -34,9 +34,9 @@ cfg_add_enable_option --name='jenkins' \
                       --only='enable'
 
 ######################################################
-#cfg_add_with_option --name='gtest' \
-#                    --doc='Define where to find google test library [/usr]' \
-#                    --var='GTEST_ROOT'
+cfg_add_with_option --name='htopml' \
+                    --doc='Define where to find the htopml library [/usr]' \
+                    --var='HTOPML_PREFIX'
 
 ######################################################
 #If we want to document extra options

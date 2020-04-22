@@ -6,6 +6,7 @@
 
 /********************  HEADERS  *********************/
 #include <regex>
+#include <cstring>
 #include <iostream>
 #include "../common/Debug.hpp"
 #include "Uri.hpp"
@@ -55,18 +56,71 @@ void Uri::reset(void)
 
 /*******************  FUNCTION  *********************/
 /**
- * Parse the given string URI and extract parts for latter use.
- * 
- * It cas exit in case of failure.
- * 
- * @param uri The URI string to parse.
+ * Parser without regular expression when runnin on old compiler
+ * which has buggy implementation (eg. gcc-4.8 on centos-7.7).
 **/
-void Uri::parse(const std::string & uri)
+void Uri::noRegexParse(const std::string & uri)
 {
-	//clear
-	this->reset();
+	//reset
+	this->type.clear();
+	this->path.clear();
 
-	//build regex
+	//vars
+	std::string key;
+	std::string value;
+	int state = 0;
+	std::string * cur = &this->type;
+
+	//loop
+	size_t i = 0;
+	//printf ("uri = %s\n", uri.c_str());
+	while(i < uri.size() + 1) {
+		if (strncmp(uri.c_str() + i, "://", 3) == 0) {
+			assumeArg(state == 0, "Unrecongnized ummap URI format : %1").arg(uri).end();
+			//printf("type: %s\n", cur->c_str());
+			cur = &this->path;
+			state = 1;
+			i += 3;
+		} else if (uri[i] == '?') {
+			assumeArg(state == 1, "Unrecongnized ummap URI format : %1").arg(uri).end();
+			//printf("path: %s\n", cur->c_str());
+			cur = &key;
+			state = 2;
+			i++;
+		} else if (uri[i] == '&' || uri[i] == '\0') {
+			assumeArg(state == 3 || state == 1, "Unrecongnized ummap URI format : %1").arg(uri).end();
+			if (state == 3)
+			{
+				//printf("key: '%s'='%s'\n", key.c_str(), value.c_str());
+				this->params[key] = value;
+				key.clear();
+				value.clear();
+				cur = &key;
+				state = 2;
+			} else if (state == 1) {
+				//printf("path='%s'\n", this->path.c_str());
+			}
+			i++;
+		} else if (uri[i] == '=') {
+			assumeArg(state == 2, "Unrecongnized ummap URI format : %1").arg(uri).end();
+			cur = &value;
+			state = 3;
+			i++;
+		} else {
+			//printf("%c\n", uri[i]);
+			*cur += uri[i];
+			i++;
+		}
+	}
+
+	//set
+	this->uri = uri;
+}
+
+/*******************  FUNCTION  *********************/
+void Uri::regexParse(const std::string & uri)
+{
+	//vars
 	std::regex reg(cst_uri_regexp);
 	std::smatch matches;
 
@@ -87,7 +141,7 @@ void Uri::parse(const std::string & uri)
 			args += '&';
 
 			//loop
-			for (int i = 1 ; i < args.size() ; i++) {
+			for (size_t i = 1 ; i < args.size() ; i++) {
 				if (args[i] == '&') {
 					//insert
 					this->params[name] = buf;
@@ -108,6 +162,27 @@ void Uri::parse(const std::string & uri)
 		}
 	} else {
 		UMMAP_FATAL_ARG("Unrecongnized ummap URI format : %1").arg(uri).end();
+	}
+}
+
+/*******************  FUNCTION  *********************/
+/**
+ * Parse the given string URI and extract parts for latter use.
+ * 
+ * It can exit in case of failure.
+ * 
+ * @param uri The URI string to parse.
+**/
+void Uri::parse(const std::string & uri)
+{
+	//clear
+	this->reset();
+
+	//build regex
+	try {
+		this->regexParse(uri);
+	} catch (std::exception & e) {
+		this->noRegexParse(uri);
 	}
 }
 

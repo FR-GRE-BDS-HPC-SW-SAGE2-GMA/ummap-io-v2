@@ -12,6 +12,10 @@
 #include "../drivers/FDDriver.hpp"
 #include "../drivers/MemoryDriver.hpp"
 #include "../drivers/DummyDriver.hpp"
+#include "../drivers/MmapDriver.hpp"
+#ifdef MERO_FOUND
+#include "../drivers/ClovisDriver.hpp"
+#endif
 #include "../policies/FifoPolicy.hpp"
 #include "MeroRessource.hpp"
 #include "Uri.hpp"
@@ -73,20 +77,31 @@ Driver * UriHandler::buildDriver(const std::string & uri)
 
 	//cases
 	std::string type = parser.getType();
+	Driver * driver = NULL;
 	if (type == "file") {
-		return this->buildDriverFOpen(parser.getPath(), parser.getParam("mode", "w+"));
+		driver = this->buildDriverFOpen(parser.getPath(), parser.getParam("mode", "w+"));
 	} else if (type == "mem") {
 		size_t memsize = fromHumanMemSize(parser.getPath());
-		return new MemoryDriver(memsize);
+		driver = new MemoryDriver(memsize);
 	} else if (type == "dummy") {
 		size_t value = atol(parser.getPath().c_str());
-		return new DummyDriver(value);
+		driver = new DummyDriver(value);
 	} else if (type == "mero" || type == "merofile" ) {
-		return buildDriverMero(parser);
+		driver = buildDriverMero(parser);
+	} else if (type == "mmap" || type == "dax" ) {
+		driver = this->buildDriverFOpenMmap(parser.getPath(), parser.getParam("mode", "w+"));
+	} else if (type == "mmapanon") {
+		driver = new MmapDriver(0, true);
 	} else {
 		UMMAP_FATAL_ARG("Invalid ressource type to build driver : %1").arg(uri).end();
 		return NULL;
 	}
+
+	//attach uri for debugging
+	driver->setUri(realUri);
+
+	//return
+	return driver;
 }
 
 /*******************  FUNCTION  *********************/
@@ -99,17 +114,25 @@ Policy * UriHandler::buildPolicy(const std::string & uri, bool local)
 	std::string realUri = this->replaceVariables(uri);
 
 	//parse
-	Uri parser(uri);
+	Uri parser(realUri);
 
 	//cases
 	std::string type = parser.getType();
+	Policy * policy = NULL;
 	if (type == "fifo") {
 		size_t memsize = fromHumanMemSize(parser.getPath());
-		return new FifoPolicy(memsize, local);
+		policy = new FifoPolicy(memsize, local);
+	} else if (type == "none") {
+		policy = NULL;
 	} else {
 		UMMAP_FATAL_ARG("Invalid ressource type to build policy : %1").arg(uri).end();
-		return NULL;
 	}
+
+	//set
+	policy->setUri(realUri);
+
+	//ret
+	return policy;
 }
 
 /*******************  FUNCTION  *********************/
@@ -154,6 +177,26 @@ Driver * UriHandler::buildDriverFOpen(const std::string & fname, const std::stri
 }
 
 /*******************  FUNCTION  *********************/
+Driver * UriHandler::buildDriverFOpenMmap(const std::string & fname, const std::string & mode)
+{
+	//open
+	FILE * fp = fopen(fname.c_str(), mode.c_str());
+	assumeArg(fp != NULL, "Fail to open file '%1': %2")
+		.arg(fname)
+		.argStrErrno()
+		.end();
+	
+	//create driver
+	Driver * res = new MmapDriver(fileno(fp));
+
+	//close
+	fclose(fp);
+
+	//return
+	return res;
+}
+
+/*******************  FUNCTION  *********************/
 //mero://1234:1234
 Driver * UriHandler::buildDriverMero(const Uri & uri)
 {
@@ -180,8 +223,9 @@ Driver * UriHandler::buildDriverMero(const Uri & uri)
 	this->ressourceHandler.checkRessource<MeroRessource>("mero");
 
 	//build driver
-	#ifdef HAVE_MERO
-		//TODO do mero real
+	#ifdef MERO_FOUND
+		m0_uint128 m0id = {id.high, id.low};
+		return new ClovisDriver(m0id);
 	#else
 		if (uri.getType() == "merofile")
 		{
@@ -190,7 +234,7 @@ Driver * UriHandler::buildDriverMero(const Uri & uri)
 
 			//replacement
 			char fname[1024];
-			sprintf(fname, "%lx:%lx", id.low, id.high);
+			sprintf(fname, "%lx:%lx", id.high, id.low);
 			return buildDriverFOpen(fname, "w+");
 		} else {
 			UMMAP_FATAL_ARG("Mero is not available, cannot use uri : %1").arg(uri.getURI()).end();

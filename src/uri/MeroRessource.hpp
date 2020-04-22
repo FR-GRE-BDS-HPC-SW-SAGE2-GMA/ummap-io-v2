@@ -8,6 +8,7 @@
 #define UMMAP_MERO_RESSOURCE_HPP
 
 /********************  HEADERS  *********************/
+#include <string>
 #include "RessourceHandler.hpp"
 
 /********************  NAMESPACE  *******************/
@@ -20,6 +21,13 @@ class MeroRessource : public Ressource
 	public:
 		MeroRessource(void);
 		virtual ~MeroRessource(void);
+		static void setRessourceInfo(int ressourceIndex, const std::string & ressourceFile);
+	private:
+		#ifdef MERO_FOUND
+			bool hasInit;
+		#endif
+		static std::string ressourceFile;
+		static int ressourceIndex;
 };
 
 }

@@ -56,7 +56,7 @@ ssize_t FDDriver::pread(void * buffer, size_t size, size_t offset)
 }
 
 /*******************  FUNCTION  *********************/
-void FDDriver::sync(size_t offset, size_t size)
+void FDDriver::sync(void * ptr, size_t offset, size_t size)
 {
 	::fdatasync(fd);
 }

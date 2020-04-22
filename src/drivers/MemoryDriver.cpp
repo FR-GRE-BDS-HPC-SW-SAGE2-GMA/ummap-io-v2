@@ -101,7 +101,7 @@ ssize_t MemoryDriver::pread(void * buffer, size_t size, size_t offset)
 }
 
 /*******************  FUNCTION  *********************/
-void MemoryDriver::sync(size_t offset, size_t size)
+void MemoryDriver::sync(void * ptr, size_t offset, size_t size)
 {
 	//check
 	assert(buffer != NULL);

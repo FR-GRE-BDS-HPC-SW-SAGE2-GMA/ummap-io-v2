@@ -35,7 +35,6 @@ class FifoPolicy : public Policy
 		virtual void freeElementStorage(Mapping * mapping) override;
 	protected:
 		ListElement root;
-		std::mutex rootLock;
 		size_t currentMemory;
 };
 

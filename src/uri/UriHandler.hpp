@@ -35,6 +35,7 @@ class UriHandler
 		std::string replaceVariables(std::string value);
 	private:
 		Driver * buildDriverFOpen(const std::string & fname, const std::string & mode);
+		Driver * buildDriverFOpenMmap(const std::string & fname, const std::string & mode);
 		Driver * buildDriverMero(const Uri & uri);
 	private:
 		std::mutex variablesMutes;

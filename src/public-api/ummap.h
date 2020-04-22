@@ -47,11 +47,13 @@ void ummap_skip_first_read(void * ptr);
 //drivers
 ummap_driver_t * ummap_driver_create_uri(const char * uri);
 ummap_driver_t * ummap_driver_create_fopen(const char * file_path, const char * mode);
+ummap_driver_t * ummap_driver_create_dax_fopen(const char * file_path, const char * mode, bool allowNotAligned);
 ummap_driver_t * ummap_driver_create_fd(int fd);
+ummap_driver_t * ummap_driver_create_dax_fd(int fd, bool allowNotAligned);
 ummap_driver_t * ummap_driver_create_memory(size_t size);
 ummap_driver_t * ummap_driver_create_dummy(char value);
 #ifdef MERO_FOUND
-	ummap_driver_t * ummap_driver_create_clovis(struct m0_uint128 object_id, char * ressource_file, int rank);
+	ummap_driver_t * ummap_driver_create_clovis(struct m0_uint128 object_id);
 #endif
 
 void ummap_driver_destroy(ummap_driver_t * driver);
@@ -64,8 +66,8 @@ void ummap_policy_group_destroy(const char * name);
 
 /*******************  FUNCTION  *********************/
 //policies
-ummap_policy_t * umamp_policy_create_uri(const char * uri, bool local);
-ummap_policy_t * umamp_policy_create_fifo(size_t max_size, bool local);
+ummap_policy_t * ummap_policy_create_uri(const char * uri, bool local);
+ummap_policy_t * ummap_policy_create_fifo(size_t max_size, bool local);
 void ummap_policy_destroy(ummap_policy_t * policy);
 
 /*******************  FUNCTION  *********************/
@@ -73,6 +75,10 @@ void ummap_policy_destroy(ummap_policy_t * policy);
 void ummap_uri_set_variable(const char * name, const char * value);
 void ummap_uri_set_variable_int(const char * name, int value);
 void ummap_uri_set_variable_size_t(const char * name, size_t value);
+
+/*******************  FUNCTION  *********************/
+//extra driver configs
+void ummap_config_clovis_init_options(int index, const char * ressource_file);
 
 #ifdef __cplusplus
 }

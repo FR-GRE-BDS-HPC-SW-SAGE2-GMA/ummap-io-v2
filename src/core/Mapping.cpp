@@ -33,6 +33,10 @@ Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, MappingP
 	assumeArg(mapSize % UMMAP_PAGE_SIZE == 0, "Size should be multiple of page size (%1), got '%2'").arg(UMMAP_PAGE_SIZE).arg(size).end();
 	assumeArg(mapSize % segmentSize == 0, "Size should be multiple of segment size (%1), got '%2'").arg(segmentSize).arg(size).end();
 
+	//warning
+	if (localPolicy != NULL && globalPolicy != NULL)
+		localPolicy->forceUsingGroupMutex(globalPolicy->getLocalMutex());
+
 	//set
 	this->driver = driver;
 	this->localPolicy = localPolicy;
@@ -42,7 +46,11 @@ Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, MappingP
 	this->storageOffset = storageOffset;
 
 	//establish mapping
-	this->baseAddress = (char*)OS::mmapProtNone(mapSize);
+	this->baseAddress = (char*)driver->directMmap(size, storageOffset, protection & MAPPING_PROT_READ, protection & MAPPING_PROT_WRITE);
+	if (this->baseAddress == NULL)
+		this->baseAddress = (char*)OS::mmapProtNone(mapSize);
+
+	//sizes
 	this->segments = mapSize / segmentSize;
 	this->segmentSize = segmentSize;
 
@@ -77,12 +85,9 @@ Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, MappingP
 /*******************  FUNCTION  *********************/
 Mapping::~Mapping(void)
 {
-	//take all locks
-	for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
-		this->segmentMutexes[i].lock();
-
 	//unmap
-	OS::munmap(this->baseAddress, this->getAlignedSize());
+	if (driver->directMunmap(this->baseAddress, size, storageOffset) == false)
+		OS::munmap(this->baseAddress, this->getAlignedSize());
 
 	//policies
 	if (this->localPolicy != NULL)
@@ -289,6 +294,11 @@ void Mapping::sync(size_t offset, size_t size, bool unmap, bool lock)
 	assumeArg(offset % segmentSize == 0, "Should get offset (%1) multiple of segment size !").arg(offset).end();
 	assumeArg(size % segmentSize == 0, "Should get size (%1) multiple of segment size !").arg(size).end();
 
+	//direct sync
+	bool res = driver->directMSync((char*)getAddress() + offset, size, storageOffset);
+	if (res)
+		return;
+
 	//what to lock
 	const bool * toLock = getMutexRange(offset, size);
 
@@ -339,6 +349,9 @@ void Mapping::sync(size_t offset, size_t size, bool unmap, bool lock)
 			}
 		}
 
+		//sync
+		driver->sync(getAddress(), offset, size);
+
 		//unlock
 		if (lock)
 			for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
@@ -386,3 +399,41 @@ size_t Mapping::getSegmentSize(void) const
 {
 	return this->segmentSize;
 }
+
+
+/*******************  FUNCTION  *********************/
+#ifdef HAVE_HTOPML
+void ummapio::convertToJson(htopml::JsonState & json,const SegmentStatus & value)
+{
+	json.openStruct();
+		json.printField("time", value.time);
+		json.printField("mapped", value.mapped);
+		json.printField("dirty", value.dirty);
+		json.printField("needRead", value.needRead);
+	json.closeStruct();
+}
+
+/*******************  FUNCTION  *********************/
+void ummapio::convertToJson(htopml::JsonState & json,const Mapping & value)
+{
+	json.openStruct();
+		json.printField("size", value.size);
+		json.printField("segments", value.segments);
+		json.printField("segmentSize", value.segmentSize);
+		json.printField("offset", value.storageOffset);
+		json.printField("driverUri", value.driver->getUri());
+		if (value.localPolicy == NULL)
+			json.printField("localPolicyUri", "none://");
+		else
+			json.printField("localPolicyUri", value.localPolicy->getUri());
+		if (value.globalPolicy == NULL)
+			json.printField("globalPolicyUri", "none://");
+		else
+			json.printField("globalPolicyUri", value.globalPolicy->getUri());
+		json.openFieldArray("status");
+		for (size_t i = 0 ; i < value.segments ; i++)
+			json.printValue(value.segmentStatus[i]);
+		json.closeFieldArray("status");
+	json.closeStruct();
+}
+#endif //HAVE_HTOPML
