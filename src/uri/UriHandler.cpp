@@ -210,7 +210,7 @@ Driver * UriHandler::buildDriverMero(const Uri & uri)
 		const std::string & listing = uri.getParam("listing");
 		const std::string & name = uri.getParam("name");
 		id = this->objectIdListings.getObjectId(listing, name);
-	} else if (sscanf(path.c_str(), "%lx:%lx", &id.low, &id.high) == 2) {
+	} else if (sscanf(path.c_str(), "%lu:%lu", &id.high, &id.low) == 2) {
 		//nothing more to do
 	} else {
 		UMMAP_FATAL_ARG("Invalid object ID in mero URI : %1")
