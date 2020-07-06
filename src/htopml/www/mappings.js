@@ -63,7 +63,7 @@ function draw_sections(mappings)
 
 		//appned
 		html += "<div class='section'>\
-				<h1>Segment "+ i +"</h1>\
+				<h1>Mapping "+ i +"</h1>\
 				<div>" + infos + "</div>\
 				<br/>\
 				<div class='blocks' id='mapping-"+i+"'></div>\
