@@ -39,14 +39,19 @@ void * UnixOS::mmapProtNone(size_t size)
 }
 
 /*******************  FUNCTION  *********************/
-void * UnixOS::mmapProtFull(size_t size)
+void * UnixOS::mmapProtFull(size_t size, bool exec)
 {
 	//check
 	assert(size % UMMAP_PAGE_SIZE == 0);
 	assert(size > 0);
 
+	//prot
+	int prot = PROT_READ | PROT_WRITE;
+	if (exec)
+		prot |= PROT_EXEC;
+
 	//call
-	void * ptr = ::mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, 0, 0);
+	void * ptr = ::mmap(NULL, size, prot, MAP_ANON | MAP_PRIVATE, 0, 0);
 
 	//post check
 	assumeArg(ptr != MAP_FAILED, "Fail to call mmap with size=%1 : %2").arg(size).argStrErrno().end();
@@ -96,7 +101,7 @@ void UnixOS::mremapForced(void * oldPtr, size_t size, void * newPtr)
 }
 
 /*******************  FUNCTION  *********************/
-void UnixOS::mprotect(void * ptr, size_t size, bool read, bool write)
+void UnixOS::mprotect(void * ptr, size_t size, bool read, bool write, bool exec)
 {
 	//checks
 	assert(ptr != NULL);
@@ -110,6 +115,8 @@ void UnixOS::mprotect(void * ptr, size_t size, bool read, bool write)
 		prot |= PROT_READ;
 	if (write)
 		prot |= PROT_WRITE;
+	if (exec)
+		prot |= PROT_EXEC;
 
 	//apply
 	::mprotect(ptr, size, prot);

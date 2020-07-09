@@ -13,6 +13,8 @@
 //std
 #include <cstdlib>
 #include <mutex>
+//unix
+#include <sys/mman.h>
 //htopml
 #ifdef HAVE_HTOPML
 #include <htopml/JsonState.h>
@@ -24,15 +26,6 @@
 /********************  NAMESPACE  *******************/
 namespace ummapio
 {
-
-/*********************  TYPES  **********************/
-enum MappingProtection
-{
-	MAPPING_PROT_NONE = 0,
-	MAPPING_PROT_READ = 1,
-	MAPPING_PROT_WRITE = 2,
-	MAPPING_PROT_RW = 3,
-};
 
 /*********************  STRUCT  *********************/
 struct SegmentStatus
@@ -48,7 +41,7 @@ struct SegmentStatus
 class Mapping
 {
 	public:
-		Mapping(size_t size, size_t segmentSize, size_t storageOffset, MappingProtection protection, Driver * driver, Policy * localPolicy = NULL, Policy * globalPolicy = NULL);
+		Mapping(size_t size, size_t segmentSize, size_t storageOffset, int protection, Driver * driver, Policy * localPolicy = NULL, Policy * globalPolicy = NULL);
 		virtual ~Mapping(void);
 		void onSegmentationFault(void * address, bool isWrite);
 		void sync(void);
@@ -73,7 +66,7 @@ class Mapping
 		Driver * driver;
 		Policy * localPolicy;
 		Policy * globalPolicy;
-		MappingProtection protection;
+		int protection;
 		char * baseAddress;
 		size_t segments;
 		size_t segmentSize;

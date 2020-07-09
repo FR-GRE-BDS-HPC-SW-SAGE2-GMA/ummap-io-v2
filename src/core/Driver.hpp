@@ -58,7 +58,7 @@ class Driver
 		 * @param write Accept write accesses
 		 * @return NULL if the caller has to do the mapping, an addresse otherwise.
 		**/
-		virtual void * directMmap(size_t size, size_t offset, bool read, bool write);
+		virtual void * directMmap(size_t size, size_t offset, bool read, bool write, bool exec);
 		/**
 		 * Let the driver maling the memory unmaping.
 		 * @param base Base addresse of the mapping.

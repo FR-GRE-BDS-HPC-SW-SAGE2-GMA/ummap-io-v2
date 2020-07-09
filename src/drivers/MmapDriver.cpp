@@ -83,7 +83,7 @@ void MmapDriver::sync(void * ptr, size_t offset, size_t size)
 }
 
 /*******************  FUNCTION  *********************/
-void * MmapDriver::directMmap(size_t size, size_t offset, bool read, bool write)
+void * MmapDriver::directMmap(size_t size, size_t offset, bool read, bool write, bool exec)
 {
 	//alignement
 	size_t addrOffset = 0;
@@ -95,6 +95,8 @@ void * MmapDriver::directMmap(size_t size, size_t offset, bool read, bool write)
 		prot |= PROT_READ;
 	if (write)
 		prot |= PROT_WRITE;
+	if (write)
+		prot |= PROT_EXEC;
 
 	//mmap
 	void * res = NULL;

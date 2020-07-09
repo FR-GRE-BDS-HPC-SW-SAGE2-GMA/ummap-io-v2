@@ -8,8 +8,11 @@
 #define UMMAP_H
 
 /********************  HEADERS  *********************/
+//std
 #include <stdlib.h>
 #include <stdbool.h>
+//unix
+#include <sys/mman.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,15 +22,6 @@ extern "C" {
 typedef struct ummap_policy_s ummap_policy_t;
 typedef struct ummap_driver_s ummap_driver_t;
 
-/*********************  TYPES  **********************/
-typedef enum ummap_mapping_prot_s
-{
-	UMMAP_PROT_NONE = 0,
-	UMMAP_PROT_READ = 1,
-	UMMAP_PROT_WRITE = 2,
-	UMMAP_PROT_RW = 3,
-} ummap_mapping_prot_t;
-
 /*******************  FUNCTION  *********************/
 //global init/destroy
 void ummap_init(void);
@@ -35,7 +29,7 @@ void ummap_finalize(void);
 
 /*******************  FUNCTION  *********************/
 //ummap
-void * ummap(size_t size, size_t segment_size, size_t storage_offset, ummap_mapping_prot_t protection, ummap_driver_t * driver, ummap_policy_t * local_policy, const char * policy_group);
+void * ummap(size_t size, size_t segment_size, size_t storage_offset, int protection, ummap_driver_t * driver, ummap_policy_t * local_policy, const char * policy_group);
 int umunmap(void * ptr, int sync);
 void umsync(void * ptr, size_t size, int evict);
 

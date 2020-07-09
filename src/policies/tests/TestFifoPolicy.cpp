@@ -31,7 +31,7 @@ TEST(TestFifoPolicy, reg)
 	//set
 	FifoPolicy policy(2*UMMAP_PAGE_SIZE, true);
 	DummyDriver driver;
-	Mapping mapping(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, &driver, NULL, NULL);
+	Mapping mapping(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, &driver, NULL, NULL);
 
 	policy.allocateElementStorage(&mapping, 8);
 	policy.freeElementStorage(&mapping);
@@ -43,7 +43,7 @@ TEST(TestFifoPolicy, evict)
 	//set
 	FifoPolicy * policy = new FifoPolicy(2*UMMAP_PAGE_SIZE, true);
 	DummyDriver driver;
-	GMockMapping mapping(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, &driver, policy, NULL);
+	GMockMapping mapping(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, &driver, policy, NULL);
 	char * ptr = (char*)mapping.getAddress();
 
 	//touch no effect
@@ -74,7 +74,7 @@ TEST(TestFifoPolicy, evict_notify_other)
 
 	//setup
 	DummyDriver driver;
-	Mapping mapping(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, &driver, policy, &globalPolicy);
+	Mapping mapping(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, &driver, policy, &globalPolicy);
 	char * ptr = (char*)mapping.getAddress();
 
 	//touch no effect

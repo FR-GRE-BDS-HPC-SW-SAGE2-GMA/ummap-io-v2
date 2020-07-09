@@ -24,7 +24,7 @@ TEST(TestMapping, constructor_destructor)
 	size_t segments = 8;
 	size_t size = segments * UMMAP_PAGE_SIZE;
 	DummyDriver driver(32);
-	Mapping mapping(size, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, &driver, NULL, NULL);
+	Mapping mapping(size, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, &driver, NULL, NULL);
 
 	//check status
 	for (size_t i = 0 ; i < segments ; i++) {
@@ -43,7 +43,7 @@ TEST(TestMapping, first_touch_read_first)
 	size_t segments = 8;
 	size_t size = segments * UMMAP_PAGE_SIZE;
 	DummyDriver driver(32);
-	Mapping mapping(size, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, &driver, NULL, NULL);
+	Mapping mapping(size, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, &driver, NULL, NULL);
 
 	//get
 	char * ptr = (char*)mapping.getAddress();
@@ -74,7 +74,7 @@ TEST(TestMapping, first_touch_write_first)
 	size_t segments = 8;
 	size_t size = segments * UMMAP_PAGE_SIZE;
 	DummyDriver driver(32);
-	Mapping mapping(size, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, &driver, NULL, NULL);
+	Mapping mapping(size, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, &driver, NULL, NULL);
 
 	//get
 	char * ptr = (char*)mapping.getAddress();
@@ -105,7 +105,7 @@ TEST(TestMapping, storage_offset)
 	//setup
 	size_t size = 8 * UMMAP_PAGE_SIZE;
 	GMockDriver driver;
-	Mapping mapping(size, UMMAP_PAGE_SIZE, 128, MAPPING_PROT_RW, &driver, NULL, NULL);
+	Mapping mapping(size, UMMAP_PAGE_SIZE, 128, PROT_READ|PROT_WRITE, &driver, NULL, NULL);
 
 	//get
 	char * ptr = (char*)mapping.getAddress();
@@ -125,7 +125,7 @@ TEST(TestMapping, storage_offset_and_non_full)
 	//setup
 	size_t size = 512;
 	GMockDriver driver;
-	Mapping mapping(size, UMMAP_PAGE_SIZE, 128, MAPPING_PROT_RW, &driver, NULL, NULL);
+	Mapping mapping(size, UMMAP_PAGE_SIZE, 128, PROT_READ|PROT_WRITE, &driver, NULL, NULL);
 
 	//get
 	char * ptr = (char*)mapping.getAddress();
@@ -142,7 +142,7 @@ TEST(TestMapping, first_last_non_full)
 	size_t segments = 8;
 	size_t size = segments * UMMAP_PAGE_SIZE + 1024;
 	GMockDriver driver;
-	Mapping mapping(size, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, &driver, NULL, NULL);
+	Mapping mapping(size, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, &driver, NULL, NULL);
 
 	//get
 	char * ptr = (char*)mapping.getAddress();
@@ -159,7 +159,7 @@ TEST(TestMapping, flush)
 	size_t segments = 8;
 	size_t size = segments * UMMAP_PAGE_SIZE;
 	GMockDriver driver;
-	Mapping mapping(size, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, &driver, NULL, NULL);
+	Mapping mapping(size, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, &driver, NULL, NULL);
 
 	//get
 	char * ptr = (char*)mapping.getAddress();
@@ -204,7 +204,7 @@ TEST(TestMapping, policy)
 	EXPECT_CALL(globalPolicy, allocateElementStorage(_, 8));
 	
 	//create
-	Mapping mapping(size, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, &driver, localPolicy, &globalPolicy);
+	Mapping mapping(size, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, &driver, localPolicy, &globalPolicy);
 	char * ptr = (char*)mapping.getAddress();
 
 	//touch read
@@ -242,9 +242,9 @@ TEST(TestMapping, globalPolicy)
 	FifoPolicy globalPolicy(2*UMMAP_PAGE_SIZE, false);
 	
 	//create
-	Mapping mapping1(size, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, &driver, localPolicy1, &globalPolicy);
+	Mapping mapping1(size, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, &driver, localPolicy1, &globalPolicy);
 	char * ptr1 = (char*)mapping1.getAddress();
-	Mapping mapping2(size, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, &driver, localPolicy2, &globalPolicy);
+	Mapping mapping2(size, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, &driver, localPolicy2, &globalPolicy);
 	char * ptr2 = (char*)mapping2.getAddress();
 
 	//touch read first segment

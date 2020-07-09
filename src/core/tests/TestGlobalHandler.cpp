@@ -79,7 +79,7 @@ TEST(TestGlobalHandler, basic_read_workflow)
 
 	//mapping
 	DummyDriver * driver = new DummyDriver(32);
-	Mapping mapping(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_READ, driver);
+	Mapping mapping(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, PROT_READ, driver);
 	getGlobalhandler()->registerMapping(&mapping);
 
 	//read access
@@ -103,7 +103,7 @@ TEST(TestGlobalHandler, basic_write_workflow)
 
 	//mapping
 	DummyDriver * driver = new DummyDriver(32);
-	Mapping mapping(8 * UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, driver);
+	Mapping mapping(8 * UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, driver);
 	getGlobalhandler()->registerMapping(&mapping);
 
 	//read access
@@ -131,7 +131,7 @@ TEST(TestGlobalHandler, basic_read_workflow_parallel)
 
 	//mapping
 	DummyDriver * driver = new DummyDriver(32);
-	Mapping mapping(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_READ, driver);
+	Mapping mapping(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, PROT_READ | PROT_WRITE, driver);
 	getGlobalhandler()->registerMapping(&mapping);
 
 	//read access
@@ -163,7 +163,7 @@ TEST(TestGlobalHandler, basic_write_workflow_parallel)
 
 	//mapping
 	DummyDriver * driver = new DummyDriver(32);
-	Mapping mapping(8 * UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, driver);
+	Mapping mapping(8 * UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, PROT_READ | PROT_WRITE, driver);
 	getGlobalhandler()->registerMapping(&mapping);
 
 	//read access
@@ -207,8 +207,8 @@ TEST(TestGlobalHandler, mmap_and_unmap)
 	GlobalHandler handler;
 
 	//map 2
-	void * ptr1 = handler.ummap(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, new DummyDriver(16), NULL, "none");
-	handler.ummap(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, new DummyDriver(16), NULL, "none");
+	void * ptr1 = handler.ummap(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, new DummyDriver(16), NULL, "none");
+	handler.ummap(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, new DummyDriver(16), NULL, "none");
 
 	//destroy 1
 	ASSERT_EQ(0, handler.umunmap(ptr1,0 ));
@@ -224,8 +224,8 @@ TEST(TestGlobalHandler, mmap_and_policy)
 	handler.registerPolicy("global", new FifoPolicy(4*UMMAP_PAGE_SIZE, false));
 
 	//map 2
-	void * ptr1 = handler.ummap(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, new DummyDriver(16), NULL, "global");
-	handler.ummap(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, new DummyDriver(16), NULL, "global");
+	void * ptr1 = handler.ummap(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, new DummyDriver(16), NULL, "global");
+	handler.ummap(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, new DummyDriver(16), NULL, "global");
 
 	//destroy 1
 	ASSERT_EQ(0, handler.umunmap(ptr1, 0));
@@ -240,7 +240,7 @@ TEST(TestGlobalHandler, deleteAllMappings)
 	
 	//mapping
 	DummyDriver * driver = new DummyDriver(32);
-	Mapping * mapping = new Mapping(8 * UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, MAPPING_PROT_RW, driver);
+	Mapping * mapping = new Mapping(8 * UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, driver);
 	handler.registerMapping(mapping);
 
 	//call

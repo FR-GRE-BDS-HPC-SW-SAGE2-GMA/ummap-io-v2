@@ -15,7 +15,7 @@ using namespace ummapio;
 TEST(TestOS, mmapProtFull)
 {
 	const size_t size = 10*UMMAP_PAGE_SIZE;
-	char * ptr = (char*)OS::mmapProtFull(size);
+	char * ptr = (char*)OS::mmapProtFull(size, false);
 	ASSERT_NE(ptr, nullptr);
 	for (size_t i = 0 ; i < size ; i++)
 		ASSERT_EQ(0, ptr[i]) << "Index: " << i;
@@ -38,7 +38,7 @@ TEST(TestOS, mremapForced)
 	const size_t size = 10*UMMAP_PAGE_SIZE;
 
 	//map
-	char * ptr = (char*)OS::mmapProtFull(2*size);
+	char * ptr = (char*)OS::mmapProtFull(2*size, false);
 	ASSERT_NE(ptr, nullptr);
 	
 	//remap
@@ -64,7 +64,7 @@ TEST(TestOS, mprotect_read_only)
 	char * ptr = (char*)OS::mmapProtNone(size);
 
 	//protect
-	OS::mprotect(ptr, size, true, false);
+	OS::mprotect(ptr, size, true, false, false);
 
 	//check access
 	for (size_t i = 0 ; i < size ; i++)
@@ -83,7 +83,7 @@ TEST(TestOS, mprotect_read_write)
 	char * ptr = (char*)OS::mmapProtNone(size);
 
 	//protect
-	OS::mprotect(ptr, size, true, true);
+	OS::mprotect(ptr, size, true, true, false);
 
 	//check access
 	for (size_t i = 0 ; i < size ; i++) {

@@ -142,7 +142,7 @@ bool GlobalHandler::onSegFault(void * addr, bool isWrite)
 }
 
 /*******************  FUNCTION  *********************/
-void * GlobalHandler::ummap(size_t size, size_t segmentSize, size_t storageOffset, MappingProtection protection, Driver * driver, Policy * localPolicy, const std::string & policyGroup)
+void * GlobalHandler::ummap(size_t size, size_t segmentSize, size_t storageOffset, int protection, Driver * driver, Policy * localPolicy, const std::string & policyGroup)
 {
 	//get policy
 	Policy * globalPolicy = NULL;

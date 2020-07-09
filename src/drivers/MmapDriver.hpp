@@ -24,7 +24,7 @@ class MmapDriver : public Driver
 		virtual ssize_t pwrite(const void * buffer, size_t size, size_t offset) override;
 		virtual ssize_t pread(void * buffer, size_t size, size_t offset) override;
 		virtual void sync(void* ptr, size_t offset, size_t size) override;
-		virtual void * directMmap(size_t size, size_t offset, bool read, bool write) override;
+		virtual void * directMmap(size_t size, size_t offset, bool read, bool write, bool exec) override;
 		virtual bool directMunmap(void * base, size_t size, size_t offset) override;
 		virtual bool directMSync(void * base, size_t size, size_t offset) override;
 	private:

@@ -19,7 +19,7 @@
 using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
-Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, MappingProtection protection, Driver * driver, Policy * localPolicy, Policy * globalPolicy)
+Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, int protection, Driver * driver, Policy * localPolicy, Policy * globalPolicy)
 {
 	//checks
 	assume(size > 0, "Do not accept null size mapping");
@@ -46,7 +46,7 @@ Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, MappingP
 	this->storageOffset = storageOffset;
 
 	//establish mapping
-	this->baseAddress = (char*)driver->directMmap(size, storageOffset, protection & MAPPING_PROT_READ, protection & MAPPING_PROT_WRITE);
+	this->baseAddress = (char*)driver->directMmap(size, storageOffset, protection & PROT_READ, protection & PROT_WRITE, protection & PROT_EXEC);
 	if (this->baseAddress == NULL)
 		this->baseAddress = (char*)OS::mmapProtNone(mapSize);
 
@@ -126,7 +126,7 @@ void Mapping::loadAndSwapSegment(size_t offset, bool writeAccess)
 	//data if we just made madvise on the pre-existing PROT_NONE segment.
 
 	//map a page in RW access
-	void * ptr = OS::mmapProtFull(this->segmentSize);
+	void * ptr = OS::mmapProtFull(this->segmentSize, protection & PROT_EXEC);
 
 	//read inside new segment
 	ssize_t res = this->driver->pread(ptr, readWriteSize(offset), this->storageOffset + offset);
@@ -137,7 +137,7 @@ void Mapping::loadAndSwapSegment(size_t offset, bool writeAccess)
 
 	//make read only
 	if (!writeAccess)
-		OS::mprotect(ptr, segmentSize, true, false);
+		OS::mprotect(ptr, segmentSize, true, false, protection & PROT_EXEC);
 	
 	//now remap to move the segment and override the PROT_NONE one
 	OS::mremapForced(ptr, segmentSize, this->baseAddress + offset);
@@ -158,9 +158,9 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 	SegmentStatus oldStatus;
 
 	//check
-	if (this->protection == MAPPING_PROT_NONE)
-		UMMAP_FATAL("Try to access a segment which is MAPPING_PROT_NONE");
-	if (isWrite && this->protection < MAPPING_PROT_WRITE)
+	if (this->protection == PROT_NONE)
+		UMMAP_FATAL("Try to access a segment which is PROT_NONE");
+	if (isWrite && this->protection & PROT_WRITE == 0)
 		UMMAP_FATAL("Try to write access a segment which is not writable");
 	
 	//CRITICAL SECTION
@@ -186,7 +186,7 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 		//if write or not
 		if (isWrite) {
 			//this is a write, open write access
-			OS::mprotect(segmentBase, segmentSize, true, true);
+			OS::mprotect(segmentBase, segmentSize, true, true, protection & PROT_EXEC);
 
 			//mark dirty
 			status.dirty = true;
@@ -195,7 +195,7 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 			status.time = time(NULL);
 		} else {
 			//this is a first touch withou need read, open as readonly
-			OS::mprotect(segmentBase, segmentSize, true, false);
+			OS::mprotect(segmentBase, segmentSize, true, false, protection & PROT_EXEC);
 		}
 
 		//mark as mapped
@@ -312,7 +312,7 @@ void Mapping::sync(size_t offset, size_t size, bool unmap, bool lock)
 					this->segmentMutexes[i].lock();
 
 		//mprotect the whole considered segment
-		OS::mprotect(this->baseAddress + offset, size, true, false);
+		OS::mprotect(this->baseAddress + offset, size, true, false, protection & PROT_EXEC);
 
 		//loop on all
 		//@TODO: bulk operation
@@ -339,7 +339,7 @@ void Mapping::sync(size_t offset, size_t size, bool unmap, bool lock)
 			//if unmap
 			if (unmap) {
 				//protect
-				OS::mprotect(this->baseAddress + offset, size, false, false);
+				OS::mprotect(this->baseAddress + offset, size, false, false, protection & PROT_EXEC);
 
 				//unamp
 				OS::madviseDontNeed(this->baseAddress + offset, size);
