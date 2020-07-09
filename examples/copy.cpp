@@ -59,7 +59,7 @@ int main(int argc, char ** argv)
 	
 	//sync
 	printf(" - Sync...\n");
-	ummap_sync(out, 0);
+	umsync(out, 0, 0);
 
 	//unmap
 	printf(" - Unmapping...\n");

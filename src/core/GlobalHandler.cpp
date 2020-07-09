@@ -197,7 +197,7 @@ UriHandler & GlobalHandler::getUriHandler(void)
 }
 
 /*******************  FUNCTION  *********************/
-void GlobalHandler::flush(void * ptr, size_t size)
+void GlobalHandler::flush(void * ptr, size_t size, bool evict)
 {
 	//get mapping
 	Mapping * mapping = this->mappingRegistry.getMapping(ptr);
@@ -232,7 +232,7 @@ void GlobalHandler::flush(void * ptr, size_t size)
 		"Invalid flush size, not fit in ummap mapping !");
 
 	//apply
-	mapping->sync(offset, size);
+	mapping->sync(offset, size, evict);
 }
 
 /*******************  FUNCTION  *********************/

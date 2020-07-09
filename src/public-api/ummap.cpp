@@ -222,9 +222,10 @@ ummap_policy_t * ummap_policy_create_fifo(size_t max_size, bool local)
 }
 
 /*******************  FUNCTION  *********************/
-void ummap_sync(void * ptr, size_t size)
+void umsync(void * ptr, size_t size, int evict)
 {
-	getGlobalhandler()->flush(ptr, size);
+	bool evict_bool = (evict != 0);
+	getGlobalhandler()->flush(ptr, size, evict_bool);
 }
 
 /*******************  FUNCTION  *********************/

@@ -85,7 +85,7 @@ TEST_F(TestPublicAPI, map_driver_fopen)
 	memset(ptr1, 10, 8*4096);
 
 	//unmap 1 and let the other for cleaup
-	ummap_sync(ptr1, 0);
+	umsync(ptr1, 0, 0);
 	umunmap(ptr1);
 
 	//check
@@ -119,7 +119,7 @@ TEST_F(TestPublicAPI, map_driver_dax_fopen)
 	memset(ptr1, 'a', 8*4096);
 
 	//unmap 1 and let the other for cleaup
-	ummap_sync(ptr1, 0);
+	umsync(ptr1, 0, 0);
 	umunmap(ptr1);
 
 	//check
@@ -158,7 +158,7 @@ TEST_F(TestPublicAPI, map_driver_fd)
 	memset(ptr1, 'a', 8*4096);
 
 	//unmap 1 and let the other for cleaup
-	ummap_sync(ptr1, 0);
+	umsync(ptr1, 0, 0);
 	umunmap(ptr1);
 
 	//check
@@ -197,7 +197,7 @@ TEST_F(TestPublicAPI, map_driver_dax_fd)
 	memset(ptr1, 10, 8*4096);
 
 	//unmap 1 and let the other for cleaup
-	ummap_sync(ptr1, 0);
+	umsync(ptr1, 0, 0);
 	umunmap(ptr1);
 
 	//check
@@ -237,7 +237,7 @@ TEST_F(TestPublicAPI, map_driver_dax_fd_offset)
 	memset(ptr1, 10, 8*4096 - offset);
 
 	//unmap 1 and let the other for cleaup
-	ummap_sync(ptr1, 0);
+	umsync(ptr1, 0, 0);
 	umunmap(ptr1);
 
 	//check

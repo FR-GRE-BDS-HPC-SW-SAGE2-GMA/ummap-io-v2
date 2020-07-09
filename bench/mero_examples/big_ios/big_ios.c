@@ -63,7 +63,7 @@ int main(int argc, char **argv)
     for(i = 0 ; i < 1000*1024*1024; i++) {
         index[i] = 'A';
     }
-    ummap_sync(index, size);
+    umsync(index, size, 0);
     umunmap(index);
 
     ummap_finalize();

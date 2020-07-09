@@ -37,7 +37,7 @@ void ummap_finalize(void);
 //ummap
 void * ummap(size_t size, size_t segment_size, size_t storage_offset, ummap_mapping_prot_t protection, ummap_driver_t * driver, ummap_policy_t * local_policy, const char * policy_group);
 int umunmap(void * ptr);
-void ummap_sync(void * ptr, size_t size);
+void umsync(void * ptr, size_t size, int evict);
 
 /*******************  FUNCTION  *********************/
 //setup

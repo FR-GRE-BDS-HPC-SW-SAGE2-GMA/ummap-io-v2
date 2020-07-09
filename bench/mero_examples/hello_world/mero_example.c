@@ -124,7 +124,7 @@ int main(int argc, char **argv)
     char *index = (char *)baseptr;
     sprintf(index, "GREG IS A BIT MORE HAPPY WITH UMMAP OBJECTS LIKE THIS\n");
 
-    ummap_sync(baseptr, size);
+    umsync(baseptr, size, 0);
     umunmap(baseptr);
 
 
