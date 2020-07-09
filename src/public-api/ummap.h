@@ -18,6 +18,9 @@
 extern "C" {
 #endif
 
+/********************  CONSTS  **********************/
+#define UMMAP_NO_FIRST_READ 1
+
 /*********************  TYPES  **********************/
 typedef struct ummap_policy_s ummap_policy_t;
 typedef struct ummap_driver_s ummap_driver_t;
@@ -29,7 +32,7 @@ void ummap_finalize(void);
 
 /*******************  FUNCTION  *********************/
 //ummap
-void * ummap(size_t size, size_t segment_size, size_t storage_offset, int protection, ummap_driver_t * driver, ummap_policy_t * local_policy, const char * policy_group);
+void * ummap(size_t size, size_t segment_size, size_t storage_offset, int protection, int flags, ummap_driver_t * driver, ummap_policy_t * local_policy, const char * policy_group);
 int umunmap(void * ptr, int sync);
 void umsync(void * ptr, size_t size, int evict);
 

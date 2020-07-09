@@ -142,7 +142,7 @@ bool GlobalHandler::onSegFault(void * addr, bool isWrite)
 }
 
 /*******************  FUNCTION  *********************/
-void * GlobalHandler::ummap(size_t size, size_t segmentSize, size_t storageOffset, int protection, Driver * driver, Policy * localPolicy, const std::string & policyGroup)
+void * GlobalHandler::ummap(size_t size, size_t segmentSize, size_t storageOffset, int protection, int flags, Driver * driver, Policy * localPolicy, const std::string & policyGroup)
 {
 	//get policy
 	Policy * globalPolicy = NULL;
@@ -155,6 +155,10 @@ void * GlobalHandler::ummap(size_t size, size_t segmentSize, size_t storageOffse
 	//create mapping
 	Mapping * mapping = new Mapping(size, segmentSize, storageOffset, protection, driver, localPolicy, globalPolicy);
 	this->mappingRegistry.registerMapping(mapping);
+
+	//no first read
+	if (flags &= UMMAP_NO_FIRST_READ)
+		mapping->skipFirstRead();
 	
 	//return
 	return mapping->getAddress();
