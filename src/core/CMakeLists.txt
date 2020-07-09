@@ -17,6 +17,9 @@ add_library(ummap-core OBJECT ${CORE_SRC})
 SET_TARGET_PROPERTIES(ummap-core PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 ######################################################
+install(FILES Driver.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ummap)
+
+######################################################
 if (ENABLE_TESTS)
 	add_subdirectory(tests)
 endif (ENABLE_TESTS)

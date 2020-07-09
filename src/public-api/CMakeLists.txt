@@ -19,11 +19,11 @@ if(MERO_FOUND)
 
 	SET_TARGET_PROPERTIES(ummap-public-api PROPERTIES COMPILE_FLAGS "${MERO_COMPILE_FLAGS}")
 
-	install(FILES clovis_api.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+	install(FILES clovis_api.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ummap)
 endif(MERO_FOUND)
 
 ######################################################
-install(FILES ummap.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES ummap.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ummap)
 
 ######################################################
 if (ENABLE_TESTS)
