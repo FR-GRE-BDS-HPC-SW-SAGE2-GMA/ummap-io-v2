@@ -22,8 +22,8 @@ namespace ummapio
 /*********************  TYPES  **********************/
 enum PageFaultType
 {
-    PAGEFAULT_READ = 0,
-    PAGEFAULT_WRITE
+	PAGEFAULT_READ = 0,
+	PAGEFAULT_WRITE
 };
 
 /*********************  CLASS  **********************/
