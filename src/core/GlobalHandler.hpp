@@ -13,9 +13,7 @@
 #include "MappingRegistry.hpp"
 #include "PolicyRegistry.hpp"
 #include "../uri/UriHandler.hpp"
-
-/********************  CONSTS  **********************/
-#define UMMAP_NO_FIRST_READ 1
+#include "../public-api/ummap.h"
 
 /********************  NAMESPACE  *******************/
 namespace ummapio
