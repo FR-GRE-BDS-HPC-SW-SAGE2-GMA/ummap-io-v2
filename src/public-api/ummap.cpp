@@ -73,7 +73,7 @@ void * ummap(size_t size, size_t segment_size, size_t storage_offset, int protec
 		policy_group_checked = "none";
 
 	//call & ret
-	return getGlobalhandler()->ummap(size, segment_size, storage_offset, protection, flags, driv, pol, policy_group);
+	return getGlobalhandler()->ummap(size, segment_size, storage_offset, protection, flags, driv, pol, policy_group_checked);
 }
 
 /*******************  FUNCTION  *********************/

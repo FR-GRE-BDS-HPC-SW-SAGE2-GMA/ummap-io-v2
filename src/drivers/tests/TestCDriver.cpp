@@ -9,6 +9,7 @@
 #include <gtest/gtest.h>
 //internal
 #include "../CDriver.hpp"
+#include "../../public-api/ummap.h"
 
 /***************** USING NAMESPACE ******************/
 using namespace ummapio;
@@ -90,4 +91,26 @@ TEST(TestCDriver, functions)
 	ASSERT_EQ(nullptr, driver.directMmap(0, 0, false, false, false));
 	ASSERT_FALSE(driver.directMunmap(NULL, 0, 0));
 	ASSERT_FALSE(driver.directMSync(NULL, 0, 0));
+}
+
+/*******************  FUNCTION  *********************/
+TEST(TestCDriver, c_api)
+{
+	//init
+	ummap_init();
+
+	//create driver
+	ummap_driver_t * driver = ummap_driver_create_c(&gblCDummyDriver, malloc(8));
+
+	//map
+	void * ptr = ummap(4*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, driver, NULL, NULL);
+
+	//memset
+	memset(ptr, 0, 4*4096);
+
+	//unmap
+	munmap(ptr, 0);
+
+	//init
+	ummap_finalize();
 }
