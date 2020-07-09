@@ -125,7 +125,7 @@ int main(int argc, char **argv)
     sprintf(index, "GREG IS A BIT MORE HAPPY WITH UMMAP OBJECTS LIKE THIS\n");
 
     umsync(baseptr, size, 0);
-    umunmap(baseptr);
+    umunmap(baseptr, 0);
 
 
     // Check results 

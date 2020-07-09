@@ -77,14 +77,14 @@ void * ummap(size_t size, size_t segment_size, size_t storage_offset, ummap_mapp
 }
 
 /*******************  FUNCTION  *********************/
-int umunmap(void * ptr)
+int umunmap(void * ptr, int sync)
 {
 	//check
 	assert(getGlobalhandler() != NULL);
 	assert(ptr != NULL);
 
 	//call
-	return getGlobalhandler()->umunmap(ptr);
+	return getGlobalhandler()->umunmap(ptr, sync);
 }
 
 /*******************  FUNCTION  *********************/
@@ -224,8 +224,7 @@ ummap_policy_t * ummap_policy_create_fifo(size_t max_size, bool local)
 /*******************  FUNCTION  *********************/
 void umsync(void * ptr, size_t size, int evict)
 {
-	bool evict_bool = (evict != 0);
-	getGlobalhandler()->flush(ptr, size, evict_bool);
+	getGlobalhandler()->flush(ptr, size, evict);
 }
 
 /*******************  FUNCTION  *********************/

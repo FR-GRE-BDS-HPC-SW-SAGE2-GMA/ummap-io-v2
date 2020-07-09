@@ -106,7 +106,7 @@ void MemoryDriver::sync(void * ptr, size_t offset, size_t size)
 	//check
 	assert(buffer != NULL);
 	assert(offset < this->size);
-	assert(size + offset <= this->size);
+	//assert(size + offset <= this->size);
 }
 
 /*******************  FUNCTION  *********************/

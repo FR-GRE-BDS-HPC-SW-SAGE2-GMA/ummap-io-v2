@@ -63,8 +63,8 @@ int main(int argc, char ** argv)
 
 	//unmap
 	printf(" - Unmapping...\n");
-	umunmap(in);
-	umunmap(out);
+	umunmap(in, 0);
+	umunmap(out, 0);
 
 	//fini
 	printf(" - Finalize...\n");

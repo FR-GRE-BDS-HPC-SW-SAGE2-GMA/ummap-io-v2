@@ -161,7 +161,7 @@ void * GlobalHandler::ummap(size_t size, size_t segmentSize, size_t storageOffse
 }
 
 /*******************  FUNCTION  *********************/
-int GlobalHandler::umunmap(void * ptr)
+int GlobalHandler::umunmap(void * ptr, bool sync)
 {
 	//get mapping
 	Mapping * mapping = this->mappingRegistry.getMapping(ptr);
@@ -171,6 +171,12 @@ int GlobalHandler::umunmap(void * ptr)
 
 	//unmap
 	this->mappingRegistry.unregisterMapping(mapping);
+
+	//sync
+	if (sync)
+		mapping->sync(0, mapping->getAlignedSize(), false);
+
+	//delete
 	delete mapping;
 
 	//ok
