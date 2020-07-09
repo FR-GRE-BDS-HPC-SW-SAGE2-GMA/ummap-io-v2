@@ -16,6 +16,7 @@
 #include "../drivers/MemoryDriver.hpp"
 #include "../drivers/DummyDriver.hpp"
 #include "../drivers/MmapDriver.hpp"
+#include "../drivers/CDriver.hpp"
 #ifdef MERO_FOUND
 	#include "../drivers/ClovisDriver.hpp"
 	#include "clovis_api.h"
@@ -172,6 +173,13 @@ ummap_driver_t * ummap_driver_create_memory(size_t size)
 {
 	Driver * driver = new MemoryDriver(size);
 	return (ummap_driver_t*)driver;
+}
+
+/*******************  FUNCTION  *********************/
+ummap_driver_t * ummap_driver_create_c(const ummap_c_driver_t * driver, void * driver_data)
+{
+	Driver * cppdriver = new CDriver(driver, driver_data);
+	return (ummap_driver_t*)cppdriver;
 }
 
 /*******************  FUNCTION  *********************/

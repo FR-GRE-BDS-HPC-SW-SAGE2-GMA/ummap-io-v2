@@ -9,7 +9,7 @@
 include_directories(${GTEST_INCLUDE_DIRS} ${GMOCK_INCLUDE_DIRS})
 
 ######################################################
-set(TEST_NAMES TestDummyDriver TestMemoryDriver TestFDDriver TestMmapDriver)
+set(TEST_NAMES TestDummyDriver TestMemoryDriver TestFDDriver TestMmapDriver TestCDriver)
 
 ######################################################
 FOREACH(test_name ${TEST_NAMES})

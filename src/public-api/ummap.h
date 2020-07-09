@@ -26,6 +26,17 @@ typedef struct ummap_policy_s ummap_policy_t;
 typedef struct ummap_driver_s ummap_driver_t;
 
 /*******************  FUNCTION  *********************/
+typedef struct ummap_c_driver_s {
+	ssize_t (*pwrite)(void * driver_data, const void * buffer, size_t size, size_t offset);
+	ssize_t (*pread)(void * driver_data, void * buffer, size_t size, size_t offset);
+	void (*sync)(void * driver_data, void *ptr, size_t offset, size_t size);
+	void * (*direct_mmap)(void * driver_data, size_t size, size_t offset, bool read, bool write, bool exec);
+	bool (*direct_munmap)(void * driver_data, void * base, size_t size, size_t offset);
+	bool (*direct_msync)(void * driver_data, void * base, size_t size, size_t offset);
+	void (*finalize)(void * driver_data);
+} ummap_c_driver_t;
+
+/*******************  FUNCTION  *********************/
 //global init/destroy
 void ummap_init(void);
 void ummap_finalize(void);
@@ -49,6 +60,7 @@ ummap_driver_t * ummap_driver_create_fd(int fd);
 ummap_driver_t * ummap_driver_create_dax_fd(int fd, bool allowNotAligned);
 ummap_driver_t * ummap_driver_create_memory(size_t size);
 ummap_driver_t * ummap_driver_create_dummy(char value);
+ummap_driver_t * ummap_driver_create_c(const ummap_c_driver_t * driver, void * driver_data);
 #ifdef MERO_FOUND
 	ummap_driver_t * ummap_driver_create_clovis(struct m0_uint128 object_id);
 #endif

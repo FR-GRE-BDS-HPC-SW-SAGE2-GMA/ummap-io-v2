@@ -8,7 +8,8 @@
 set(DRIVERS_SRC DummyDriver.cpp
                 MemoryDriver.cpp
                 FDDriver.cpp
-                MmapDriver.cpp)
+                MmapDriver.cpp
+                CDriver.cpp)
 
 ######################################################
 if (MERO_FOUND)
