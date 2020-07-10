@@ -86,7 +86,7 @@ Driver * UriHandler::buildDriver(const std::string & uri)
 	} else if (type == "dummy") {
 		size_t value = atol(parser.getPath().c_str());
 		driver = new DummyDriver(value);
-	} else if (type == "mero" || type == "merofile" ) {
+	} else if (type == "mero" || type == "clovis" || type == "merofile" ) {
 		driver = buildDriverMero(parser);
 	} else if (type == "mmap" || type == "dax" ) {
 		driver = this->buildDriverFOpenMmap(parser.getPath(), parser.getParam("mode", "w+"));
@@ -201,7 +201,7 @@ Driver * UriHandler::buildDriverFOpenMmap(const std::string & fname, const std::
 Driver * UriHandler::buildDriverMero(const Uri & uri)
 {
 	//check
-	assert(uri.getType() == "mero" || uri.getType() == "merofile");
+	assert(uri.getType() == "mero" || uri.getType() == "clovis" || uri.getType() == "merofile");
 
 	//id
 	ObjectId id;
