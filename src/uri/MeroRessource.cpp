@@ -48,7 +48,7 @@ MeroRessource::~MeroRessource(void)
 }
 
 /*******************  FUNCTION  *********************/
-void MeroRessource::setRessourceInfo(int ressourceIndex, const std::string & ressourceFile)
+void MeroRessource::setRessourceInfo(const std::string & ressourceFile, int ressourceIndex)
 {
 	MeroRessource::ressourceIndex = ressourceIndex;
 	MeroRessource::ressourceFile = ressourceFile;

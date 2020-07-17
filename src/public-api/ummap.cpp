@@ -280,7 +280,7 @@ void ummap_uri_set_variable_size_t(const char * name, size_t value)
 }
 
 /*******************  FUNCTION  *********************/
-void ummap_config_clovis_init_options(int index, const char * ressource_file)
+void ummap_config_clovis_init_options(const char * ressource_file, int index)
 {
-	MeroRessource::setRessourceInfo(index, ressource_file);
+	MeroRessource::setRessourceInfo(ressource_file, index);
 }
