@@ -35,6 +35,9 @@ if (HTOPML_FOUND)
 	include_directories(${HTOPML_INCLUDE_DIRS})
 	list(APPEND UMMAP_EXTERN_LIBS ${HTOPML_LIBRARY})
 endif (HTOPML_FOUND)
+if (IOCCLIENT_FOUND)
+	set(HAVE_IOC_CLIENT yes)
+endif (IOCCLIENT_FOUND)
 
 ######################################################
 #setup config file
@@ -63,6 +66,11 @@ set(UMMAP_INTERNAL_CODE
 )
 
 ######################################################
+if (IOCCLIENT_FOUND)
+	include_directories(${IOCCLIENT_INCLUDE_DIR})
+endif (IOCCLIENT_FOUND)
+
+######################################################
 if(MERO_FOUND)
 	set(UMMAP_INTERNAL_CODE ${UMMAP_INTERNAL_CODE} $<TARGET_OBJECTS:clovis_api>)
 endif(MERO_FOUND)
@@ -71,6 +79,9 @@ endif(MERO_FOUND)
 add_library(ummap-io SHARED ${UMMAP_INTERNAL_CODE})
 if(MERO_FOUND)
 	set_target_properties(ummap-io PROPERTIES LINK_FLAGS "${MERO_LINK_FLAGS}")
+endif()
+if(IOCCLIENT_FOUND)
+	target_link_libraries(ummap-io ${IOCCLIENT_LIBRARY})
 endif()
 set_target_properties(ummap-io PROPERTIES VERSION 0.0.0 SOVERSION 0)
 target_link_libraries(ummap-io ${CMAKE_THREAD_LIBS_INIT})

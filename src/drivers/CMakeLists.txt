@@ -17,6 +17,11 @@ if (MERO_FOUND)
 endif(MERO_FOUND)
 
 ######################################################
+if (IOCCLIENT_FOUND)
+	list(APPEND DRIVERS_SRC IocDriver.cpp)
+endif(IOCCLIENT_FOUND)
+
+######################################################
 add_library(ummap-drivers OBJECT ${DRIVERS_SRC})
 SET_TARGET_PROPERTIES(ummap-drivers PROPERTIES POSITION_INDEPENDENT_CODE ON)
 

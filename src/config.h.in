@@ -22,4 +22,7 @@
 //Htopml
 #cmakedefine HAVE_HTOPML
 
+//Ioc client
+#cmakedefine HAVE_IOC_CLIENT
+
 #endif //UMMAP_CONFIG_HPP

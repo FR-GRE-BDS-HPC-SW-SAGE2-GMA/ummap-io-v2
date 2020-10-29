@@ -30,6 +30,7 @@ find_package(OpenMP REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Htopml QUIET)
 find_package(Mero QUIET)
+find_package(IocClient QUIET)
 
 ######################################################
 # mero

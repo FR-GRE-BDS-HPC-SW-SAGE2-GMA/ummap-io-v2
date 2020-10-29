@@ -39,6 +39,11 @@ cfg_add_with_option --name='htopml' \
                     --var='HTOPML_PREFIX'
 
 ######################################################
+cfg_add_with_option --name='ioc-client' \
+                    --doc='Define where to find the ioc-client library [/usr]' \
+                    --var='IOCCLIENT_PREFIX'
+
+######################################################
 #If we want to document extra options
 #CFG_CUSTOM_HELP="My custom options:"
 

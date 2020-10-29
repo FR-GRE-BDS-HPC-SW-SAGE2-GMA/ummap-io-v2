@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cerrno>
+#include <config.h>
 #include "../common/Debug.hpp"
 #include "../core/GlobalHandler.hpp"
 #include "../uri/MeroRessource.hpp"
@@ -20,6 +21,9 @@
 #ifdef MERO_FOUND
 	#include "../drivers/ClovisDriver.hpp"
 	#include "clovis_api.h"
+#endif
+#ifdef HAVE_IOC_CLIENT
+	#include "../drivers/IocDriver.hpp"
 #endif
 #include "../policies/FifoPolicy.hpp"
 #include "ummap.h"
@@ -174,6 +178,15 @@ ummap_driver_t * ummap_driver_create_memory(size_t size)
 	Driver * driver = new MemoryDriver(size);
 	return (ummap_driver_t*)driver;
 }
+
+/*******************  FUNCTION  *********************/
+#ifdef HAVE_IOC_CLIENT
+	ummap_driver_t * ummap_driver_create_ioc(struct ioc_client_t * client, int64_t high, int64_t low)
+	{
+		Driver * driver = new IocDriver(client, high, low);
+		return (ummap_driver_t*)driver;
+	}
+#endif
 
 /*******************  FUNCTION  *********************/
 ummap_driver_t * ummap_driver_create_c(const ummap_c_driver_t * driver, void * driver_data)
