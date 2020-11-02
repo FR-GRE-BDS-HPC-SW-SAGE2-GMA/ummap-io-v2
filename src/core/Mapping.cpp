@@ -181,6 +181,8 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 		if (!status.mapped && status.needRead){
 			//Load in a temp buffer and swap for atomicity
 			this->loadAndSwapSegment(offset, isWrite);
+			if (isWrite)
+				status.dirty = true;
 		} else if (isWrite) {
 			//this is a write, open write access
 			OS::mprotect(segmentBase, segmentSize, true, true, protection & PROT_EXEC);

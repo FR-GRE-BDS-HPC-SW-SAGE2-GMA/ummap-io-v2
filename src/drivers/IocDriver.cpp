@@ -39,5 +39,5 @@ ssize_t IocDriver::pread(void * buffer, size_t size, size_t offset)
 /*******************  FUNCTION  *********************/
 void IocDriver::sync(void * ptr, size_t offset, size_t size)
 {
-
+	ioc_client_obj_flush(this->client, this->high, this->low);
 }
