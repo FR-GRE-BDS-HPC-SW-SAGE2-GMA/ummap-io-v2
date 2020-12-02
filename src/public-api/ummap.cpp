@@ -13,6 +13,7 @@
 #include "../common/Debug.hpp"
 #include "../core/GlobalHandler.hpp"
 #include "../uri/MeroRessource.hpp"
+#include "../uri/IocRessource.hpp"
 #include "../drivers/FDDriver.hpp"
 #include "../drivers/MemoryDriver.hpp"
 #include "../drivers/DummyDriver.hpp"
@@ -296,4 +297,10 @@ void ummap_uri_set_variable_size_t(const char * name, size_t value)
 void ummap_config_clovis_init_options(const char * ressource_file, int index)
 {
 	MeroRessource::setRessourceInfo(ressource_file, index);
+}
+
+/*******************  FUNCTION  *********************/
+void ummap_config_ioc_init_options(const char * server, const char * port)
+{
+	IocRessource::setRessourceInfo(server, port);
 }

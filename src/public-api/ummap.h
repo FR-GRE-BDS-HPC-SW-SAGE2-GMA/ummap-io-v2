@@ -90,6 +90,7 @@ void ummap_uri_set_variable_size_t(const char * name, size_t value);
 /*******************  FUNCTION  *********************/
 //extra driver configs
 void ummap_config_clovis_init_options(const char * ressource_file, int index);
+void ummap_config_ioc_init_options(const char * server, const char * port);
 
 #ifdef __cplusplus
 }

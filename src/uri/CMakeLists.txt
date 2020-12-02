@@ -5,7 +5,7 @@
 ######################################################
 
 ######################################################
-set(URI_SRC Uri.cpp UriHandler.cpp Listings.cpp RessourceHandler.cpp MeroRessource.cpp)
+set(URI_SRC Uri.cpp UriHandler.cpp Listings.cpp RessourceHandler.cpp MeroRessource.cpp IocRessource.cpp)
 
 ######################################################
 add_library(ummap-uri OBJECT ${URI_SRC})

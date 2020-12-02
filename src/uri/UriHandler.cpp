@@ -7,6 +7,7 @@
 /********************  HEADERS  *********************/
 #include <cstdio>
 #include <cassert>
+#include "config.h"
 #include "../common/Debug.hpp"
 #include "../common/HumanUnits.hpp"
 #include "../drivers/FDDriver.hpp"
@@ -16,8 +17,12 @@
 #ifdef MERO_FOUND
 #include "../drivers/ClovisDriver.hpp"
 #endif
+#ifdef HAVE_IOC_CLIENT
+#include "../drivers/IocDriver.hpp"
+#endif
 #include "../policies/FifoPolicy.hpp"
 #include "MeroRessource.hpp"
+#include "IocRessource.hpp"
 #include "Uri.hpp"
 #include "UriHandler.hpp"
 
@@ -88,6 +93,8 @@ Driver * UriHandler::buildDriver(const std::string & uri)
 		driver = new DummyDriver(value);
 	} else if (type == "mero" || type == "clovis" || type == "merofile" ) {
 		driver = buildDriverMero(parser);
+	} else if (type == "meroioc" || type == "clovisioc" || type == "ioc" ) {
+		driver = buildDriverIoc(parser);
 	} else if (type == "mmap" || type == "dax" ) {
 		driver = this->buildDriverFOpenMmap(parser.getPath(), parser.getParam("mode", "w+"));
 	} else if (type == "mmapanon") {
@@ -227,6 +234,52 @@ Driver * UriHandler::buildDriverMero(const Uri & uri)
 		m0_uint128 m0id = {id.high, id.low};
 		create_object(m0id);
 		return new ClovisDriver(m0id);
+	#else
+		if (uri.getType() == "merofile")
+		{
+			//warn
+			UMMAP_WARNING("Mero is not available, using fake fopen mode for tests");
+
+			//replacement
+			char fname[1024];
+			sprintf(fname, "%lx:%lx", id.high, id.low);
+			return buildDriverFOpen(fname, "w+");
+		} else {
+			UMMAP_FATAL_ARG("Mero is not available, cannot use uri : %1").arg(uri.getURI()).end();
+			return NULL;
+		}
+	#endif
+}
+
+/*******************  FUNCTION  *********************/
+//ioc://1234:1234
+Driver * UriHandler::buildDriverIoc(const Uri & uri)
+{
+	//check
+	assert(uri.getType() == "meroioc" || uri.getType() == "clovisioc" || uri.getType() == "ioc");
+
+	//id
+	ObjectId id;
+	const std::string & path = uri.getPath();
+	if (path == "auto") {
+		const std::string & listing = uri.getParam("listing");
+		const std::string & name = uri.getParam("name");
+		id = this->objectIdListings.getObjectId(listing, name);
+	} else if (sscanf(path.c_str(), "%lu:%lu", &id.high, &id.low) == 2) {
+		//nothing more to do
+	} else {
+		UMMAP_FATAL_ARG("Invalid object ID in mero URI : %1")
+			.arg(uri.getURI())
+			.end();
+		return NULL;
+	}
+
+	//init mero
+	this->ressourceHandler.checkRessource<IocRessource>("ioc");
+
+	//build driver
+	#ifdef HAVE_IOC_CLIENT
+		return new IocDriver(IocRessource::getClient(), id.high, id.low);
 	#else
 		if (uri.getType() == "merofile")
 		{

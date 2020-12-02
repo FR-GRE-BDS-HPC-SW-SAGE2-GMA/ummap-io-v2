@@ -128,6 +128,9 @@ void Mapping::loadAndSwapSegment(size_t offset, bool writeAccess)
 	//map a page in RW access
 	void * ptr = OS::mmapProtFull(this->segmentSize, protection & PROT_EXEC);
 
+	//char * ptr = (char*)this->baseAddress + offset;
+	//OS::mprotect(ptr, segmentSize, true, true, protection & PROT_EXEC);
+
 	//read inside new segment
 	ssize_t res = this->driver->pread(ptr, readWriteSize(offset), this->storageOffset + offset);
 	assumeArg(res >= 0, "Fail to read all data, got %1 instead of %2 !")
@@ -311,7 +314,7 @@ void Mapping::sync(size_t offset, size_t size, bool unmap, bool lock)
 					this->segmentMutexes[i].lock();
 
 		//mprotect the whole considered segment
-		OS::mprotect(this->baseAddress + offset, size, true, false, protection & PROT_EXEC);
+		OS::mprotect(this->baseAddress + offset, size, true, true/*TODO*/, protection & PROT_EXEC);
 
 		//loop on all
 		//@TODO: bulk operation

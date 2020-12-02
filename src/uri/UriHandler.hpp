@@ -37,6 +37,7 @@ class UriHandler
 		Driver * buildDriverFOpen(const std::string & fname, const std::string & mode);
 		Driver * buildDriverFOpenMmap(const std::string & fname, const std::string & mode);
 		Driver * buildDriverMero(const Uri & uri);
+		Driver * buildDriverIoc(const Uri & uri);
 	private:
 		std::mutex variablesMutes;
 		std::map<std::string, std::string> variables;
