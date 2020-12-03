@@ -21,6 +21,7 @@
 #include "../drivers/IocDriver.hpp"
 #endif
 #include "../policies/FifoPolicy.hpp"
+#include "../policies/LifoPolicy.hpp"
 #include "MeroRessource.hpp"
 #include "IocRessource.hpp"
 #include "Uri.hpp"
@@ -129,6 +130,9 @@ Policy * UriHandler::buildPolicy(const std::string & uri, bool local)
 	if (type == "fifo") {
 		size_t memsize = fromHumanMemSize(parser.getPath());
 		policy = new FifoPolicy(memsize, local);
+	} else if (type == "lifo") {
+		size_t memsize = fromHumanMemSize(parser.getPath());
+		policy = new LifoPolicy(memsize, local);
 	} else if (type == "none") {
 		policy = NULL;
 	} else {

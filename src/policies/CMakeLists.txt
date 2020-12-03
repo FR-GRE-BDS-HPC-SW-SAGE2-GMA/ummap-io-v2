@@ -5,7 +5,7 @@
 ######################################################
 
 ######################################################
-set(POLICIES_SRC FifoPolicy.cpp)
+set(POLICIES_SRC FifoPolicy.cpp LifoPolicy.cpp)
 
 ######################################################
 add_library(ummap-policies OBJECT ${POLICIES_SRC})
