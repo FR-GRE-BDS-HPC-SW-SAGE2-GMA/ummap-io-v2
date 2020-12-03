@@ -140,9 +140,10 @@ TEST(TestGlobalHandler, basic_read_workflow_parallel)
 	#pragma omp parallel shared(ok)
 	{
 		#pragma omp barrier
-		for (int i = 0 ; i < 8*UMMAP_PAGE_SIZE ; i++) {
-			if (ptr[i] != 32)
+		for (size_t i = 0 ; i < 8*UMMAP_PAGE_SIZE ; i++) {
+			if (ptr[i] != 32) {
 				ok = false;
+			}
 		}
 	}
 	ASSERT_TRUE(ok);

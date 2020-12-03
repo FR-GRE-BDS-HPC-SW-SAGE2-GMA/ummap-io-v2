@@ -44,6 +44,7 @@ Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, int prot
 	this->protection = protection;
 	this->size = size;
 	this->storageOffset = storageOffset;
+	this->threadSafe = true;
 
 	//establish mapping
 	this->baseAddress = (char*)driver->directMmap(size, storageOffset, protection & PROT_READ, protection & PROT_WRITE, protection & PROT_EXEC);
@@ -114,7 +115,10 @@ void * Mapping::getAddress(void)
 }
 
 /*******************  FUNCTION  *********************/
-
+void Mapping::disableThreadSafety(void)
+{
+	this->threadSafe = false;
+}
 
 /*******************  FUNCTION  *********************/
 void Mapping::loadAndSwapSegment(size_t offset, bool writeAccess)
@@ -126,10 +130,13 @@ void Mapping::loadAndSwapSegment(size_t offset, bool writeAccess)
 	//data if we just made madvise on the pre-existing PROT_NONE segment.
 
 	//map a page in RW access
-	void * ptr = OS::mmapProtFull(this->segmentSize, protection & PROT_EXEC);
-
-	//char * ptr = (char*)this->baseAddress + offset;
-	//OS::mprotect(ptr, segmentSize, true, true, protection & PROT_EXEC);
+	void * ptr = NULL;
+	if (threadSafe) {
+		ptr = OS::mmapProtFull(this->segmentSize, protection & PROT_EXEC);
+	} else {
+		ptr = (char*)this->baseAddress + offset;
+		OS::mprotect(ptr, segmentSize, true, true, protection & PROT_EXEC);
+	}
 
 	//read inside new segment
 	ssize_t res = this->driver->pread(ptr, readWriteSize(offset), this->storageOffset + offset);
@@ -143,7 +150,8 @@ void Mapping::loadAndSwapSegment(size_t offset, bool writeAccess)
 		OS::mprotect(ptr, segmentSize, true, false, protection & PROT_EXEC);
 	
 	//now remap to move the segment and override the PROT_NONE one
-	OS::mremapForced(ptr, segmentSize, this->baseAddress + offset);
+	if (threadSafe)
+		OS::mremapForced(ptr, segmentSize, this->baseAddress + offset);
 }
 
 /*******************  FUNCTION  *********************/
@@ -184,8 +192,10 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 		if (!status.mapped && status.needRead){
 			//Load in a temp buffer and swap for atomicity
 			this->loadAndSwapSegment(offset, isWrite);
-			if (isWrite)
+			if (isWrite) {
 				status.dirty = true;
+				status.time = time(NULL);
+			}
 		} else if (isWrite) {
 			//this is a write, open write access
 			OS::mprotect(segmentBase, segmentSize, true, true, protection & PROT_EXEC);
@@ -313,18 +323,18 @@ void Mapping::sync(size_t offset, size_t size, bool unmap, bool lock)
 				if (toLock[i])
 					this->segmentMutexes[i].lock();
 
-		//mprotect the whole considered segment
-		OS::mprotect(this->baseAddress + offset, size, true, true/*TODO*/, protection & PROT_EXEC);
-
 		//loop on all
 		//@TODO: bulk operation
 		for (size_t curOffset = offset ; curOffset < offset + size ; curOffset += this->segmentSize) {
 			size_t id = curOffset / this->segmentSize;
 			//check status
 			SegmentStatus & status = this->segmentStatus[id];
-			if (status.dirty) {
+			if (status.dirty && status.mapped) {
 				//compute
 				void * segmentPtr = this->baseAddress + curOffset;
+
+				//mprotect the whole considered segment
+				OS::mprotect(this->baseAddress + curOffset, segmentSize, true, !threadSafe/*TODO*/, protection & PROT_EXEC);
 
 				//apply
 				ssize_t res = this->driver->pwrite(segmentPtr, readWriteSize(curOffset), this->storageOffset + curOffset);
@@ -336,23 +346,25 @@ void Mapping::sync(size_t offset, size_t size, bool unmap, bool lock)
 				//update status
 				status.dirty = false;
 				status.needRead = true;
-			}
 
-			//if unmap
-			if (unmap) {
-				//protect
-				OS::mprotect(this->baseAddress + offset, size, false, false, protection & PROT_EXEC);
+				//if unmap
+				if (unmap) {
+					//protect
+					OS::mprotect(this->baseAddress + curOffset, segmentSize, false, false, protection & PROT_EXEC);
 
-				//unamp
-				OS::madviseDontNeed(this->baseAddress + offset, size);
+					//unamp
+					OS::madviseDontNeed(this->baseAddress + curOffset, segmentSize);
 
-				//mark unmapped
-				status.mapped = false;
+					//mark unmapped
+					status.mapped = false;
+				} else if (!threadSafe) {
+					OS::mprotect(this->baseAddress + curOffset, segmentSize, true, false/*TODO*/, protection & PROT_EXEC);
+				}
 			}
 		}
 
 		//sync
-		driver->sync(getAddress(), offset, size);
+		//driver->sync(getAddress(), offset, size);
 
 		//unlock
 		if (lock)

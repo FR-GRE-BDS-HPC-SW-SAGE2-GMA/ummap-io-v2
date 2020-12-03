@@ -27,6 +27,7 @@
 	#include "../drivers/IocDriver.hpp"
 #endif
 #include "../policies/FifoPolicy.hpp"
+#include "../policies/LifoPolicy.hpp"
 #include "ummap.h"
 
 /***************** USING NAMESPACE ******************/
@@ -239,6 +240,13 @@ void ummap_policy_group_destroy(const char * name)
 ummap_policy_t * ummap_policy_create_fifo(size_t max_size, bool local)
 {
 	Policy * policy = new FifoPolicy(max_size, local);
+	return (ummap_policy_t*)policy;
+}
+
+/*******************  FUNCTION  *********************/
+ummap_policy_t * ummap_policy_create_lifo(size_t max_size, bool local)
+{
+	Policy * policy = new LifoPolicy(max_size, local);
 	return (ummap_policy_t*)policy;
 }
 

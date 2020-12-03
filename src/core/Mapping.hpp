@@ -54,6 +54,7 @@ class Mapping
 		size_t getSize(void) const;
 		size_t getAlignedSize(void) const;
 		size_t getSegmentSize(void) const;
+		void disableThreadSafety();
 	public:
 		#ifdef HAVE_HTOPML
 		friend void convertToJson(htopml::JsonState & json,const Mapping & value);
@@ -75,6 +76,7 @@ class Mapping
 		SegmentStatus * segmentStatus;
 		std::mutex * segmentMutexes;
 		int segmentMutexesCnt;
+		bool threadSafe;
 };
 
 /*******************  FUNCTION  *********************/

@@ -20,6 +20,7 @@ extern "C" {
 
 /********************  CONSTS  **********************/
 #define UMMAP_NO_FIRST_READ 1
+#define UMMAP_THREAD_UNSAFE 2
 
 /*********************  TYPES  **********************/
 typedef struct ummap_policy_s ummap_policy_t;
@@ -79,6 +80,7 @@ void ummap_policy_group_destroy(const char * name);
 //policies
 ummap_policy_t * ummap_policy_create_uri(const char * uri, bool local);
 ummap_policy_t * ummap_policy_create_fifo(size_t max_size, bool local);
+ummap_policy_t * ummap_policy_create_lifo(size_t max_size, bool local);
 void ummap_policy_destroy(ummap_policy_t * policy);
 
 /*******************  FUNCTION  *********************/

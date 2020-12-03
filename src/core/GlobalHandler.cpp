@@ -157,8 +157,12 @@ void * GlobalHandler::ummap(size_t size, size_t segmentSize, size_t storageOffse
 	this->mappingRegistry.registerMapping(mapping);
 
 	//no first read
-	if (flags &= UMMAP_NO_FIRST_READ)
+	if (flags & UMMAP_NO_FIRST_READ)
 		mapping->skipFirstRead();
+
+	//no thread sage
+	if (flags & UMMAP_THREAD_UNSAFE)
+		mapping->disableThreadSafety();
 	
 	//return
 	return mapping->getAddress();
