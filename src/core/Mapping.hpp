@@ -61,7 +61,7 @@ class Mapping
 		#endif
 	private:
 		void loadAndSwapSegment(size_t offset, bool writeAccess);
-		const bool * getMutexRange(size_t offset, size_t size) const;
+		const bool * getMutexRange(size_t offset, size_t size, bool * buffer, size_t bufferSize) const;
 		size_t readWriteSize(size_t offset);
 	private:
 		Driver * driver;

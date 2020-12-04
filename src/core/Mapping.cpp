@@ -257,7 +257,7 @@ size_t Mapping::getAlignedSize(void) const
 }
 
 /*******************  FUNCTION  *********************/
-const bool * Mapping::getMutexRange(size_t offset, size_t size) const
+const bool * Mapping::getMutexRange(size_t offset, size_t size, bool * buffer, size_t bufferSize) const
 {
 	//check
 	assert(offset < this->getSize());
@@ -266,7 +266,11 @@ const bool * Mapping::getMutexRange(size_t offset, size_t size) const
 	assert(size % this->segmentSize == 0);
 
 	//allocate
-	bool * list = new bool[this->segmentMutexesCnt];
+	bool * list = buffer;
+	if (list == NULL || bufferSize < this->segmentMutexesCnt)
+		list = new bool[this->segmentMutexesCnt];
+
+	//init
 	for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
 		list[i] = false;
 
@@ -312,7 +316,9 @@ void Mapping::sync(size_t offset, size_t size, bool unmap, bool lock)
 		return;
 
 	//what to lock
-	const bool * toLock = getMutexRange(offset, size);
+	const int stackToLockSize = 2048;
+	bool stackToLock[stackToLockSize];
+	const bool * toLock = getMutexRange(offset, size, stackToLock, stackToLockSize);
 
 	//CRITICAL SECTION
 	{
@@ -371,6 +377,9 @@ void Mapping::sync(size_t offset, size_t size, bool unmap, bool lock)
 			for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
 				if (toLock[i])
 					this->segmentMutexes[i].unlock();
+		
+		if (toLock != stackToLock)
+			delete toLock;
 	}
 }
 
