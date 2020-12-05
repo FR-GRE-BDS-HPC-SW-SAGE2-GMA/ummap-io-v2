@@ -41,7 +41,7 @@ ssize_t CDriver::pwrite(const void * buffer, size_t size, size_t offset)
 /*******************  FUNCTION  *********************/
 ssize_t CDriver::pread(void * buffer, size_t size, size_t offset)
 {
-	this->c_driver.pread(this->driver_data, buffer, size, offset);
+	return this->c_driver.pread(this->driver_data, buffer, size, offset);
 }
 
 /*******************  FUNCTION  *********************/
@@ -63,7 +63,7 @@ void CDriver::sync(void * ptr, size_t offset, size_t size)
 void * CDriver::directMmap(size_t size, size_t offset, bool read, bool write, bool exec)
 {
 	if (this->c_driver.direct_mmap == NULL)
-		return false;
+		return NULL;
 	else
 		return this->c_driver.direct_mmap(this->driver_data, size, offset, read, write, exec);
 }

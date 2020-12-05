@@ -16,7 +16,9 @@ using namespace ummapio;
 /*******************  GLOBALS  **********************/
 std::string IocRessource::server = "127.0.0.1";
 std::string IocRessource::port = "8556";
-struct ioc_client_t * IocRessource::client = NULL;
+#ifdef HAVE_IOC_CLIENT
+	struct ioc_client_t * IocRessource::client = NULL;
+#endif //HAVE_IOC_CLIENT
 
 /*******************  FUNCTION  *********************/
 IocRessource::IocRessource(void)
