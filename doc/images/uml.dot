@@ -72,6 +72,10 @@ digraph DAQPIPE
 		label = "{MmapDriver|\l|\l}"
 	]
 
+	IocDriver [
+		label = "{IocDriver|\l|\l}"
+	]
+
 	//class
 	MappingRegistry [
 		label = "{MappingRegistry|\l|\l}"
@@ -110,6 +114,10 @@ digraph DAQPIPE
 		label = "{MeroRessource|\l|\l}"
 	]
 
+	IocRessource [
+		label = "{IocRessource|\l|\l}"
+	]
+
 	RessourceHandler [
 		label = "{RessourceHandler|\l|\l}"
 	]
@@ -132,14 +140,17 @@ digraph DAQPIPE
 	Driver -> MemoryDriver
 	Driver -> GMockDriver
 	Driver -> ClovisDriver
+	Driver -> IocDriver
 	Driver -> MmapDriver
 	Ressource -> MeroRessource
+	Ressource -> IocRessource
 
 	//composition
 	Mapping -> Policy[arrowtail=odiamond]
 	Mapping -> Driver[arrowtail=odiamond]
 	MappingRegistry -> Mapping[arrowtail=odiamond]
 	FifoPolicy -> ListElement[arrowtail=odiamond]
+	LifoPolicy -> ListElement[arrowtail=odiamond]
 	GlobalHandler -> MappingRegistry[arrowtail=odiamond]
 	GlobalHandler -> PolicyRegistry[arrowtail=odiamond]
 	GlobalHandler -> UriHandler[arrowtail=odiamond]
