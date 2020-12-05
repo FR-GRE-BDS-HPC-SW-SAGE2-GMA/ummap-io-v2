@@ -64,14 +64,62 @@ digraph DAQPIPE
 		label = "{GMockDriver|\l|\l}"
 	]
 
-	//Registry classes
-	Registry [
-		label = "{Registry|\l|\l}"
+	ClovisDriver [
+		label = "{ClovisDriver|\l|\l}"
 	]
 
-	//Registry classes
+	MmapDriver [
+		label = "{MmapDriver|\l|\l}"
+	]
+
+	//class
+	MappingRegistry [
+		label = "{MappingRegistry|\l|\l}"
+	]
+
+	//class
 	ListElement [
 		label = "{ListElement|\l|\l}"
+	]
+
+	//class
+	GlobalHandler [
+		label = "{GlobalHandler|\l|\l}"
+	]
+
+	//class
+	PolicyRegistry [
+		label = "{PolicyRegistry|\l|\l}"
+	]
+
+	//class
+	HtopmlMappings [
+		label = "{HtopmlMappings|\l|\l}"
+	]
+
+	//Uri classes
+	Listing [
+		label = "{Listing|\l|\l}"
+	]
+
+	Ressource [
+		label = "{Ressource|\l|\l}"
+	]
+
+	MeroRessource [
+		label = "{MeroRessource|\l|\l}"
+	]
+
+	RessourceHandler [
+		label = "{RessourceHandler|\l|\l}"
+	]
+
+	Uri [
+		label = "{Uri|\l|\l}"
+	]
+
+	UriHandler [
+		label = "{UriHandler|\l|\l}"
 	]
 
 	//inheritance links
@@ -83,11 +131,22 @@ digraph DAQPIPE
 	Driver -> FDDriver
 	Driver -> MemoryDriver
 	Driver -> GMockDriver
+	Driver -> ClovisDriver
+	Driver -> MmapDriver
+	Ressource -> MeroRessource
 
 	//composition
-	//Mapping->Policy[constraint=false, arrowtail=odiamond]
-	Mapping->Policy[arrowtail=odiamond]
-	Mapping->Driver[arrowtail=odiamond]
-	Registry -> Mapping[arrowtail=odiamond]
+	Mapping -> Policy[arrowtail=odiamond]
+	Mapping -> Driver[arrowtail=odiamond]
+	MappingRegistry -> Mapping[arrowtail=odiamond]
 	FifoPolicy -> ListElement[arrowtail=odiamond]
+	GlobalHandler -> MappingRegistry[arrowtail=odiamond]
+	GlobalHandler -> PolicyRegistry[arrowtail=odiamond]
+	GlobalHandler -> UriHandler[arrowtail=odiamond]
+	UriHandler -> RessourceHandler[arrowtail=odiamond]
+	UriHandler -> Listing[arrowtail=odiamond]
+	UriHandler -> Uri[arrowtail=odiamond]
+	PolicyRegistry -> Policy[arrowtail=odiamond]
+	HtopmlMappings -> MappingRegistry[arrowtail=odiamond]
+	RessourceHandler -> Ressource[arrowtail=odiamond]
 }
