@@ -6,7 +6,7 @@ This page provide some defintions of concepts used in the ummap-io-v2 code.
 Mapping
 -------
 
-A memory mapping is a segment in the virtual addressed space when is mapped the given object.
+A memory mapping is an area in the virtual addressed space when is mapped the given object.
 This correspond in the Unix semantic to an mmap memory space.
 
 Segment
@@ -37,7 +37,7 @@ full access to NVDIMM just following the same idea of the FSDAX approach at the 
 Policy
 ------
 
-One cas attach a policy to the mapping permitting to control the maximum amount of real
+We can attach a policy to the mapping permitting to control the maximum amount of real
 physical memory it requires. The policy track the memory consumption and provide
 eviction rules to keep the memory at its limit.
 
@@ -66,7 +66,7 @@ given global policy.
 URI: Unified Ressource Identifier
 ---------------------------------
 
-This identifiter permits to init a driver in the caller application without detailing
+This identifier permits to init a driver in the caller application without detailing
 in the code which driver we are using. This permits to support any driver in an app
 without implementation the exact building of each driver. 
 
@@ -99,9 +99,9 @@ URI variables
 -------------
 
 When using an MPI application we might want to get an ouptut file name which contain
-the rank. If we want to provide the output in a config file to be able to chaneg
+the rank. If we want to provide the output in a config file to be able to change
 the IO driver in use easily we might want to be able to add the rank dynamically
-to the filename we are using. This is the reason of the URI variablse which can be
+to the filename we are using. This is the reason of the URI variables which can be
 registered by the application and replaced in the uris.
 
 For example: ```file://output-{rank}.raw```.
