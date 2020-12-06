@@ -31,6 +31,10 @@ digraph DAQPIPE
 		label = "{FifoPolicy|\l|\l}"
 	]
 
+	FifoWindowPolicy [
+		label = "{FifoWindowPolicy|\l|\l}"
+	]
+
 	LifoPolicy [
 		label = "{LifoPolicy|\l|\l}"
 	]
@@ -131,6 +135,7 @@ digraph DAQPIPE
 	]
 
 	//inheritance links
+	Policy -> FifoWindowPolicy
 	Policy -> FifoPolicy
 	Policy -> LifoPolicy
 	Policy -> DummyPolicy
@@ -150,6 +155,7 @@ digraph DAQPIPE
 	Mapping -> Driver[arrowtail=odiamond]
 	MappingRegistry -> Mapping[arrowtail=odiamond]
 	FifoPolicy -> ListElement[arrowtail=odiamond]
+	FifoWindowPolicy -> ListElement[arrowtail=odiamond]
 	LifoPolicy -> ListElement[arrowtail=odiamond]
 	GlobalHandler -> MappingRegistry[arrowtail=odiamond]
 	GlobalHandler -> PolicyRegistry[arrowtail=odiamond]
