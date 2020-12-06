@@ -171,7 +171,7 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 	//check
 	if (this->protection == PROT_NONE)
 		UMMAP_FATAL("Try to access a segment which is PROT_NONE");
-	if (isWrite && this->protection & PROT_WRITE == 0)
+	if (isWrite && (this->protection & PROT_WRITE) == 0)
 		UMMAP_FATAL("Try to write access a segment which is not writable");
 	
 	//CRITICAL SECTION

@@ -49,7 +49,7 @@ class Policy
 		void unregisterMapping(Mapping * mapping);
 		PolicyStorage getStorageInfo(void * entry);
 		PolicyStorage getStorageInfo(Mapping * mapping);
-		static bool contains(PolicyStorage & storage, void * entry);
+		virtual bool contains(PolicyStorage & storage, void * entry);
 	protected:
 		bool local;
 		size_t maxMemory;

@@ -53,6 +53,8 @@ void FifoPolicy::freeElementStorage(Mapping * mapping)
 		ListElement * elements = static_cast<ListElement*>(storage.elements);
 		for (size_t i = 0 ; i < storage.elementCount ; i++) {
 			ListElement & cur = elements[i];
+			if (cur.isInList())
+				this->currentMemory -= mapping->getSegmentSize();
 			cur.removeFromList();
 		}
 

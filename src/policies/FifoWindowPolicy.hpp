@@ -41,6 +41,8 @@ class FifoWindowPolicy : public Policy
 		virtual void notifyEvict(Mapping * mapping, size_t index) override;
 		virtual void freeElementStorage(Mapping * mapping) override;
 	protected:
+		virtual bool contains(PolicyStorage & storage, void * entry) override;
+	protected:
 		ListElement rootFixedWindow;
 		ListElement rootSlidingWindow;
 		size_t currentFixedMemory;
