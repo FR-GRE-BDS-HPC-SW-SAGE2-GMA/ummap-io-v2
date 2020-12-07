@@ -38,15 +38,14 @@ FifoWindowPolicy::~FifoWindowPolicy(void)
 void FifoWindowPolicy::allocateElementStorage(Mapping * mapping, size_t segmentCount)
 {
 	//allocate
-	FifoWindowPolicyMeta * meta = new FifoWindowPolicyMeta;
-	meta->elements = new ListElement[segmentCount];
-	meta->isFixedMemory = new bool[segmentCount];
+	ListElement * elements = new ListElement[segmentCount];
+	bool * extraInfos = new bool[segmentCount];
 
 	//set default
-	memset(meta->isFixedMemory, 0, sizeof(bool) * segmentCount);
+	memset(extraInfos, 0, sizeof(bool) * segmentCount);
 
 	//register
-	this->registerMapping(mapping, meta, segmentCount, sizeof(ListElement));
+	this->registerMapping(mapping, elements, segmentCount, sizeof(ListElement), extraInfos);
 }
 
 /*******************  FUNCTION  *********************/
@@ -61,12 +60,15 @@ void FifoWindowPolicy::freeElementStorage(Mapping * mapping)
 		//@TODO get & unregister
 		PolicyStorage storage = this->getStorageInfo(mapping);
 
+		//extract
+		ListElement * elements = static_cast<ListElement*>(storage.elements);
+		bool * isFixedMemory = static_cast<bool*>(storage.extraInfos);
+
 		//remove all from list
-		FifoWindowPolicyMeta * meta = static_cast<FifoWindowPolicyMeta*>(storage.elements);
 		for (size_t i = 0 ; i < storage.elementCount ; i++) {
-			ListElement & cur = meta->elements[i];
+			ListElement & cur = elements[i];
 			if (cur.isInList()) {
-				if (meta->isFixedMemory[i])
+				if (isFixedMemory[i])
 					this->currentFixedMemory -= mapping->getSegmentSize();
 				else
 					this->currentSlidingWindowMemory -= mapping->getSegmentSize();
@@ -78,9 +80,8 @@ void FifoWindowPolicy::freeElementStorage(Mapping * mapping)
 		this->unregisterMapping(mapping);
 
 		//free
-		delete [] meta->isFixedMemory;
-		delete [] meta->elements;
-		delete meta;
+		delete [] isFixedMemory;
+		delete [] elements;
 	}
 }
 
@@ -96,8 +97,8 @@ void FifoWindowPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite
 		PolicyStorage storage = this->getStorageInfo(mapping);
 
 		//get element
-		FifoWindowPolicyMeta * meta = static_cast<FifoWindowPolicyMeta*>(storage.elements);
-		ListElement * elements = meta->elements;
+		bool * isFixedMemory = static_cast<bool*>(storage.extraInfos);
+		ListElement * elements = static_cast<ListElement*>(storage.elements);
 		ListElement & cur = elements[index];
 
 		//check if is new touch
@@ -108,7 +109,7 @@ void FifoWindowPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite
 
 		//impact counters
 		if (!isFirstAccess) {
-			if (meta->isFixedMemory[index]) {
+			if (isFixedMemory[index]) {
 				this->currentFixedMemory -= mapping->getSegmentSize();
 				assert(this->currentFixedMemory >= 0);
 			} else {
@@ -119,7 +120,7 @@ void FifoWindowPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite
 
 		//select mode
 		bool isFixed = (this->currentFixedMemory < this->maxFixedMemory);
-		meta->isFixedMemory[index] = isFixed;
+		isFixedMemory[index] = isFixed;
 	
 		//insert in list
 		if (isFixed) {
@@ -138,8 +139,8 @@ void FifoWindowPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite
 				PolicyStorage evictInfos = getStorageInfo(toEvict);
 
 				//calc id
-				FifoWindowPolicyMeta * meta = static_cast<FifoWindowPolicyMeta*>(evictInfos.elements);
-				size_t id = toEvict - meta->elements;
+				ListElement * elements = static_cast<ListElement*>(evictInfos.elements);
+				size_t id = toEvict - elements;
 
 				//evict
 				evictInfos.mapping->evict(this, id);
@@ -164,15 +165,15 @@ void FifoWindowPolicy::notifyEvict(Mapping * mapping, size_t index)
 		PolicyStorage storage = getStorageInfo(mapping);
 
 		//get element
-		FifoWindowPolicyMeta * meta = static_cast<FifoWindowPolicyMeta*>(storage.elements);
-		ListElement * elements = meta->elements;
+		bool * isFixedMemory = static_cast<bool*>(storage.extraInfos);
+		ListElement * elements = static_cast<ListElement*>(storage.elements);
 		ListElement & cur = elements[index];
 
 		//check
 		assert(cur.isInList());
 
 		//impact counters
-		if (meta->isFixedMemory[index]) {
+		if (isFixedMemory[index]) {
 			this->currentFixedMemory -= mapping->getSegmentSize();
 			assert(this->currentFixedMemory >= 0);
 		} else {
@@ -183,13 +184,4 @@ void FifoWindowPolicy::notifyEvict(Mapping * mapping, size_t index)
 		//remove from list
 		cur.removeFromList();
 	}
-}
-
-
-/*******************  FUNCTION  *********************/
-bool FifoWindowPolicy::contains(PolicyStorage & storage, void * entry)
-{
-	FifoWindowPolicyMeta * meta = static_cast<FifoWindowPolicyMeta*>(storage.elements);
-	ListElement * elements = meta->elements;
-	return (entry >= elements && entry < (char*)elements + (storage.elementCount * storage.elementSize));
 }

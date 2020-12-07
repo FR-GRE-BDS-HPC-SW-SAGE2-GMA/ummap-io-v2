@@ -22,12 +22,31 @@ namespace ummapio
 class Mapping;
 
 /*********************  STRUCT  *********************/
+/**
+ * Define a policy storage joining a mapping with is tracking elements.
+**/
 struct PolicyStorage
 {
+	/**
+	 * Mapping attached to the policy list elements.
+	**/
 	Mapping * mapping;
+	/**
+	 * Elements to track the segment status. This is commonly a list of next/prev elements.
+	**/
 	void * elements;
+	/**
+	 * Number of elements in the mapping.
+	**/
 	size_t elementCount;
+	/**
+	 * Size of a an element.
+	**/
 	size_t elementSize;
+	/**
+	 * Optional extra infos to be used by the policy implementation.
+	**/
+	void * extraInfos;
 };
 
 /*********************  CLASS  **********************/
@@ -45,11 +64,11 @@ class Policy
 		void forceUsingGroupMutex(std::recursive_mutex * mutex);
 		std::recursive_mutex * getLocalMutex(void);
 	protected:
-		void registerMapping(Mapping * mapping, void * storage, size_t elementCount, size_t elementSize);
+		void registerMapping(Mapping * mapping, void * storage, size_t elementCount, size_t elementSize, void * extraInfos = NULL);
 		void unregisterMapping(Mapping * mapping);
 		PolicyStorage getStorageInfo(void * entry);
 		PolicyStorage getStorageInfo(Mapping * mapping);
-		virtual bool contains(PolicyStorage & storage, void * entry);
+		static bool contains(PolicyStorage & storage, void * entry);
 	protected:
 		bool local;
 		size_t maxMemory;

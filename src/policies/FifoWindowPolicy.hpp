@@ -23,13 +23,6 @@ namespace ummapio
 /*********************  CLASS  **********************/
 class Mapping;
 
-/********************  STRUCT  **********************/
-struct FifoWindowPolicyMeta
-{
-	ListElement * elements;
-	bool * isFixedMemory;
-};
-
 /*********************  CLASS  **********************/
 class FifoWindowPolicy : public Policy
 {
@@ -40,8 +33,6 @@ class FifoWindowPolicy : public Policy
 		virtual void notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool mapped, bool dirty) override;
 		virtual void notifyEvict(Mapping * mapping, size_t index) override;
 		virtual void freeElementStorage(Mapping * mapping) override;
-	protected:
-		virtual bool contains(PolicyStorage & storage, void * entry) override;
 	protected:
 		ListElement rootFixedWindow;
 		ListElement rootSlidingWindow;
