@@ -224,7 +224,7 @@ bool GlobalHandler::onSegFault(void * addr, bool isWrite)
  * @param protection Define the access protection to assign to this mapping. It uses the flags from mmap so you can
  * use the given flags and 'or' them: PROT_READ, PROT_WRIT, PROT_EXEC.
  * @param flags Flags to enable of disable some behaviors of ummap-io. Currently valid flags are : UMMAP_NO_FIRST_READ, 
- * UMMAP_THREAD_UNSAFE and UMMAP_DRIVER_NO_AUTO_DELETE. Go in their respective documentation to get more information on them.
+ * UMMAP_THREAD_UNSAFE. Go in their respective documentation to get more information on them.
  * @param driver Pointer to the given driver. If UMMAP_DRVIER_NO_AUTO_DELETE if enabled the destruction of the driver is you 
  * own responsability, otherwise it will be destroyed automatically.
  * @param localPolicy Define the local policy to be used.
@@ -247,12 +247,6 @@ void * GlobalHandler::ummap(size_t size, size_t segmentSize, size_t storageOffse
 	//no first read
 	if (flags & UMMAP_NO_FIRST_READ)
 		mapping->skipFirstRead();
-
-	//autodestroy
-	if (flags & UMMAP_DRIVER_NO_AUTO_DELETE)
-		driver->setAutoclean(false);
-	else
-		driver->setAutoclean(true);
 
 	//no thread sage
 	if (flags & UMMAP_THREAD_UNSAFE)
