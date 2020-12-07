@@ -20,13 +20,22 @@ namespace ummapio
 {
 
 /*********************  TYPES  **********************/
+/**
+ * Used to track the page fault type in a readable way.
+**/
 enum PageFaultType
 {
+	/** The page fault is a read fault. **/
 	PAGEFAULT_READ = 0,
+	/** The page fault is a write fault. **/
 	PAGEFAULT_WRITE
 };
 
 /*********************  CLASS  **********************/
+/**
+ * The global handler is the main struct handling all the objects to make
+ * ummap working. It is called from the C public API.
+**/
 class GlobalHandler
 {
 	public:
@@ -45,8 +54,11 @@ class GlobalHandler
 		void deleteAllMappings(void);
 		UriHandler & getUriHandler(void);
 	private:
+		/** Registry of all active mappings in use. **/
 		MappingRegistry mappingRegistry;
+		/** Registry of global policies in use. **/
 		PolicyRegistry policyRegistry;
+		/** URI handler to be used to build drivers and policies from strings. **/
 		UriHandler uriHandler;
 };
 

@@ -27,7 +27,7 @@ class PublicPolicy: public Policy
 		void unregisterMapping(Mapping * mapping) {Policy::unregisterMapping(mapping);};
 		PolicyStorage getStorageInfo(void * entry) {return Policy::getStorageInfo(entry);};
 		PolicyStorage getStorageInfo(Mapping * mapping) {return Policy::getStorageInfo(mapping);};
-		static bool contains(PolicyStorage & storage, void * entry) {return Policy::contains(storage, entry);};
+		virtual bool contains(PolicyStorage & storage, void * entry) {return Policy::contains(storage, entry);};
 };
 
 /*******************  FUNCTION  *********************/
@@ -49,13 +49,16 @@ TEST(TestPolicy, contains)
 		.elementSize = 1,
 	};
 
+	//policy
+	PublicPolicy policy;
+
 	//ok
-	ASSERT_TRUE(PublicPolicy::contains(storage, buffer));
-	ASSERT_TRUE(PublicPolicy::contains(storage, buffer+ size - 1));
+	ASSERT_TRUE(policy.contains(storage, buffer));
+	ASSERT_TRUE(policy.contains(storage, buffer+ size - 1));
 
 	//not ok
-	ASSERT_FALSE(PublicPolicy::contains(storage, buffer - 1));
-	ASSERT_FALSE(PublicPolicy::contains(storage, buffer+ size));
+	ASSERT_FALSE(policy.contains(storage, buffer - 1));
+	ASSERT_FALSE(policy.contains(storage, buffer+ size));
 
 	//free
 	free(buffer);

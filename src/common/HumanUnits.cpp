@@ -13,9 +13,18 @@
 using namespace ummapio;
 
 /********************  CONSTS  **********************/
+/**
+ * Define the regular expression to check allowed human readable size units 
+ * It allow notation like 4096, 4KB, 8MB, 16GB, 32TB.
+**/
 static const char * cstHumanMemSizeRegex = "([0-9]+)([KMGT]?B)?";
 
 /*******************  FUNCTION  *********************/
+/**
+ * Parse the human readable size without using regular expression.
+ * @param value Define the size to parse as a string. Eg. 8MB.
+ * @return Return the parsed size in bytes.
+**/
 static size_t fromHumanMemSizeNoRegexp(const std::string & value)
 {
 	//vars
@@ -49,6 +58,11 @@ static size_t fromHumanMemSizeNoRegexp(const std::string & value)
 	return res;
 }
 
+/**
+ * Parse the human readable size by using regular expression.
+ * @param value Define the size to parse as a string. Eg. 8MB.
+ * @return Return the parsed size in bytes.
+**/
 static size_t fromHumanMemSizeRegexp(const std::string & value)
 {
 	//var
@@ -84,6 +98,11 @@ static size_t fromHumanMemSizeRegexp(const std::string & value)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Select the parsing mode depending on availability of regular
+ * expression support which is not complete on old system.
+ * The regular expression mode is more strict on check to detect errors.
+**/
 size_t ummapio::fromHumanMemSize(const std::string & value)
 {
 	try {

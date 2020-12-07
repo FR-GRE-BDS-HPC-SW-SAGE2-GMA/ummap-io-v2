@@ -38,6 +38,9 @@ endif (HTOPML_FOUND)
 if (IOCCLIENT_FOUND)
 	set(HAVE_IOC_CLIENT yes)
 endif (IOCCLIENT_FOUND)
+if (MERO_FOUND)
+	set(HAVE_MERO yes)
+endif (MERO_FOUND)
 
 ######################################################
 #setup config file

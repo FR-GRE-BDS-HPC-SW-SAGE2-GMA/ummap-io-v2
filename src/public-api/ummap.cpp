@@ -19,7 +19,7 @@
 #include "../drivers/DummyDriver.hpp"
 #include "../drivers/MmapDriver.hpp"
 #include "../drivers/CDriver.hpp"
-#ifdef MERO_FOUND
+#ifdef HAVE_MERO
 	#include "../drivers/ClovisDriver.hpp"
 	#include "clovis_api.h"
 #endif
@@ -108,6 +108,7 @@ void ummap_skip_first_read(void * ptr)
 ummap_driver_t * ummap_driver_create_dummy(char value)
 {
 	Driver * driver = new DummyDriver(value);
+	driver->setAutoclean(true);
 	return (ummap_driver_t*)driver;
 }
 
@@ -122,13 +123,14 @@ ummap_driver_t * ummap_driver_create_fopen(const char * file_path, const char * 
 		.end();
 	
 	//create driver
-	ummap_driver_t * res = ummap_driver_create_fd(fileno(fp));
+	ummap_driver_t * driver = ummap_driver_create_fd(fileno(fp));
+	ummap_driver_set_autoclean(driver, true);
 
 	//close
 	fclose(fp);
 
 	//return
-	return res;
+	return driver;
 }
 
 /*******************  FUNCTION  *********************/
@@ -142,35 +144,44 @@ ummap_driver_t * ummap_driver_create_dax_fopen(const char * file_path, const cha
 		.end();
 	
 	//create driver
-	ummap_driver_t * res = ummap_driver_create_dax_fd(fileno(fp), allowNotAligned);
+	ummap_driver_t * driver = ummap_driver_create_dax_fd(fileno(fp), allowNotAligned);
+	ummap_driver_set_autoclean(driver, true);
 
 	//close
 	fclose(fp);
 
 	//return
-	return res;
+	return driver;
 }
 
 /*******************  FUNCTION  *********************/
 ummap_driver_t * ummap_driver_create_fd(int fd)
 {
 	Driver * driver = new FDDriver(fd);
+	driver->setAutoclean(true);
 	return (ummap_driver_t*)driver;
 }
 
-#ifdef MERO_FOUND
+
 /*******************  FUNCTION  *********************/
-ummap_driver_t * ummap_driver_create_clovis(struct m0_uint128 object_id)
+ummap_driver_t * ummap_driver_create_clovis(int64_t high, int64_t low, bool create)
 {
-	ClovisDriver * driver = new ClovisDriver(object_id);
-	return (ummap_driver_t*)driver;
+	#ifdef HAVE_MERO
+		struct m0_uint128 object_id = {high, low};
+		ClovisDriver * driver = new ClovisDriver(object_id, create);
+		driver->setAutoclean(true);
+		return (ummap_driver_t*)driver;
+	#else
+		UMMAP_FATAL("Try to create a clovis driver, but ummap was compiled without mero !");
+		return NULL;
+	#endif
 }
-#endif
 
 /*******************  FUNCTION  *********************/
 ummap_driver_t * ummap_driver_create_dax_fd(int fd, bool allowNotAligned)
 {
 	Driver * driver = new MmapDriver(fd, allowNotAligned);
+	driver->setAutoclean(true);
 	return (ummap_driver_t*)driver;
 }
 
@@ -178,6 +189,7 @@ ummap_driver_t * ummap_driver_create_dax_fd(int fd, bool allowNotAligned)
 ummap_driver_t * ummap_driver_create_memory(size_t size)
 {
 	Driver * driver = new MemoryDriver(size);
+	driver->setAutoclean(true);
 	return (ummap_driver_t*)driver;
 }
 
@@ -186,6 +198,7 @@ ummap_driver_t * ummap_driver_create_memory(size_t size)
 	ummap_driver_t * ummap_driver_create_ioc(struct ioc_client_t * client, int64_t high, int64_t low)
 	{
 		Driver * driver = new IocDriver(client, high, low);
+		driver->setAutoclean(true);
 		return (ummap_driver_t*)driver;
 	}
 #endif
@@ -193,8 +206,9 @@ ummap_driver_t * ummap_driver_create_memory(size_t size)
 /*******************  FUNCTION  *********************/
 ummap_driver_t * ummap_driver_create_c(const ummap_c_driver_t * driver, void * driver_data)
 {
-	Driver * cppdriver = new CDriver(driver, driver_data);
-	return (ummap_driver_t*)cppdriver;
+	Driver * cdriver = new CDriver(driver, driver_data);
+	cdriver->setAutoclean(true);
+	return (ummap_driver_t*)cdriver;
 }
 
 /*******************  FUNCTION  *********************/

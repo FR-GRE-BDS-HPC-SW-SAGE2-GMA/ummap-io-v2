@@ -40,7 +40,8 @@ namespace ummapio
 class ClovisDriver : public Driver
 {
 	public:
-		ClovisDriver(struct m0_uint128 object_id);
+		ClovisDriver(struct m0_uint128 object_id, bool create = false);
+		ClovisDriver(int64_t high, int64_t low, bool create = false);
 		virtual ~ClovisDriver(void) override;
 		virtual ssize_t pwrite(const void * buffer, size_t size, size_t offset) override;
 		virtual ssize_t pread(void * buffer, size_t size, size_t offset) override;

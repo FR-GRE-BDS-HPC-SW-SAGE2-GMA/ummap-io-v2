@@ -19,6 +19,14 @@
 using namespace ummapio;
 using namespace testing;
 
+/*********************  CLASS  **********************/
+class MockLifoPolicy : public LifoPolicy
+{
+	public:
+		MockLifoPolicy(size_t maxMemory, bool local) : LifoPolicy(maxMemory, local) {};
+		size_t getCurrentMemory(void) {return this->currentMemory;};
+};
+
 /*******************  FUNCTION  *********************/
 TEST(TestLifoPolicy, constructor)
 {
@@ -85,4 +93,32 @@ TEST(TestLifoPolicy, evict_notify_other)
 	//touch effect 0
 	EXPECT_CALL(globalPolicy, notifyEvict(&mapping, 1));
 	mapping.onSegmentationFault(ptr+2*UMMAP_PAGE_SIZE, true);
+}
+
+/*******************  FUNCTION  *********************/
+TEST(TestLifoPolicy, freeElementStorage)
+{
+	//set
+	MockLifoPolicy policy(2*UMMAP_PAGE_SIZE, true);
+
+	//setup
+	DummyDriver driver;
+	Mapping * mapping = new Mapping(8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, &driver, NULL, &policy);
+	char * ptr = (char*)mapping->getAddress();
+
+	//check
+	ASSERT_EQ(0, policy.getCurrentMemory());
+
+	//touch
+	mapping->onSegmentationFault(ptr+0*UMMAP_PAGE_SIZE, true);
+	mapping->onSegmentationFault(ptr+1*UMMAP_PAGE_SIZE, true);
+
+	//check
+	ASSERT_EQ(2*UMMAP_PAGE_SIZE, policy.getCurrentMemory());
+
+	//remove
+	delete mapping;
+
+	//check
+	ASSERT_EQ(0, policy.getCurrentMemory());
 }

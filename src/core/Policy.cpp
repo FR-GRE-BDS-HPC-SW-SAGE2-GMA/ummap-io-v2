@@ -17,6 +17,11 @@
 using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
+/**
+ * Policy constructor.
+ * @param maxMemory Define the maximum memory to be allowed by this policy.
+ * @param local Define if we are using a local of global policy to know how to use mutexes.
+**/
 Policy::Policy(size_t maxMemory, bool local)
 {
 	this->maxMemory = maxMemory;
@@ -25,32 +30,48 @@ Policy::Policy(size_t maxMemory, bool local)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Destructor of the policy.
+**/
 Policy::~Policy(void)
 {
 
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Replace the current lock to be used by the given one. This is used
+ * when using a local and global policy to share locking for eviction operations.
+ * @param mutex The mutex to be used instead of the local one.
+**/
 void Policy::forceUsingGroupMutex(std::recursive_mutex * mutex)
 {
 	this->mutexPtr = mutex;
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Get the local mutex.
+**/
 std::recursive_mutex * Policy::getLocalMutex(void)
 {
 	return &this->localMutex;
 }
 
 /*******************  FUNCTION  *********************/
-void Policy::registerMapping(Mapping * mapping, void * storage, size_t elementCount, size_t elementSize)
+/**
+ * Register a new mapping to the policy.
+ * It mostly allocate the new elements for status tracking.
+**/
+void Policy::registerMapping(Mapping * mapping, void * storage, size_t elementCount, size_t elementSize, void * extraInfos)
 {
 	//setup
 	PolicyStorage entry = {
 		.mapping = mapping,
 		.elements = storage,
 		.elementCount = elementCount,
-		.elementSize = elementSize
+		.elementSize = elementSize,
+		.extraInfos = extraInfos,
 	};
 
 	//register, CRITICAL SECTION
@@ -61,16 +82,25 @@ void Policy::registerMapping(Mapping * mapping, void * storage, size_t elementCo
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Check if the storage contain the given entry by looking in elements range.
+**/
 bool Policy::contains(PolicyStorage & storage, void * entry)
 {
 	return (entry >= storage.elements && entry < (char*)storage.elements + (storage.elementCount * storage.elementSize));
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Get the storage info from the given entry.
+ * @param entry The entry from which we want to storage info.
+ * @return Return the storage info related to the given entry.
+ * This function fail by exiting if not found.
+**/
 PolicyStorage Policy::getStorageInfo(void * entry)
 {
 	//vars
-	PolicyStorage res = {0,0,0};
+	PolicyStorage res = {0,0,0,0};
 
 	//lock
 	std::lock_guard<std::recursive_mutex> lockGuard(*this->mutexPtr);
@@ -90,6 +120,12 @@ PolicyStorage Policy::getStorageInfo(void * entry)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Get the storage info for the given mapping.
+ * @param mapping Define the mapping for which we want the storage info;.
+ * @return Return the storage info. If not found the function make the process
+ * failing on error.
+**/
 PolicyStorage Policy::getStorageInfo(Mapping * mapping)
 {
 	//var
@@ -120,6 +156,10 @@ PolicyStorage Policy::getStorageInfo(Mapping * mapping)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * unregister the given mapping.
+ * @param mapping The mapping to unregister.
+**/
 void Policy::unregisterMapping(Mapping * mapping)
 {
 	//start CRITICAL SECTION
@@ -136,12 +176,19 @@ void Policy::unregisterMapping(Mapping * mapping)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Associate the URI used to build the policy to keep track and report it to htopml.
+ * @param uri The URI as a string.
+**/
 void Policy::setUri(const std::string & uri)
 {
 	this->uri = uri;
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Returnt he URI associated to the policy.
+**/
 const std::string & Policy::getUri(void) const
 {
 	return this->uri;

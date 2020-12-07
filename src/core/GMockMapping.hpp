@@ -18,6 +18,9 @@ namespace ummapio
 {
 
 /*********************  CLASS  **********************/
+/**
+ * A mock of mapping object the be used for unite tests.
+**/
 class GMockMapping : public Mapping
 {
 	public:

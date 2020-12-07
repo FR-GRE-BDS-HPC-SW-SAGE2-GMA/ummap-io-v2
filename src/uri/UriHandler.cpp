@@ -21,6 +21,7 @@
 #include "../drivers/IocDriver.hpp"
 #endif
 #include "../policies/FifoPolicy.hpp"
+#include "../policies/FifoWindowPolicy.hpp"
 #include "../policies/LifoPolicy.hpp"
 #include "MeroRessource.hpp"
 #include "IocRessource.hpp"
@@ -133,6 +134,10 @@ Policy * UriHandler::buildPolicy(const std::string & uri, bool local)
 	} else if (type == "lifo") {
 		size_t memsize = fromHumanMemSize(parser.getPath());
 		policy = new LifoPolicy(memsize, local);
+	} else if (type == "fifo-window") {
+		size_t memSize = fromHumanMemSize(parser.getPath());
+		size_t slidingSize = fromHumanMemSize(parser.getParam("window"));
+		policy = new FifoWindowPolicy(memSize, slidingSize, local);
 	} else if (type == "none") {
 		policy = NULL;
 	} else {
@@ -236,8 +241,7 @@ Driver * UriHandler::buildDriverMero(const Uri & uri)
 	//build driver
 	#ifdef MERO_FOUND
 		m0_uint128 m0id = {id.high, id.low};
-		create_object(m0id);
-		return new ClovisDriver(m0id);
+		return new ClovisDriver(m0id, true);
 	#else
 		if (uri.getType() == "merofile")
 		{
