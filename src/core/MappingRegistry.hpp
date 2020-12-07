@@ -25,10 +25,16 @@ namespace ummapio
 {
 
 /*********************  STRUCT  *********************/
-struct RegistryEntry
+/**
+ * Define an entry in the mapping registry.
+**/
+struct MappingRegistryEntry
 {
+	/** Pointer to the mapping. **/
 	Mapping * mapping;
+	/** Base address. **/
 	char * base;
+	/** End address **/
 	char * end;
 };
 
@@ -50,8 +56,10 @@ class MappingRegistry
 	private:
 		bool contain(Mapping * mapping);
 	private:
+		/** Spinlock to protect the registry from concurrent accesses. **/
 		Spinlock lock;
-		std::list<RegistryEntry> entries;
+		/** List of entries **/
+		std::list<MappingRegistryEntry> entries;
 };
 
 /*******************  FUNCTION  *********************/

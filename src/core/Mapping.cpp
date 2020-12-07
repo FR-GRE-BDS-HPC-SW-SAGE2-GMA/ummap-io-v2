@@ -19,6 +19,20 @@
 using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
+/**
+ * Establish a new memory mapping.
+ * @param size Define the size of the mapping. If can be a non multiple of segment size. In this case, the mapping itself
+ * will be sized to the next multiple. For read/write operations it will ignore this extra sub-segment.
+ * @param segmentSize Equivalent of the page size for a standard mmap, it define the granularity of the IO operations.
+ * This size must be a multiple of the OS page size (4K).
+ * @param storageOffset Offset to apply on the storage of reach the data to be mapped. It does not have to be aligned on
+ * page size.
+ * @param protection Define the access protection to assign to this mapping. It uses the flags from mmap so you can
+ * use the given flags and 'or' them: PROT_READ, PROT_WRIT, PROT_EXEC.
+ * @param driver Pointer to the given driver. It will be destroyed automatically depending on its status about auto clean.
+ * @param localPolicy Define the local policy to be used.
+ * @param globalPolicy Define the global policy to be used and shared between multiple mappings.
+**/
 Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, int protection, Driver * driver, Policy * localPolicy, Policy * globalPolicy)
 {
 	//checks
@@ -84,6 +98,10 @@ Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, int prot
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Destructor of a mapping.
+ * It unmap the mapping and destroy the local ressources.
+**/
 Mapping::~Mapping(void)
 {
 	//unmap
@@ -109,18 +127,34 @@ Mapping::~Mapping(void)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Return the base address of the mapping.
+**/
 void * Mapping::getAddress(void)
 {
 	return this->baseAddress;
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Disable the thread safety concerning the mprotect and mremap semantic.
+ * It still keep the mutexes which are untouched by this action.
+**/
 void Mapping::disableThreadSafety(void)
 {
 	this->threadSafe = false;
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * On a first touch we need to allow access to the segment and load
+ * the data. In order to get thread safety the data is first load in 
+ * another segment which is then mremapped to override the current one.
+ * This behavior is disabled by disableThreadSafety() and replaced
+ * by a pure mprotect operation.
+ * In some extreme pressure cases the mremap approach seems to increase
+ * the memory used by the system.
+**/
 void Mapping::loadAndSwapSegment(size_t offset, bool writeAccess)
 {
 	//Rational: In order to be atomic we load the data in a segment, then
@@ -155,6 +189,14 @@ void Mapping::loadAndSwapSegment(size_t offset, bool writeAccess)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Recive notification of segmentation fault on a an address of the mapping.
+ * In this case, we need to load the data from the storage and change the
+ * access write. On write operation we need to mark the segment as dirty for
+ * later flush.
+ * @param address The faulty address to determine the touched segment.
+ * @param isWrite Define if it is a write or read access.
+**/
 void Mapping::onSegmentationFault(void * address, bool isWrite)
 {
 	//checks
@@ -222,6 +264,11 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Get the status of the given segment identified by its offset.
+ * @param offset Offset of the segment for which we want the status.
+ * @return Retuen the status of the given segment.
+**/
 SegmentStatus Mapping::getSegmentStatus(size_t offset)
 {
 	//checks
@@ -245,18 +292,29 @@ SegmentStatus Mapping::getSegmentStatus(size_t offset)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Return the size of the mapping (not aligned to segment size).
+**/
 size_t Mapping::getSize(void) const
 {
 	return this->size;
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Retun the size of the memory mapping (aligned on segment size)
+**/
 size_t Mapping::getAlignedSize(void) const
 {
 	return this->segmentSize * this->segments;
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Return the list of mutex to be taken to cover the given memory range.
+ * @param offset to start with.
+ * @param size Range to consider.
+**/
 const bool * Mapping::getMutexRange(size_t offset, size_t size) const
 {
 	//check
@@ -283,12 +341,22 @@ const bool * Mapping::getMutexRange(size_t offset, size_t size) const
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Apply a sync operation on the wall segment.
+**/
 void Mapping::sync(void)
 {
 	this->sync(0, getSize());
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Used to handle the read/write operations to handle the end of the
+ * mapping which is no a multiple of the segment size.
+ * @param offset Offset from where to read/write.
+ * @return Return the size of a segment if not at then end of the mapping
+ * and return the required size otherwise.
+**/
 size_t Mapping::readWriteSize(size_t offset)
 {
 	if (size - offset >= segmentSize)
@@ -298,6 +366,14 @@ size_t Mapping::readWriteSize(size_t offset)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Apply a sync operation.
+ * @param offset Sync from the given offset.
+ * @param size Define the range of the memory to sync.
+ * @param unmap Define if we unmap the sync pages.
+ * @param lock Define it we need to take a lock to make the operation
+ * (if already taken by policies operations to avoid deadlocks).
+**/
 void Mapping::sync(size_t offset, size_t size, bool unmap, bool lock)
 {
 	//check
@@ -375,12 +451,22 @@ void Mapping::sync(size_t offset, size_t size, bool unmap, bool lock)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Use to prefeatch the given range. But not implemented yet.
+**/
 void Mapping::prefetch(size_t offset, size_t size)
 {
 
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * When evicting a segment we need to notify the local
+ * and global policies.
+ * @param sourcePolicy Define the policy which has initiated the eviction
+ * operation of NULL if none. This is used to not self notify itself.
+ * @param segmentId Define the ID of the segment to be evicted.
+**/
 void Mapping::evict(Policy * sourcePolicy, size_t segmentId)
 {
 	//CRITICAL SECTION
@@ -402,6 +488,10 @@ void Mapping::evict(Policy * sourcePolicy, size_t segmentId)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Set the skip first read flag on all segments. In this case the memory
+ * will contain zeroes on the first access and not the data from storage.
+**/
 void Mapping::skipFirstRead(void)
 {
 	for (size_t i = 0 ; i < this->segments ; i++)
@@ -409,6 +499,9 @@ void Mapping::skipFirstRead(void)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Return the segment size in use.
+**/
 size_t Mapping::getSegmentSize(void) const
 {
 	return this->segmentSize;
@@ -417,6 +510,9 @@ size_t Mapping::getSegmentSize(void) const
 
 /*******************  FUNCTION  *********************/
 #ifdef HAVE_HTOPML
+/**
+ * When htopml is enabled this function is used to dump the mapping state in a json format.
+**/
 void ummapio::convertToJson(htopml::JsonState & json,const SegmentStatus & value)
 {
 	json.openStruct();
@@ -428,6 +524,9 @@ void ummapio::convertToJson(htopml::JsonState & json,const SegmentStatus & value
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * When htopml is enabled this function is used to dump the mapping state in a json format.
+**/
 void ummapio::convertToJson(htopml::JsonState & json,const Mapping & value)
 {
 	json.openStruct();

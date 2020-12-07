@@ -21,6 +21,7 @@ extern "C" {
 /********************  CONSTS  **********************/
 #define UMMAP_NO_FIRST_READ 1
 #define UMMAP_THREAD_UNSAFE 2
+#define UMMAP_DRIVER_NO_AUTO_DELETE 4
 
 /*********************  TYPES  **********************/
 typedef struct ummap_policy_s ummap_policy_t;

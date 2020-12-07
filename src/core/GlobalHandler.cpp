@@ -22,13 +22,29 @@
 using namespace ummapio;
 
 /********************  MACROS  **********************/
+/**
+ * Extract faulting error informations. It is used in the page fault handler
+ * to extract the type of fault.
+**/
 #define GET_REG_ERR(context) ((ucontext_t *)context)->uc_mcontext.gregs[REG_ERR]
 
 /********************  GLOBAL  **********************/
+/**
+ * The global handler is spawned once and tracked by this global pointer.
+**/
 static GlobalHandler * gblHandler = NULL;
+/**
+ * When setting the segmentation fault handler we want to keep track
+ * of a possibly pre-existing one so we can fallback on it if the fault
+ * is not for us.
+**/
 static struct sigaction gblOldHandler;
 
 /*******************  FUNCTION  *********************/
+/**
+ * Function used to setup the page fault handler and keep track
+ * of the old one.
+**/
 void ummapio::setupSegfaultHandler(void)
 {
 	//get old action
@@ -47,6 +63,9 @@ void ummapio::setupSegfaultHandler(void)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Unset the page fault handler and restore the old one.
+**/
 void ummapio::unsetSegfaultHandler(void)
 {
 	//mask
@@ -57,6 +76,12 @@ void ummapio::unsetSegfaultHandler(void)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * C function used to capture segmentation faults.
+ * @param sig Signal recived.
+ * @param si Signal informations.
+ * @param context Context of the fault.
+**/
 void ummapio::segfaultHandler(int sig, siginfo_t *si, void *context)
 {
 	//extract
@@ -70,6 +95,12 @@ void ummapio::segfaultHandler(int sig, siginfo_t *si, void *context)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Constructor of the global handler.
+ * If we use htopml this functions is responsible of registering the
+ * mapping registry to htopml in order to get access to all pending
+ * mappings.
+**/
 GlobalHandler::GlobalHandler(void)
 {
 	#ifdef HAVE_HTOPML
@@ -78,6 +109,10 @@ GlobalHandler::GlobalHandler(void)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Global destructor responsible of destroying all active mappings
+ * before existing.
+**/
 GlobalHandler::~GlobalHandler(void)
 {
 	if (this->mappingRegistry.isEmpty() == false) {
@@ -87,42 +122,78 @@ GlobalHandler::~GlobalHandler(void)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Delete all active mappings. This is used buy the destructor.
+**/
 void GlobalHandler::deleteAllMappings(void)
 {
 	this->mappingRegistry.deleteAllMappings();
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Register a new mapping to the global handler to be notified
+ * on segmentation fault.
+ * @param mapping Pointer to the mapping to register.
+**/
 void GlobalHandler::registerMapping(Mapping * mapping)
 {
 	this->mappingRegistry.registerMapping(mapping);
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Unregister the given mapping before destroying it so it does
+ * not recive anymore segmentation fault notifications.
+ * @param mapping Pointer to the mapping to unregister.
+**/
 void GlobalHandler::unregisterMapping(Mapping * mapping)
 {
 	this->mappingRegistry.unregisterMapping(mapping);
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Register a global policy to the policy registry.
+ * @param name Define the name of the policy.
+ * @param policy Pointer to the policty to register.
+**/
 void GlobalHandler::registerPolicy(const std::string & name, Policy * policy)
 {
 	this->policyRegistry.registerPolicy(name, policy);
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Unregister the policy identifed by its name. It will also destroy it/
+ * @param name Name of the policy to unregister.
+**/
 void GlobalHandler::unregisterPolicy(const std::string & name)
 {
 	this->policyRegistry.unregisterPolicy(name);
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Ask the policy registry to get the given policy identifed by its name.
+ * @param name Name of the policy to extract.
+ * @return Return a pointer to the given policy of NULL if not found.
+**/
 Policy * GlobalHandler::getPolicy(const std::string & name)
 {
 	return this->policyRegistry.get(name);
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Handle segmentation fault signal to redirect the notification to the
+ * related mapping.
+ * @param addr Define the address of the fault.
+ * @param isWrite True if the fault is a write access of false for a read access.
+ * @return Return true if the notification has been delivered or false if not.
+ * For non delivered message the caller must send the fault signal to the default
+ * handler.
+**/
 bool GlobalHandler::onSegFault(void * addr, bool isWrite)
 {
 	//get mapping
@@ -142,6 +213,23 @@ bool GlobalHandler::onSegFault(void * addr, bool isWrite)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Establish a new memory mapping.
+ * @param size Define the size of the mapping. If can be a non multiple of segment size. In this case, the mapping itself
+ * will be sized to the next multiple. For read/write operations it will ignore this extra sub-segment.
+ * @param segmentSize Equivalent of the page size for a standard mmap, it define the granularity of the IO operations.
+ * This size must be a multiple of the OS page size (4K).
+ * @param storageOffset Offset to apply on the storage of reach the data to be mapped. It does not have to be aligned on
+ * page size.
+ * @param protection Define the access protection to assign to this mapping. It uses the flags from mmap so you can
+ * use the given flags and 'or' them: PROT_READ, PROT_WRIT, PROT_EXEC.
+ * @param flags Flags to enable of disable some behaviors of ummap-io. Currently valid flags are : UMMAP_NO_FIRST_READ, 
+ * UMMAP_THREAD_UNSAFE and UMMAP_DRIVER_NO_AUTO_DELETE. Go in their respective documentation to get more information on them.
+ * @param driver Pointer to the given driver. If UMMAP_DRVIER_NO_AUTO_DELETE if enabled the destruction of the driver is you 
+ * own responsability, otherwise it will be destroyed automatically.
+ * @param localPolicy Define the local policy to be used.
+ * @param globalPolicy Define the global policy to be used and shared between multiple mappings.
+**/
 void * GlobalHandler::ummap(size_t size, size_t segmentSize, size_t storageOffset, int protection, int flags, Driver * driver, Policy * localPolicy, const std::string & policyGroup)
 {
 	//get policy
@@ -160,6 +248,12 @@ void * GlobalHandler::ummap(size_t size, size_t segmentSize, size_t storageOffse
 	if (flags & UMMAP_NO_FIRST_READ)
 		mapping->skipFirstRead();
 
+	//autodestroy
+	if (flags & UMMAP_DRIVER_NO_AUTO_DELETE)
+		driver->setAutoclean(false);
+	else
+		driver->setAutoclean(true);
+
 	//no thread sage
 	if (flags & UMMAP_THREAD_UNSAFE)
 		mapping->disableThreadSafety();
@@ -169,6 +263,12 @@ void * GlobalHandler::ummap(size_t size, size_t segmentSize, size_t storageOffse
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Unmap the mapping identifed by the given address.
+ * @param ptr Address of the segment to unmap. It can be any bytes 
+ * inside the targeted segments.
+ * @param sync Apply a sync before unmapping the segment.
+**/
 int GlobalHandler::umunmap(void * ptr, bool sync)
 {
 	//get mapping
@@ -192,6 +292,11 @@ int GlobalHandler::umunmap(void * ptr, bool sync)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Notify the given segment to not read the storage data on the first memory access but init
+ * the memory with zeroes.
+ * @param ptr Pointer to any bytes inside the targeted segment.
+**/
 void GlobalHandler::skipFirstRead(void * ptr)
 {
 	//get mapping
@@ -205,12 +310,22 @@ void GlobalHandler::skipFirstRead(void * ptr)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Return a reference to the URI handler.
+**/
 UriHandler & GlobalHandler::getUriHandler(void)
 {
 	return this->uriHandler;
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Apply a flush operation of the given segment. This will send
+ * all the data to the storage.
+ * @param ptr Define the base address from where to start the flush operation.
+ * @param size Define the size of the region to flush.
+ * @param evict Enable of disable the automatic eviction of the flushed pages.
+**/
 void GlobalHandler::flush(void * ptr, size_t size, bool evict)
 {
 	//get mapping
@@ -250,6 +365,10 @@ void GlobalHandler::flush(void * ptr, size_t size, bool evict)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Setup the global handler pointer.
+ * @param handler Handler to register.
+**/
 void ummapio::setGlobalHandler(GlobalHandler * handler)
 {
 	assert(handler != NULL);
@@ -258,6 +377,10 @@ void ummapio::setGlobalHandler(GlobalHandler * handler)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * For global fini operation, destroy the global handler so
+ * all ressources will be cleaned.
+**/
 void ummapio::clearGlobalHandler(void)
 {
 	if (gblHandler != NULL) {
@@ -267,6 +390,9 @@ void ummapio::clearGlobalHandler(void)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Return the global handler.
+**/
 GlobalHandler * ummapio::getGlobalhandler(void)
 {
 	assume(gblHandler != NULL, "Missing initialization of ummap-io before use !");
