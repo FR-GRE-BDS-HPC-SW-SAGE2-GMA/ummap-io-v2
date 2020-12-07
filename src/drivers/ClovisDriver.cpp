@@ -23,16 +23,16 @@ ClovisDriver::ClovisDriver(struct m0_uint128 object_id, bool create)
 	m_object_id.u_lo = object_id.u_lo;
 	m_object_id.u_hi = object_id.u_hi;
 	if (create)
-		create_object(m0id);
+		create_object(m_object_id);
 }
 
 /*******************  FUNCTION  *********************/
-ClobisDriver::ClovisDriver(int64_t high, int64_t low, bool create)
+ClovisDriver::ClovisDriver(int64_t high, int64_t low, bool create)
 {
 	m_object_id.u_lo = low;
 	m_object_id.u_hi = high;
 	if (create)
-		create_object(m0id);
+		create_object(m_object_id);
 }
 
 /*******************  FUNCTION  *********************/
