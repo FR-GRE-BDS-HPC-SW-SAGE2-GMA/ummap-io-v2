@@ -19,7 +19,7 @@
 #include "../drivers/DummyDriver.hpp"
 #include "../drivers/MmapDriver.hpp"
 #include "../drivers/CDriver.hpp"
-#ifdef MERO_FOUND
+#ifdef HAVE_MERO
 	#include "../drivers/ClovisDriver.hpp"
 	#include "clovis_api.h"
 #endif
@@ -162,15 +162,20 @@ ummap_driver_t * ummap_driver_create_fd(int fd)
 	return (ummap_driver_t*)driver;
 }
 
-#ifdef MERO_FOUND
+
 /*******************  FUNCTION  *********************/
-ummap_driver_t * ummap_driver_create_clovis(struct m0_uint128 object_id)
+ummap_driver_t * ummap_driver_create_clovis(int64_t high, int64_t low, bool create)
 {
-	ClovisDriver * driver = new ClovisDriver(object_id);
-	driver->setAutoclean(true);
-	return (ummap_driver_t*)driver;
+	#ifdef HAVE_MERO
+		struct m0_uint128 object_id = {high, low};
+		ClovisDriver * driver = new ClovisDriver(object_id, create);
+		driver->setAutoclean(true);
+		return (ummap_driver_t*)driver;
+	#else
+		UMMAP_FATAL("Try to create a clovis driver, but ummap was compiled without mero !");
+		return NULL;
+	#endif
 }
-#endif
 
 /*******************  FUNCTION  *********************/
 ummap_driver_t * ummap_driver_create_dax_fd(int fd, bool allowNotAligned)

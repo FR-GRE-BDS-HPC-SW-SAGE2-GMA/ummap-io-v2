@@ -22,6 +22,9 @@
 //Htopml
 #cmakedefine HAVE_HTOPML
 
+//Mero
+#cmakedefine HAVE_MERO
+
 //Ioc client
 #cmakedefine HAVE_IOC_CLIENT
 
