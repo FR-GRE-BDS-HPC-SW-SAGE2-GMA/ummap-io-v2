@@ -350,9 +350,12 @@ const bool * Mapping::getMutexRange(size_t offset, size_t size, bool * buffer, s
 /**
  * Apply a sync operation on the wall segment.
 **/
-void Mapping::sync(void)
+void Mapping::flush(bool sync)
 {
-	this->sync(0, getSize());
+	int flags = UMMAP_FLUSH_DEFAULT;
+	if (sync)
+		flags |= UMMAP_FLUSH_SYNC;
+	this->flush(0, getSize(), flags);
 }
 
 /*******************  FUNCTION  *********************/
@@ -376,17 +379,29 @@ size_t Mapping::readWriteSize(size_t offset)
  * Apply a sync operation.
  * @param offset Sync from the given offset.
  * @param size Define the range of the memory to sync.
- * @param unmap Define if we unmap the sync pages.
- * @param lock Define it we need to take a lock to make the operation
- * (if already taken by policies operations to avoid deadlocks).
+ * @param flags Define flags. You can look on :
+ *  - UMMAP_FLUSH_DEFAULT
+ *  - UMMAP_FLUSH_SYNC
+ *  - UMMAP_FLUSH_UNMAP
+ *  - UMMAP_FLUSH_NO_LOCK
 **/
-void Mapping::sync(size_t offset, size_t size, bool unmap, bool lock)
+void Mapping::flush(size_t offset, size_t size, int flags)
 {
 	//check
 	assumeArg(offset < this->getSize(), "Offset (%1) is not in valid range !").arg(offset).end();
 	assumeArg(offset + size <= this->getAlignedSize(), "'Offset (%1) + size' is not in valid range !").arg(offset).end();
 	assumeArg(offset % segmentSize == 0, "Should get offset (%1) multiple of segment size !").arg(offset).end();
 	assumeArg(size % segmentSize == 0, "Should get size (%1) multiple of segment size !").arg(size).end();
+
+	//default flags
+	bool sync = false;
+	bool unmap = false;
+	bool lock = true;
+
+	//apply flags
+	if (flags & UMMAP_FLUSH_SYNC) sync = true;
+	if (flags & UMMAP_FLUSH_UNMAP) unmap = true;
+	if (flags & UMMAP_FLUSH_NO_LOCK) lock = false;
 
 	//direct sync
 	bool res = driver->directMSync((char*)getAddress() + offset, size, storageOffset);
@@ -448,7 +463,8 @@ void Mapping::sync(size_t offset, size_t size, bool unmap, bool lock)
 		}
 
 		//sync
-		//driver->sync(getAddress(), offset, size);
+		if (sync)
+			driver->sync(getAddress(), offset, size);
 
 		//unlock
 		if (lock)
@@ -494,7 +510,7 @@ void Mapping::evict(Policy * sourcePolicy, size_t segmentId)
 			globalPolicy->notifyEvict(this, segmentId);
 	
 		//flush memory
-		sync(segmentId * segmentSize, segmentSize, true, false);
+		flush(segmentId * segmentSize, segmentSize, UMMAP_FLUSH_UNMAP | UMMAP_FLUSH_NO_LOCK);
 	}
 }
 

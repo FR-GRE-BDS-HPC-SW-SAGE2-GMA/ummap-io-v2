@@ -27,6 +27,12 @@
 namespace ummapio
 {
 
+/*********************  DEFINES  ********************/
+#define UMMAP_FLUSH_DEFAULT 0
+#define UMMAP_FLUSH_SYNC 1
+#define UMMAP_FLUSH_UNMAP 2
+#define UMMAP_FLUSH_NO_LOCK 4
+
 /*********************  STRUCT  *********************/
 /**
  * Struct defining the status variable to track the stage of each segment of a mapping.
@@ -63,8 +69,8 @@ class Mapping
 		Mapping(size_t size, size_t segmentSize, size_t storageOffset, int protection, Driver * driver, Policy * localPolicy = NULL, Policy * globalPolicy = NULL);
 		virtual ~Mapping(void);
 		void onSegmentationFault(void * address, bool isWrite);
-		void sync(void);
-		void sync(size_t offset, size_t size, bool unmap = false, bool lock = true);
+		void flush(bool sync);
+		void flush(size_t offset, size_t size, int flags = UMMAP_FLUSH_DEFAULT);
 		void prefetch(size_t offset, size_t size);
 		virtual void evict(Policy * sourcePolicy, size_t segmentId);
 		void * getAddress(void);

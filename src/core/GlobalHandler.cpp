@@ -276,7 +276,7 @@ int GlobalHandler::umunmap(void * ptr, bool sync)
 
 	//sync
 	if (sync)
-		mapping->sync(0, mapping->getAlignedSize(), false);
+		mapping->flush(0, mapping->getAlignedSize(), UMMAP_FLUSH_SYNC);
 
 	//delete
 	delete mapping;
@@ -355,7 +355,10 @@ void GlobalHandler::flush(void * ptr, size_t size, bool evict)
 		"Invalid flush size, not fit in ummap mapping !");
 
 	//apply
-	mapping->sync(offset, size, evict);
+	int flags = UMMAP_FLUSH_SYNC;
+	if (evict)
+		flags |= UMMAP_FLUSH_UNMAP;
+	mapping->flush(offset, size, flags);
 }
 
 /*******************  FUNCTION  *********************/

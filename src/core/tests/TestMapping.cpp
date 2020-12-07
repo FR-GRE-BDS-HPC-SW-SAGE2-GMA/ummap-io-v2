@@ -181,7 +181,7 @@ TEST(TestMapping, flush)
 	EXPECT_CALL(driver, pwrite(_, UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
 
 	//flush
-	mapping.sync();
+	mapping.flush(false);
 
 	//cannot access anymore
 	ASSERT_DEATH(ptr[0] = 10, "");
