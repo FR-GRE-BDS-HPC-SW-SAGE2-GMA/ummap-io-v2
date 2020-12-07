@@ -8,6 +8,7 @@
 //std
 #include <mutex>
 #include <cassert>
+#include <cstring>
 //internal
 #include "../common/Debug.hpp"
 #include "../core/Mapping.hpp"

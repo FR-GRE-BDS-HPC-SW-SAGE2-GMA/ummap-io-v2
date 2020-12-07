@@ -15,7 +15,7 @@
 /**
  * Regular expression to check correctness and extract parts.
 **/
-const char * cst_uri_regexp = "^([a-zA-Z0-9]+)://([a-zA-Z0-9_/.:-]+)([?]([a-zA-Z0-9]+=[a-zA-Z0-9._/+-]+)?(&[a-zA-Z0-9]+=[a-zA-Z0-9._/+-]+)*)?$";
+const char * cst_uri_regexp = "^([a-zA-Z0-9-]+)://([a-zA-Z0-9_/.:-]+)([?]([a-zA-Z0-9]+=[a-zA-Z0-9._/+-]+)?(&[a-zA-Z0-9]+=[a-zA-Z0-9._/+-]+)*)?$";
 
 /***************** USING NAMESPACE ******************/
 using namespace ummapio;

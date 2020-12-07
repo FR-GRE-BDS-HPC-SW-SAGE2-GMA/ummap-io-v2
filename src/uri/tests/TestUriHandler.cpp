@@ -7,6 +7,9 @@
 /********************  HEADERS  *********************/
 #include <gtest/gtest.h>
 #include "../UriHandler.hpp"
+#include "../../policies/FifoPolicy.hpp"
+#include "../../policies/LifoPolicy.hpp"
+#include "../../policies/FifoWindowPolicy.hpp"
 
 /***************** USING NAMESPACE ******************/
 using namespace ummapio;
@@ -71,7 +74,18 @@ TEST(TestUriHandler, buildPolicy)
 	Policy * policy = NULL;
 	UriHandler handler;
 
-	//firo
+	//fifo
 	policy = handler.buildPolicy("fifo://4096", true);
+	ASSERT_NE(nullptr, dynamic_cast<FifoPolicy*>(policy));
+	delete policy;
+
+	//fifo
+	policy = handler.buildPolicy("fifo-window://8MB?window=1MB", true);
+	ASSERT_NE(nullptr, dynamic_cast<FifoWindowPolicy*>(policy));
+	delete policy;
+
+	//lifo
+	policy = handler.buildPolicy("lifo://4096", true);
+	ASSERT_NE(nullptr, dynamic_cast<LifoPolicy*>(policy));
 	delete policy;
 }
