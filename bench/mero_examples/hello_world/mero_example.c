@@ -118,7 +118,7 @@ int main(int argc, char **argv)
     void *baseptr = NULL;
 
     ummap_init();
-    baseptr = ummap(size, segsize, offset, PROT_READ|PROT_WRITE, 0, ummap_driver_create_clovis(id) , NULL, "none");
+    baseptr = ummap(size, segsize, offset, PROT_READ|PROT_WRITE, 0, ummap_driver_create_clovis(id.u_hi, id.u_lo, false) , NULL, "none");
 
     // Set some random value on the allocation
     char *index = (char *)baseptr;
