@@ -39,6 +39,9 @@ struct MappingRegistryEntry
 };
 
 /*********************  CLASS  **********************/
+/**
+ * Class to implement a registry of all the active mappings.
+**/
 class MappingRegistry
 {
 	public:

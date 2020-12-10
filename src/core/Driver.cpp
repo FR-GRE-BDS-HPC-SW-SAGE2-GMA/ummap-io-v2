@@ -50,12 +50,19 @@ bool Driver::hasAutoclean(void) const
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Setup the URI of the driver to be printed by htopml if enabled.
+ * @param uri Define the uri value to assign.
+**/
 void Driver::setUri(const std::string & uri)
 {
 	this->uri = uri;
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Return the current URI as a string.
+**/
 const std::string & Driver::getUri(void) const
 {
 	return this->uri;

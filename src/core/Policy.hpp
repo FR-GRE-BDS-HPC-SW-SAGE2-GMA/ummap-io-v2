@@ -50,6 +50,12 @@ struct PolicyStorage
 };
 
 /*********************  CLASS  **********************/
+/**
+ * Base class to imlement a policy. A policy is an implementation providing
+ * touch and evict methods to be able to keep control on the memory consumption
+ * of a given mapping.
+ * A policy can be local of global so it might use locks to secure accesses.
+**/
 class Policy
 {
 	public:
@@ -70,11 +76,23 @@ class Policy
 		PolicyStorage getStorageInfo(Mapping * mapping);
 		static bool contains(PolicyStorage & storage, void * entry);
 	protected:
+		/** Define if the policy is a local of global policy shared between multiple mappings. **/
 		bool local;
+		/** Keep track of the maximum memory allowed by the current policy. **/
 		size_t maxMemory;
+		/** Keep track of state storage attached to each handle mappings. **/
 		std::list<PolicyStorage> storageRegistry;
+		/** 
+		 * Shared mutex to protect the access to the local states. It is a pointer so
+		 * we can share the mutex between the local and global policy if both are used.
+		**/
 		std::recursive_mutex * mutexPtr;
+		/**
+		 * Local policy to be pointed by mutexPtr if local only and shared with all interacting policies
+		 * if we are in a shared policy.
+		**/
 		std::recursive_mutex localMutex;
+		/** Keeo track of the URI for htopml. **/
 		std::string uri;
 };
 
