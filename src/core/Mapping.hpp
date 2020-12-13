@@ -130,7 +130,7 @@ class Mapping
 		int segmentMutexesCnt;
 		/**
 		 * Enable of disable the thread safety concerning the mprotect/mremap operations. (locks
-		 * and kept).
+		 * are kept).
 		**/
 		bool threadSafe;
 };

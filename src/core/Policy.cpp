@@ -107,8 +107,10 @@ PolicyStorage Policy::getStorageInfo(void * entry)
 
 	//loop to search
 	for (auto it : this->storageRegistry) {
-		if (contains(it, entry))
+		if (contains(it, entry)) {
 			res = it;
+			break;
+		}
 	}
 
 	//not found
@@ -142,8 +144,10 @@ PolicyStorage Policy::getStorageInfo(Mapping * mapping)
 
 		//loop to search
 		for (auto it : this->storageRegistry) {
-			if (it.mapping == mapping)
+			if (it.mapping == mapping) {
 				res = it;
+				break;
+			}
 		}
 	}
 
