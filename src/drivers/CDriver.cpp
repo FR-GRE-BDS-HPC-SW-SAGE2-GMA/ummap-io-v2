@@ -39,13 +39,11 @@ CDriver::CDriver(const ummap_c_driver_t * c_driver, void * driver_data)
 
 /*******************  FUNCTION  *********************/
 /**
- * Destructor of the driver. It call the finilize function and free the driver
- * memory.
+ * Destructor of the driver. It call the finilize function.
 **/
 CDriver::~CDriver(void)
 {
 	this->c_driver.finalize(this->driver_data);
-	free(this->c_driver);
 }
 
 /*******************  FUNCTION  *********************/

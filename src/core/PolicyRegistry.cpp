@@ -79,7 +79,6 @@ void PolicyRegistry::unregisterPolicy(const std::string & name)
 		if (it != this->entries.end()) {
 			delete it->second;
 			this->entries.erase(it);
-			break;
 		}
 	}
 }
