@@ -16,6 +16,12 @@
 using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
+/**
+ * Create a memory driver for the given size.
+ * @param size Define the size of the memory space to be handled by the driver.
+ * @param defaultValue Value to be transmitted to memset() to initilize the 
+ * memory space.
+**/
 MemoryDriver::MemoryDriver(size_t size, char defaultValue)
 {
 	//check
@@ -28,6 +34,12 @@ MemoryDriver::MemoryDriver(size_t size, char defaultValue)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Create a clone version of the memory driver sharing the memory space with
+ * the given driver. In this case the last driver sharing will be resposnible
+ * of the memory freeing.
+ * @param driver Pointer to the original driver to share its buffer.
+**/
 MemoryDriver::MemoryDriver(MemoryDriver * driver)
 {
 	//check

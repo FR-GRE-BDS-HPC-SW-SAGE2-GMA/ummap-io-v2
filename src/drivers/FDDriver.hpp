@@ -15,6 +15,9 @@ namespace ummapio
 {
 
 /*********************  CLASS  **********************/
+/**
+ * Implement a driver accessing the a file via its file descriptor.
+**/
 class FDDriver : public Driver
 {
 	public:
@@ -24,6 +27,7 @@ class FDDriver : public Driver
 		virtual ssize_t pread(void * buffer, size_t size, size_t offset) override;
 		virtual void sync(void * ptr, size_t offset, size_t size) override;
 	private:
+		/** File descriptor to be used for data transfers **/
 		int fd;
 };
 

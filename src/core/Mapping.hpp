@@ -28,9 +28,13 @@ namespace ummapio
 {
 
 /*********************  DEFINES  ********************/
+/** Default value for flags on flush operation. **/
 #define UMMAP_FLUSH_DEFAULT 0
+/** Apply a sync operation after flushing the data. **/
 #define UMMAP_FLUSH_SYNC 1
+/** Unmap the memory after the flush operation. **/
 #define UMMAP_FLUSH_UNMAP 2
+/** Do not take locks when flushing data. **/
 #define UMMAP_FLUSH_NO_LOCK 4
 
 /*********************  STRUCT  *********************/

@@ -19,6 +19,11 @@
 using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
+/**
+ * Driver constructor with the file descriptor.
+ * The constructor make a dup() on this file descriptor so the caller can
+ * make a close on its descriptor.
+**/
 FDDriver::FDDriver(int fd)
 {
 	assert(fd > 0);

@@ -15,6 +15,11 @@
 using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
+/**
+ * Constructor of the dummy driver.
+ * @param value Define the valid to give to memset() to initiliaze the memory
+ * on the first access.
+**/
 DummyDriver::DummyDriver(char value)
 {
 	this->value = value;

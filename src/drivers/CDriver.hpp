@@ -17,6 +17,11 @@ namespace ummapio
 {
 
 /*********************  CLASS  **********************/
+/**
+ * Wrapper to let the user implement a new driver directly from C language.
+ * This wrapper mostly redirect the calls to overrided C++ functions to the C
+ * pointed functions from the C struct.
+**/
 class CDriver : public Driver
 {
 	public:
@@ -29,7 +34,9 @@ class CDriver : public Driver
 		virtual bool directMunmap(void * base, size_t size, size_t offset) override;
 		virtual bool directMSync(void * base, size_t size, size_t offset) override;
 	private:
+		/** Structure containing the function pointer to implement the driver. **/
 		ummap_c_driver_t c_driver;
+		/** Pointer to raw data to transmit to the driver functions when called. **/
 		void * driver_data;
 };
 

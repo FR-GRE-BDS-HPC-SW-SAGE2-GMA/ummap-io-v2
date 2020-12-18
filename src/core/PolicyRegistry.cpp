@@ -16,18 +16,30 @@
 using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
+/**
+ * Constructor, currently do nothing.
+**/
 PolicyRegistry::PolicyRegistry(void)
 {
 
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Destructor of the policty registry. It destroy all the registered
+ * policies.
+**/
 PolicyRegistry::~PolicyRegistry(void)
 {
 	deleteAll();
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Register a new policy.
+ * @param name Define the name attached to the policy.
+ * @param policy Pointer to the policy to be registered under name.
+**/
 void PolicyRegistry::registerPolicy(const std::string & name, Policy * policy)
 {
 	//check
@@ -49,6 +61,10 @@ void PolicyRegistry::registerPolicy(const std::string & name, Policy * policy)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Remove a policy from the registry and delete it.
+ * @param name Name of the policy to remove.
+**/
 void PolicyRegistry::unregisterPolicy(const std::string & name)
 {
 	//check
@@ -63,11 +79,17 @@ void PolicyRegistry::unregisterPolicy(const std::string & name)
 		if (it != this->entries.end()) {
 			delete it->second;
 			this->entries.erase(it);
+			break;
 		}
 	}
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Search the requested policy by its name.
+ * @param name Name of the wanted policy.
+ * @return Return the requested policy by pointer or NULL if not found.
+**/
 Policy * PolicyRegistry::get(const std::string &name)
 {
 	//check
@@ -89,6 +111,9 @@ Policy * PolicyRegistry::get(const std::string &name)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Delete all the registred policies.
+**/
 void PolicyRegistry::deleteAll(void)
 {
 	//CRITICAL SECTION
@@ -105,6 +130,9 @@ void PolicyRegistry::deleteAll(void)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Check if there is at least one policy or if the registry is empty.
+**/
 bool PolicyRegistry::isEmpty(void)
 {
 	//CRITICAL SECTION

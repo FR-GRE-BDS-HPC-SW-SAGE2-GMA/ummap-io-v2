@@ -20,16 +20,32 @@
 using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
+/**
+ * Constructor of the C driver.
+ * @param c_driver Pointer to the C driver to get the implementation of driver
+ * steps.
+ * @param driver_data Raw pointer to data to be transmitted to the driver
+ * functions.
+**/
 CDriver::CDriver(const ummap_c_driver_t * c_driver, void * driver_data)
 {
+	//check
+	assert(c_driver != NULL);
+
+	//assign
 	this->c_driver = *c_driver;
 	this->driver_data = driver_data;
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Destructor of the driver. It call the finilize function and free the driver
+ * memory.
+**/
 CDriver::~CDriver(void)
 {
 	this->c_driver.finalize(this->driver_data);
+	free(this->c_driver);
 }
 
 /*******************  FUNCTION  *********************/

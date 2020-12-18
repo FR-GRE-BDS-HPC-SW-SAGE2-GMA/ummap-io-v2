@@ -16,6 +16,12 @@ namespace ummapio
 {
 
 /*********************  CLASS  **********************/
+/**
+ * Implement a memory driver. It is more a proof of concept for testing
+ * ummap as it just allocate a memory space to store the data in addition
+ * of the ummap mapping. It used memcpy() to synchronize the data between
+ * this memory space and the mapping.
+**/
 class MemoryDriver : public Driver
 {
 	public:
@@ -28,8 +34,14 @@ class MemoryDriver : public Driver
 		char * getBuffer(void);
 		size_t getSize(void) const;
 	private:
+		/** Size of the memory space. **/
 		size_t size;
+		/** Pointer to the memory space. **/
 		char * buffer;
+		/** 
+		 * Number of pointers to the buffer to be shared between multiple driver
+		 * instances.
+		**/
 		int * share;
 };
 

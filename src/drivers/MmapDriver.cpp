@@ -20,6 +20,11 @@
 using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
+/**
+ * Constructir of the direct mmap driver.
+ * @param fd File descriptor of the file to mmap. Can be 0 for anonymous memory.
+ * @param allowNotAligned Define if we allow not aligned mappings (offset and size).
+**/
 MmapDriver::MmapDriver(int fd, bool allowNotAligned)
 {
 	//setup
@@ -128,15 +133,22 @@ bool MmapDriver::directMunmap(void * base, size_t size, size_t offset)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Check the alignement restrictor and apply offset/size fixes to fit with
+ * the page alignement constrain of the mapping.
+ * @param size Take the mapping size and will be aligned on page size.
+ * @param offset Take the offset in file and will be aligned on page size.
+ * @param addrOffset Will be updated to emulate the not aligned mapping.
+**/
 void MmapDriver::checkAndSetAlign(size_t & size, size_t & offset, size_t & addrOffset)
 {
 	//check align
 	if (allowNotAligned == false) {
-		assumeArg(size % UMMAP_PAGE_SIZE == 0, "Size must be aligned to page size, got : %1 with alignemdnd : %2")
+		assumeArg(size % UMMAP_PAGE_SIZE == 0, "Size must be aligned to page size, got : %1 with alignement : %2")
 			.arg(size)
 			.arg(size % UMMAP_PAGE_SIZE)
 			.end();
-		assumeArg(offset % UMMAP_PAGE_SIZE == 0, "Offset must be aligned to page size, got : %1 with alignemdnd : %2")
+		assumeArg(offset % UMMAP_PAGE_SIZE == 0, "Offset must be aligned to page size, got : %1 with alignement : %2")
 			.arg(offset)
 			.arg(offset % UMMAP_PAGE_SIZE)
 			.end();

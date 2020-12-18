@@ -16,6 +16,14 @@ namespace ummapio
 {
 
 /*********************  CLASS  **********************/
+/**
+ * Provide a special driver using ummap to directly mmap a file bypassing
+ * all the internals of ummap. This can be usefull on NVDIMM memory being able
+ * to exploit it directly without changing the API in the application.
+ * 
+ * The way to proceed is mostly by providing the directMmap, directMunmap and
+ * directMunmap functions from the driver creating the bypass.
+**/
 class MmapDriver : public Driver
 {
 	public:
@@ -30,7 +38,9 @@ class MmapDriver : public Driver
 	private:
 		void checkAndSetAlign(size_t & size, size_t & offset, size_t &addrOffset);
 	private:
+		/** File descriptor to be directly mapped. **/
 		int fd;
+		/** If we allow not aligned mappings. **/
 		bool allowNotAligned;
 };
 

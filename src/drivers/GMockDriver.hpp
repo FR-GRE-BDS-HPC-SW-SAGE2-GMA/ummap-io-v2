@@ -18,6 +18,9 @@ namespace ummapio
 {
 
 /*********************  CLASS  **********************/
+/**
+ * Implement a mock driver based on GoogleMock for unit testing.
+**/
 class GMockDriver : public Driver
 {
 	public:

@@ -17,6 +17,10 @@ namespace ummapio
 {
 
 /*********************  CLASS  **********************/
+/**
+ * Implement the driver for the io-catcher makeing a cache between ummap and
+ * Mero.
+**/
 class IocDriver : public Driver
 {
 	public:
@@ -26,8 +30,11 @@ class IocDriver : public Driver
 		virtual ssize_t pread(void * buffer, size_t size, size_t offset) override;
 		virtual void sync(void * ptr, size_t offset, size_t size) override;
 	private:
+		/** Keep track of the client struct to communicate. **/
 		struct ioc_client_t * client;
+		/** High part of the object ID **/
 		int64_t high;
+		/** Low part of the object ID **/
 		int64_t low;
 };
 

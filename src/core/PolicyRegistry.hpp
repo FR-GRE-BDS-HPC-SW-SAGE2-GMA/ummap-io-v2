@@ -20,6 +20,11 @@ namespace ummapio
 {
 
 /*********************  CLASS  **********************/
+/**
+ * The registry associate each registered policy to a name so we can
+ * use this name to find it without keeping track of global pointers
+ * over the application using ummap.
+**/
 class PolicyRegistry
 {
 	public:
@@ -31,7 +36,9 @@ class PolicyRegistry
 		bool isEmpty(void);
 		Policy * get(const std::string & name);
 	private:
+		/** Spinlock to protect the access to the map **/
 		Spinlock lock;
+		/** Map of policies indexed by name. **/
 		std::map<std::string, Policy *> entries;
 };
 

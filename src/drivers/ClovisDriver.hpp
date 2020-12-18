@@ -38,6 +38,10 @@ namespace ummapio
 {
 
 /*********************  CLASS  **********************/
+/**
+ * This driver implement the support for the clovis API from the mero object 
+ * storage.
+**/
 class ClovisDriver : public Driver
 {
 	public:
@@ -48,12 +52,15 @@ class ClovisDriver : public Driver
 		virtual ssize_t pread(void * buffer, size_t size, size_t offset) override;
 		virtual void sync(void * ptr, size_t offset, size_t size) override;
 	private:
+		/** Keep track of the object ID to be memory mapped.**/
 		struct m0_uint128 m_object_id;
 };
 
 }
 
-
+/**
+ * Implement support of stream operator on object ID.
+**/
 inline std::ostream&
 operator<<(std::ostream& out, struct m0_uint128 object_id)
 {
