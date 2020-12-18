@@ -18,6 +18,9 @@ namespace ummapio
 {
 
 /*********************  CLASS  **********************/
+/**
+ * Provide a mocked policy to unit testing.
+**/
 class GMockPolicy : public Policy
 {
 	public:

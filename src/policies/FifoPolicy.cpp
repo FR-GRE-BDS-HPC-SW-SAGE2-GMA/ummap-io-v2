@@ -18,6 +18,11 @@
 using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
+/**
+ * Constructor of the FIFO policy.
+ * @param maxMemory Maximum memory allowed before evicting pages.
+ * @param local Define if it is a local policy so we can avoid some locks.
+**/
 FifoPolicy::FifoPolicy(size_t maxMemory, bool local = false)
 	:Policy(maxMemory, local)
 {
@@ -25,6 +30,9 @@ FifoPolicy::FifoPolicy(size_t maxMemory, bool local = false)
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Destructor of the fifo policy.
+**/
 FifoPolicy::~FifoPolicy(void)
 {
 

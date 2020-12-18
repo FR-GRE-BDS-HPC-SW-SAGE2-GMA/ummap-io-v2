@@ -61,9 +61,33 @@ class Policy
 	public:
 		Policy(size_t maxMemory, bool local);
 		virtual ~Policy(void);
+		/**
+		 * Allocate the element storage to keep track of the pages for the given
+		 * new memory mapping.
+		 * @param mapping The new memory mapping.
+		 * @param segmentCount The number of segments in the mapping.
+		**/
 		virtual void allocateElementStorage(Mapping * mapping, size_t segmentCount) = 0;
+		/**
+		 * Notify a memory access to a segment to register it in the eviction list.
+		 * @param mapping The mapping of the segment.
+		 * @param index Index of the segment in the mapping.
+		 * @param isWrite True if we are handling a write memory access
+		 * @param mapped If already mapped or a new mapping.
+		 * @param dirty If the segment was dirty.
+		**/
 		virtual void notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool mapped, bool dirty) = 0;
+		/**
+		 * Notify an eviction from the mapping to update lists. This can append when
+		 * the other (local or global) policy generate an eviction.
+		 * @param mapping Define the mapping for which we evict the segment.
+		 * @param index Define the index of the segment to evict.
+		**/
 		virtual void notifyEvict(Mapping * mapping, size_t index) = 0;
+		/**
+		 * Cleanup the element storage linked to the given memory mapping.
+		 * @param mapping The mapping we want to untrack.
+		**/
 		virtual void freeElementStorage(Mapping * mapping) = 0;
 		void setUri(const std::string & uri);
 		const std::string & getUri(void) const;

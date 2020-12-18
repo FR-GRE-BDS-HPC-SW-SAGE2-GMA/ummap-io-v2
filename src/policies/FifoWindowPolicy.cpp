@@ -19,6 +19,13 @@
 using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
+/**
+ * Constructor of the fifo window policy.
+ * @param maxMemory Maximum memory allowed by the policy (fixed + sliding window)
+ * @param maxSlidingWindow Maximum meomry allowed by the sliding window (it must be 
+ * deduced from the max memory to determine the fixed window size).
+ * @param local Define if it is a local or global memory.
+**/
 FifoWindowPolicy::FifoWindowPolicy(size_t maxMemory, size_t maxSlidingMemory, bool local = false)
 	:Policy(maxMemory, local)
 {

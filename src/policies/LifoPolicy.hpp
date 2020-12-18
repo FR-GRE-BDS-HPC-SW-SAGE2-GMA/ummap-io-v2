@@ -24,6 +24,9 @@ namespace ummapio
 class Mapping;
 
 /*********************  CLASS  **********************/
+/**
+ * Provide the implementation of a LIFO (Last In, First Out) policy.
+**/
 class LifoPolicy : public Policy
 {
 	public:
@@ -34,7 +37,9 @@ class LifoPolicy : public Policy
 		virtual void notifyEvict(Mapping * mapping, size_t index) override;
 		virtual void freeElementStorage(Mapping * mapping) override;
 	protected:
+		/** Root element of the linked list of segments to track.**/
 		ListElement root;
+		/** Keep track of the current memory usage.**/
 		size_t currentMemory;
 };
 

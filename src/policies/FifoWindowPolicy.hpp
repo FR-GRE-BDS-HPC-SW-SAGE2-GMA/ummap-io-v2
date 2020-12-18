@@ -24,6 +24,10 @@ namespace ummapio
 class Mapping;
 
 /*********************  CLASS  **********************/
+/**
+ * Implement a FIFO policy with a sliding window. We first fill the fixed window and when it
+ * is full we let it as it is and use the sliding window to fill/evict.
+**/
 class FifoWindowPolicy : public Policy
 {
 	public:
@@ -34,11 +38,22 @@ class FifoWindowPolicy : public Policy
 		virtual void notifyEvict(Mapping * mapping, size_t index) override;
 		virtual void freeElementStorage(Mapping * mapping) override;
 	protected:
+		/** Root element of the fixed window **/
 		ListElement rootFixedWindow;
+		/** Root element of the sliding window when the fixed one if full. **/
 		ListElement rootSlidingWindow;
+		/** 
+		 * Keep track of the memory used by the fixed window. When full we 
+		 * register to the sliding window.
+		**/
 		size_t currentFixedMemory;
+		/**
+		 * Keep track of the memory used by the sliding window.
+		**/
 		size_t currentSlidingWindowMemory;
+		/** Maximum memory allowed by the sliding window. **/
 		size_t maxSlidingMemory;
+		/** Maximum memory allowed by the fixed window. **/
 		size_t maxFixedMemory;
 };
 

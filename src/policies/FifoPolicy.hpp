@@ -24,6 +24,9 @@ namespace ummapio
 class Mapping;
 
 /*********************  CLASS  **********************/
+/**
+ * Provide the implementation of a FIFO (First In, First Out) policy.
+**/
 class FifoPolicy : public Policy
 {
 	public:
@@ -34,7 +37,9 @@ class FifoPolicy : public Policy
 		virtual void notifyEvict(Mapping * mapping, size_t index) override;
 		virtual void freeElementStorage(Mapping * mapping) override;
 	protected:
+		/** Root element of the linked list of segments to track.**/
 		ListElement root;
+		/** Keep track of the current memory usage.**/
 		size_t currentMemory;
 };
 
