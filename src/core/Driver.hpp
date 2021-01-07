@@ -65,11 +65,15 @@ class Driver
 		 * Let the driver maling the memory unmaping.
 		 * @param base Base addresse of the mapping.
 		 * @param size Size of the mapping.
+		 * @param offset Define the offset in file.
 		 * @return Return true if it has unmapped, false if it need to be done by the caller.
 		**/
 		virtual bool directMunmap(void * base, size_t size, size_t offset);
 		/**
 		 * When directly mapping do not make the ummap internal state tracking but direct msync
+		 * @param base Base addresse of the mapping.
+		 * @param size Size of the mapping.
+		 * @param offset Define the offset in file.
 		**/
 		virtual bool directMSync(void * base, size_t size, size_t offset);
 		void setAutoclean(bool status = true);
