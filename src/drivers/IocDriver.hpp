@@ -24,7 +24,7 @@ namespace ummapio
 class IocDriver : public Driver
 {
 	public:
-		IocDriver(struct ioc_client_t * client, int64_t high, int64_t low);
+		IocDriver(struct ioc_client_t * client, int64_t high, int64_t low, bool create = true);
 		virtual ~IocDriver(void) override;
 		virtual ssize_t pwrite(const void * buffer, size_t size, size_t offset) override;
 		virtual ssize_t pread(void * buffer, size_t size, size_t offset) override;

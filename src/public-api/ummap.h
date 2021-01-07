@@ -63,7 +63,7 @@ ummap_driver_t * ummap_driver_create_dax_fd(int fd, bool allowNotAligned);
 ummap_driver_t * ummap_driver_create_memory(size_t size);
 ummap_driver_t * ummap_driver_create_dummy(char value);
 ummap_driver_t * ummap_driver_create_c(const ummap_c_driver_t * driver, void * driver_data);
-ummap_driver_t * ummap_driver_create_ioc(struct ioc_client_t * client, int64_t high, int64_t low);
+ummap_driver_t * ummap_driver_create_ioc(struct ioc_client_t * client, int64_t high, int64_t low, bool create);
 ummap_driver_t * ummap_driver_create_clovis(int64_t hight, int64_t low, bool create);
 
 void ummap_driver_destroy(ummap_driver_t * driver);

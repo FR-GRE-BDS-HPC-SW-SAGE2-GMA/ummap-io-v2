@@ -95,7 +95,7 @@ Driver * UriHandler::buildDriver(const std::string & uri)
 		driver = new DummyDriver(value);
 	} else if (type == "mero" || type == "clovis" || type == "merofile" ) {
 		driver = buildDriverMero(parser);
-	} else if (type == "meroioc" || type == "clovisioc" || type == "ioc" ) {
+	} else if (type == "meroioc" || type == "clovisioc" || type == "ioc" || type == "iocfile" ) {
 		driver = buildDriverIoc(parser);
 	} else if (type == "mmap" || type == "dax" ) {
 		driver = this->buildDriverFOpenMmap(parser.getPath(), parser.getParam("mode", "w+"));
@@ -264,7 +264,7 @@ Driver * UriHandler::buildDriverMero(const Uri & uri)
 Driver * UriHandler::buildDriverIoc(const Uri & uri)
 {
 	//check
-	assert(uri.getType() == "meroioc" || uri.getType() == "clovisioc" || uri.getType() == "ioc");
+	assert(uri.getType() == "meroioc" || uri.getType() == "clovisioc" || uri.getType() == "ioc" || uri.getType() == "iocfile");
 
 	//id
 	ObjectId id;
@@ -289,7 +289,7 @@ Driver * UriHandler::buildDriverIoc(const Uri & uri)
 	#ifdef HAVE_IOC_CLIENT
 		return new IocDriver(IocRessource::getClient(), id.high, id.low);
 	#else
-		if (uri.getType() == "merofile")
+		if (uri.getType() == "iocfile")
 		{
 			//warn
 			UMMAP_WARNING("Mero is not available, using fake fopen mode for tests");

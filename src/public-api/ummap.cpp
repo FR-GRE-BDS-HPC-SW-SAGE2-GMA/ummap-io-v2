@@ -195,9 +195,9 @@ ummap_driver_t * ummap_driver_create_memory(size_t size)
 
 /*******************  FUNCTION  *********************/
 #ifdef HAVE_IOC_CLIENT
-	ummap_driver_t * ummap_driver_create_ioc(struct ioc_client_t * client, int64_t high, int64_t low)
+	ummap_driver_t * ummap_driver_create_ioc(struct ioc_client_t * client, int64_t high, int64_t low, bool create)
 	{
-		Driver * driver = new IocDriver(client, high, low);
+		Driver * driver = new IocDriver(client, high, low, create);
 		driver->setAutoclean(true);
 		return (ummap_driver_t*)driver;
 	}

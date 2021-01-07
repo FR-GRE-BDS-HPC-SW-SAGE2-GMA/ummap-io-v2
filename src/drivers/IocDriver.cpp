@@ -12,11 +12,13 @@
 using namespace ummapio;
 
 /*********************  CLASS  **********************/
-IocDriver::IocDriver(struct ioc_client_t * client, int64_t high, int64_t low)
+IocDriver::IocDriver(struct ioc_client_t * client, int64_t high, int64_t low, bool create)
 {
 	this->client = client;
 	this->high = high;
 	this->low = low;
+	if (create)
+		ioc_client_obj_create(this->client, this->high, this->low);
 }
 
 /*******************  FUNCTION  *********************/
