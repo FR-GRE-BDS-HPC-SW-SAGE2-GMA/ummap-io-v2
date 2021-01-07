@@ -19,8 +19,10 @@ extern "C" {
 #endif
 
 /********************  CONSTS  **********************/
+#define UMMAP_DEFAULT 0
 #define UMMAP_NO_FIRST_READ 1
 #define UMMAP_THREAD_UNSAFE 2
+#define UMMAP_FIXED 4
 
 /*********************  TYPES  **********************/
 typedef struct ummap_policy_s ummap_policy_t;
@@ -32,7 +34,7 @@ typedef struct ummap_c_driver_s {
 	ssize_t (*pwrite)(void * driver_data, const void * buffer, size_t size, size_t offset);
 	ssize_t (*pread)(void * driver_data, void * buffer, size_t size, size_t offset);
 	void (*sync)(void * driver_data, void *ptr, size_t offset, size_t size);
-	void * (*direct_mmap)(void * driver_data, size_t size, size_t offset, bool read, bool write, bool exec);
+	void * (*direct_mmap)(void * addr, void * driver_data, size_t size, size_t offset, bool read, bool write, bool exec, bool mapFixed);
 	bool (*direct_munmap)(void * driver_data, void * base, size_t size, size_t offset);
 	bool (*direct_msync)(void * driver_data, void * base, size_t size, size_t offset);
 	void (*finalize)(void * driver_data);
@@ -45,7 +47,7 @@ void ummap_finalize(void);
 
 /*******************  FUNCTION  *********************/
 //ummap
-void * ummap(size_t size, size_t segment_size, size_t storage_offset, int protection, int flags, ummap_driver_t * driver, ummap_policy_t * local_policy, const char * policy_group);
+void * ummap(void * addr, size_t size, size_t segment_size, size_t storage_offset, int protection, int flags, ummap_driver_t * driver, ummap_policy_t * local_policy, const char * policy_group);
 int umunmap(void * ptr, int sync);
 void umsync(void * ptr, size_t size, int evict);
 

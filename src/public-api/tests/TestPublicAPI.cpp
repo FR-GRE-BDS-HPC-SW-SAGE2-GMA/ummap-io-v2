@@ -47,7 +47,7 @@ TEST_F(TestPublicAPI, nested_init)
 TEST_F(TestPublicAPI, map_unmap_simple)
 {
 	//map 2
-	void * ptr1 = ummap(8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dummy(16), NULL, "none");
+	void * ptr1 = ummap(NULL, 8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dummy(16), NULL, "none");
 	memset(ptr1, 10, 8*4096);
 
 	//unmap 1 and let the other for cleaup
@@ -58,8 +58,8 @@ TEST_F(TestPublicAPI, map_unmap_simple)
 TEST_F(TestPublicAPI, map_unmap_multi)
 {
 	//map 2
-	void * ptr1 = ummap(8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dummy(16), NULL, "none");
-	void * ptr2 = ummap(8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dummy(16), NULL, "none");
+	void * ptr1 = ummap(NULL, 8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dummy(16), NULL, "none");
+	void * ptr2 = ummap(NULL, 8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dummy(16), NULL, "none");
 
 	//touch
 	memset(ptr1, 10, 8*4096);
@@ -76,7 +76,7 @@ TEST_F(TestPublicAPI, map_driver_fopen)
 	const char * fname = "/tmp/test-ummap-fopen-driver.txt";
 
 	//map 2
-	void * ptr1 = ummap(8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_fopen(fname, "w+"), NULL, "none");
+	void * ptr1 = ummap(NULL, 8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_fopen(fname, "w+"), NULL, "none");
 
 	//we just write, no read pre-existing content
 	ummap_skip_first_read(ptr1);
@@ -110,7 +110,7 @@ TEST_F(TestPublicAPI, map_driver_dax_fopen)
 	truncate(fname, 8*4096);
 
 	//map 2
-	void * ptr1 = ummap(8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dax_fopen(fname, "rw+", false), NULL, "none");
+	void * ptr1 = ummap(NULL, 8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dax_fopen(fname, "rw+", false), NULL, "none");
 
 	//we just write, no read pre-existing content
 	ummap_skip_first_read(ptr1);
@@ -148,7 +148,7 @@ TEST_F(TestPublicAPI, map_driver_fd)
 	ftruncate(fd, 8*4096);
 
 	//map 2
-	void * ptr1 = ummap(8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_fd(fd), NULL, "none");
+	void * ptr1 = ummap(NULL, 8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_fd(fd), NULL, "none");
 	fclose(fp);
 
 	//we just write, no read pre-existing content
@@ -187,7 +187,7 @@ TEST_F(TestPublicAPI, map_driver_dax_fd)
 	ftruncate(fd, 8*4096);
 
 	//map 2
-	void * ptr1 = ummap(8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dax_fd(fd, false), NULL, "none");
+	void * ptr1 = ummap(NULL, 8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dax_fd(fd, false), NULL, "none");
 	fclose(fp);
 
 	//we just write, no read pre-existing content
@@ -227,7 +227,7 @@ TEST_F(TestPublicAPI, map_driver_dax_fd_offset)
 
 	//map 2
 	const size_t offset = 256;
-	void * ptr1 = ummap(8*4096 - offset, 4096, offset, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dax_fd(fd, true), NULL, "none");
+	void * ptr1 = ummap(NULL, 8*4096 - offset, 4096, offset, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dax_fd(fd, true), NULL, "none");
 	fclose(fp);
 
 	//we just write, no read pre-existing content
@@ -258,7 +258,7 @@ TEST_F(TestPublicAPI, map_driver_dax_fd_offset)
 /*******************  FUNCTION  *********************/
 TEST_F(TestPublicAPI, map_driver_memory_ok)
 {
-	void * ptr1 = ummap(8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_memory(8*4096), NULL, "none");
+	void * ptr1 = ummap(NULL, 8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_memory(8*4096), NULL, "none");
 	memset(ptr1, 10, 8*4096);
 
 	//unmap 1 and let the other for cleaup
@@ -268,7 +268,7 @@ TEST_F(TestPublicAPI, map_driver_memory_ok)
 /*******************  FUNCTION  *********************/
 TEST_F(TestPublicAPI, map_driver_memory_not_ok)
 {
-	void * ptr1 = ummap(8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_memory(4*4096), NULL, "none");
+	void * ptr1 = ummap(NULL, 8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_memory(4*4096), NULL, "none");
 	ASSERT_DEATH(memset(ptr1, 10, 8*4096),"overpass");
 
 	//unmap 1 and let the other for cleaup
@@ -278,7 +278,7 @@ TEST_F(TestPublicAPI, map_driver_memory_not_ok)
 /*******************  FUNCTION  *********************/
 TEST_F(TestPublicAPI, map_driver_dummy)
 {
-	void * ptr1 = ummap(8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dummy(64), NULL, "none");
+	void * ptr1 = ummap(NULL, 8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dummy(64), NULL, "none");
 	memset(ptr1, 10, 8*4096);
 
 	//check
@@ -315,7 +315,7 @@ TEST_F(TestPublicAPI, policy_group)
 	ummap_policy_group_register("global", globalPolicy);
 
 	//map
-	void * ptr1 = ummap(8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dummy(64), localPolicy, "global");
+	void * ptr1 = ummap(NULL, 8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dummy(64), localPolicy, "global");
 	memset(ptr1, 0 , 8*4096);
 
 	//unmap
@@ -329,7 +329,7 @@ TEST_F(TestPublicAPI, lbm_bugguy_case_1)
 	size_t size = 37140768;
 
 	//map
-	void * ptr1 = ummap(size, 1024*1024, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dummy(64), NULL, "none");
+	void * ptr1 = ummap(NULL, size, 1024*1024, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dummy(64), NULL, "none");
 
 	//touch
 	#pragma omp parallel
@@ -348,7 +348,7 @@ void test_create_uri(const char * uri)
 	size_t size = 8*segmentSize;
 
 	//map
-	void * ptr1 = ummap(size, segmentSize, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_uri(uri), NULL, "none");
+	void * ptr1 = ummap(NULL, size, segmentSize, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_uri(uri), NULL, "none");
 
 	//touch
 	for (size_t i = 0 ; i < size ; i++)

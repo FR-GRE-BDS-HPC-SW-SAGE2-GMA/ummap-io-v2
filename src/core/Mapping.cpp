@@ -21,6 +21,7 @@ using namespace ummapio;
 /*******************  FUNCTION  *********************/
 /**
  * Establish a new memory mapping.
+ * @param addr Address hint where to establish the mapping like in standard mmap semantic.
  * @param size Define the size of the mapping. If can be a non multiple of segment size. In this case, the mapping itself
  * will be sized to the next multiple. For read/write operations it will ignore this extra sub-segment.
  * @param segmentSize Equivalent of the page size for a standard mmap, it define the granularity of the IO operations.
@@ -29,11 +30,14 @@ using namespace ummapio;
  * page size.
  * @param protection Define the access protection to assign to this mapping. It uses the flags from mmap so you can
  * use the given flags and 'or' them: PROT_READ, PROT_WRIT, PROT_EXEC.
+ * @param flags Flags to enable of disable some behaviors of ummap-io. Currently valid flags are : UMMAP_NO_FIRST_READ, 
+ * UMMAP_THREAD_UNSAFE. Go in their respective documentation to get more information on them. You can also use UMMAP_FIXED
+ * to force the targetted address to establish the mapping.
  * @param driver Pointer to the given driver. It will be destroyed automatically depending on its status about auto clean.
  * @param localPolicy Define the local policy to be used.
  * @param globalPolicy Define the global policy to be used and shared between multiple mappings.
 **/
-Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, int protection, Driver * driver, Policy * localPolicy, Policy * globalPolicy)
+Mapping::Mapping(void *addr, size_t size, size_t segmentSize, size_t storageOffset, int protection, int flags, Driver * driver, Policy * localPolicy, Policy * globalPolicy)
 {
 	//checks
 	assume(size > 0, "Do not accept null size mapping");
@@ -60,10 +64,17 @@ Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, int prot
 	this->storageOffset = storageOffset;
 	this->threadSafe = true;
 
+	//no thread safe
+	if (flags & UMMAP_THREAD_UNSAFE)
+		this->threadSafe = false;
+
+	//if use map fixed
+	bool mapFixed = (flags & UMMAP_FIXED);
+
 	//establish mapping
-	this->baseAddress = (char*)driver->directMmap(size, storageOffset, protection & PROT_READ, protection & PROT_WRITE, protection & PROT_EXEC);
+	this->baseAddress = (char*)driver->directMmap(addr, size, storageOffset, protection & PROT_READ, protection & PROT_WRITE, protection & PROT_EXEC, mapFixed);
 	if (this->baseAddress == NULL)
-		this->baseAddress = (char*)OS::mmapProtNone(mapSize);
+		this->baseAddress = (char*)OS::mmapProtNone(addr, mapSize, mapFixed);
 
 	//sizes
 	this->segments = mapSize / segmentSize;
@@ -95,6 +106,10 @@ Mapping::Mapping(size_t size, size_t segmentSize, size_t storageOffset, int prot
 	if (static_cast<size_t>(this->segmentMutexesCnt) > this->segments)
 		this->segmentMutexesCnt = this->segments;
 	this->segmentMutexes = new std::mutex[this->segmentMutexesCnt];
+
+	//no first read
+	if (flags & UMMAP_NO_FIRST_READ)
+		this->skipFirstRead();
 }
 
 /*******************  FUNCTION  *********************/

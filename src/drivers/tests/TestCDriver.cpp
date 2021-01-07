@@ -35,7 +35,7 @@ void c_dummy_sync(void * driver_data, void *ptr, size_t offset, size_t size)
 }
 
 /*******************  FUNCTION  *********************/
-void * c_dummy_direct_mmap(void * driver_data, size_t size, size_t offset, bool read, bool write, bool exec)
+void * c_dummy_direct_mmap(void * addr, void * driver_data, size_t size, size_t offset, bool read, bool write, bool exec, bool map_fixed)
 {
 	assert(driver_data != NULL);
 	return NULL;
@@ -88,7 +88,7 @@ TEST(TestCDriver, functions)
 	ASSERT_EQ(10, driver.pwrite(NULL, 10, 0));
 	ASSERT_EQ(12, driver.pread(NULL, 12, 0));
 	driver.sync(NULL, 0, 0);
-	ASSERT_EQ(nullptr, driver.directMmap(0, 0, false, false, false));
+	ASSERT_EQ(nullptr, driver.directMmap(NULL, 0, 0, false, false, false, false));
 	ASSERT_FALSE(driver.directMunmap(NULL, 0, 0));
 	ASSERT_FALSE(driver.directMSync(NULL, 0, 0));
 }
@@ -103,7 +103,7 @@ TEST(TestCDriver, c_api)
 	ummap_driver_t * driver = ummap_driver_create_c(&gblCDummyDriver, malloc(8));
 
 	//map
-	void * ptr = ummap(4*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, driver, NULL, NULL);
+	void * ptr = ummap(NULL, 4*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, driver, NULL, NULL);
 
 	//memset
 	memset(ptr, 0, 4*4096);

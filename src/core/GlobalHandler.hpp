@@ -41,7 +41,7 @@ class GlobalHandler
 	public:
 		GlobalHandler(void);
 		~GlobalHandler(void);
-		void * ummap(size_t size, size_t segmentSize, size_t storageOffset, int protection, int flags, Driver * driver, Policy * localPolicy, const std::string & policyGroup);
+		void * ummap(void * addr, size_t size, size_t segmentSize, size_t storageOffset, int protection, int flags, Driver * driver, Policy * localPolicy, const std::string & policyGroup);
 		int umunmap(void * ptr, bool sync);
 		void flush(void * ptr, size_t size, bool evict);
 		void skipFirstRead(void * ptr);

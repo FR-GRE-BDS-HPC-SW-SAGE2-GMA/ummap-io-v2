@@ -28,7 +28,7 @@ TEST(TestMmapDriver, anonymous_no_offset)
 {
 	MmapDriver driver;
 	size_t size = 4* UMMAP_PAGE_SIZE;
-	char * ptr = (char*)driver.directMmap(size, 0, true, true, false);
+	char * ptr = (char*)driver.directMmap(NULL, size, 0, true, true, false, false);
 	memset(ptr, 10, size);
 	driver.directMunmap(ptr, size, 0);
 }
@@ -38,7 +38,7 @@ TEST(TestMmapDriver, anonymous_offset)
 {
 	MmapDriver driver;
 	size_t size = 4* UMMAP_PAGE_SIZE;
-	char * ptr = (char*)driver.directMmap(size, 4096, true, true, false);
+	char * ptr = (char*)driver.directMmap(NULL, size, 4096, true, true, false, false);
 	memset(ptr, 10, size);
 	driver.directMunmap(ptr, size, 4096);
 }
@@ -49,8 +49,8 @@ TEST(TestMmapDriver, anonymous_not_aligned)
 	MmapDriver driver;
 	size_t size = 4* UMMAP_PAGE_SIZE;
 	
-	ASSERT_DEATH(driver.directMmap(size, 1024, true, true, false), "aligned");
-	ASSERT_DEATH(driver.directMmap(size+1024, 0, true, true, false), "aligned");
+	ASSERT_DEATH(driver.directMmap(NULL, size, 1024, true, true, false, false), "aligned");
+	ASSERT_DEATH(driver.directMmap(NULL, size+1024, 0, true, true, false, false), "aligned");
 }
 
 /*******************  FUNCTION  *********************/
@@ -71,7 +71,7 @@ TEST(TestMmapDriver, fileMapping_no_offset)
 	//map
 	size_t offset = 0;
 	MmapDriver driver(fileno(fp));
-	char * ptr = (char*)driver.directMmap(size, offset, true, true, false);
+	char * ptr = (char*)driver.directMmap(NULL, size, offset, true, true, false, false);
 	for (size_t i = 0 ; i < size ; i++)
 		ASSERT_EQ((char)i, ptr[i]);
 	driver.directMunmap(ptr, size, offset);
@@ -100,7 +100,7 @@ TEST(TestMmapDriver, fileMapping_aligned_offset)
 	size_t offset = 4096;
 	size_t fsize = size - offset;
 	MmapDriver driver(fileno(fp));
-	char * ptr = (char*)driver.directMmap(fsize, offset, true, true, false);
+	char * ptr = (char*)driver.directMmap(NULL, fsize, offset, true, true, false, false);
 	for (size_t i = 0 ; i < fsize ; i++)
 		ASSERT_EQ((char)((i + offset)  + (i + offset) / UMMAP_PAGE_SIZE), ptr[i]);
 	driver.directMunmap(ptr, fsize, offset);
@@ -129,7 +129,7 @@ TEST(TestMmapDriver, fileMapping_not_aligned_offset)
 	size_t offset = 32;
 	size_t fsize = size - offset;
 	MmapDriver driver(fileno(fp), true);
-	char * ptr = (char*)driver.directMmap(fsize, offset, true, true, false);
+	char * ptr = (char*)driver.directMmap(NULL, fsize, offset, true, true, false, false);
 	for (size_t i = 0 ; i < fsize ; i++)
 		ASSERT_EQ((char)(i+offset), ptr[i]);
 	driver.directMunmap(ptr, fsize, offset);
@@ -151,7 +151,7 @@ TEST(TestMmapDriver, sync)
 
 	//map
 	MmapDriver driver(fileno(fp), true);
-	char * ptr = (char*)driver.directMmap(size, 0, true, true, false);
+	char * ptr = (char*)driver.directMmap(NULL, size, 0, true, true, false, false);
 	fclose(fp);
 
 	//write & flush

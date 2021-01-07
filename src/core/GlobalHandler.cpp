@@ -215,6 +215,8 @@ bool GlobalHandler::onSegFault(void * addr, bool isWrite)
 /*******************  FUNCTION  *********************/
 /**
  * Establish a new memory mapping.
+ * @param addr Define the memory address where to place the mapping. NULL for default it can be forced
+ * by using flag UMMAP_MAP_FIXED.
  * @param size Define the size of the mapping. If can be a non multiple of segment size. In this case, the mapping itself
  * will be sized to the next multiple. For read/write operations it will ignore this extra sub-segment.
  * @param segmentSize Equivalent of the page size for a standard mmap, it define the granularity of the IO operations.
@@ -224,13 +226,14 @@ bool GlobalHandler::onSegFault(void * addr, bool isWrite)
  * @param protection Define the access protection to assign to this mapping. It uses the flags from mmap so you can
  * use the given flags and 'or' them: PROT_READ, PROT_WRIT, PROT_EXEC.
  * @param flags Flags to enable of disable some behaviors of ummap-io. Currently valid flags are : UMMAP_NO_FIRST_READ, 
- * UMMAP_THREAD_UNSAFE. Go in their respective documentation to get more information on them.
+ * UMMAP_THREAD_UNSAFE. Go in their respective documentation to get more information on them. You can also use UMMAP_FIXED
+ * to force the targetted address to establish the mapping.
  * @param driver Pointer to the given driver. If UMMAP_DRVIER_NO_AUTO_DELETE if enabled the destruction of the driver is you 
  * own responsability, otherwise it will be destroyed automatically.
  * @param localPolicy Define the local policy to be used.
  * @param globalPolicy Define the global policy to be used and shared between multiple mappings.
 **/
-void * GlobalHandler::ummap(size_t size, size_t segmentSize, size_t storageOffset, int protection, int flags, Driver * driver, Policy * localPolicy, const std::string & policyGroup)
+void * GlobalHandler::ummap(void * addr, size_t size, size_t segmentSize, size_t storageOffset, int protection, int flags, Driver * driver, Policy * localPolicy, const std::string & policyGroup)
 {
 	//get policy
 	Policy * globalPolicy = NULL;
@@ -241,16 +244,8 @@ void * GlobalHandler::ummap(size_t size, size_t segmentSize, size_t storageOffse
 	}
 
 	//create mapping
-	Mapping * mapping = new Mapping(size, segmentSize, storageOffset, protection, driver, localPolicy, globalPolicy);
+	Mapping * mapping = new Mapping(NULL, size, segmentSize, storageOffset, protection, UMMAP_DEFAULT, driver, localPolicy, globalPolicy);
 	this->mappingRegistry.registerMapping(mapping);
-
-	//no first read
-	if (flags & UMMAP_NO_FIRST_READ)
-		mapping->skipFirstRead();
-
-	//no thread sage
-	if (flags & UMMAP_THREAD_UNSAFE)
-		mapping->disableThreadSafety();
 	
 	//return
 	return mapping->getAddress();

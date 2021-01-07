@@ -51,7 +51,7 @@ int main(int argc, char ** argv)
 		printf(" - Mapping...\n");
 		ummap_driver_t * driver = ummap_driver_create_uri(driver_uri);
 		ummap_policy_t * policy = ummap_policy_create_fifo(4096 * 4, false);
-		char * ptr = (char*)ummap(size, segment_size, 0, PROT_READ|PROT_WRITE, 0, driver, policy, "global");
+		char * ptr = (char*)ummap(NULL, size, segment_size, 0, PROT_READ|PROT_WRITE, 0, driver, policy, "global");
 
 		//write
 		for (int i = 0 ; i < repeat ; i++) {

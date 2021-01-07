@@ -24,8 +24,8 @@ namespace ummapio
 class GMockMapping : public Mapping
 {
 	public:
-		GMockMapping(size_t size, size_t segmentSize, size_t storageOffset, int protection, Driver * driver, Policy * localPolicy = NULL, Policy * globalPolicy = NULL)
-			: Mapping(size, segmentSize, storageOffset, protection, driver, localPolicy, globalPolicy) {};
+		GMockMapping(void * addr, size_t size, size_t segmentSize, size_t storageOffset, int protection, int flags, Driver * driver, Policy * localPolicy = NULL, Policy * globalPolicy = NULL)
+			: Mapping(addr, size, segmentSize, storageOffset, protection, flags, driver, localPolicy, globalPolicy) {};
 		MOCK_METHOD(void, evict, (Policy * sourcePolicy, size_t segmentId));
 };
 

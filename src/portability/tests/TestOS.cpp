@@ -26,7 +26,7 @@ TEST(TestOS, mmapProtFull)
 TEST(TestOS, mmapProtNone)
 {
 	const size_t size = 10*UMMAP_PAGE_SIZE;
-	char * ptr = (char*)OS::mmapProtNone(size);
+	char * ptr = (char*)OS::mmapProtNone(NULL, size, false);
 	ASSERT_NE(ptr, nullptr);
 	ASSERT_DEATH(ptr[0] = 'a', "");
 	OS::munmap(ptr, size);
@@ -61,7 +61,7 @@ TEST(TestOS, mprotect_read_only)
 	const size_t size = 10*UMMAP_PAGE_SIZE;
 
 	//map
-	char * ptr = (char*)OS::mmapProtNone(size);
+	char * ptr = (char*)OS::mmapProtNone(NULL, size, false);
 
 	//protect
 	OS::mprotect(ptr, size, true, false, false);
@@ -80,7 +80,7 @@ TEST(TestOS, mprotect_read_write)
 	const size_t size = 10*UMMAP_PAGE_SIZE;
 
 	//map
-	char * ptr = (char*)OS::mmapProtNone(size);
+	char * ptr = (char*)OS::mmapProtNone(NULL, size, false);
 
 	//protect
 	OS::mprotect(ptr, size, true, true, false);

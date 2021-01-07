@@ -69,7 +69,7 @@ const std::string & Driver::getUri(void) const
 }
 
 /*******************  FUNCTION  *********************/
-void * Driver::directMmap(size_t size, size_t offset, bool read, bool write, bool exec)
+void * Driver::directMmap(void *addr, size_t size, size_t offset, bool read, bool write, bool exec, bool mapFixed)
 {
 	return NULL;
 }

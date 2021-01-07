@@ -64,7 +64,7 @@ void ummap_finalize(void)
 }
 
 /*******************  FUNCTION  *********************/
-void * ummap(size_t size, size_t segment_size, size_t storage_offset, int protection, int flags, ummap_driver_t * driver, ummap_policy_t * local_policy, const char * policy_group)
+void * ummap(void * addr, size_t size, size_t segment_size, size_t storage_offset, int protection, int flags, ummap_driver_t * driver, ummap_policy_t * local_policy, const char * policy_group)
 {
 	//check
 	assert(getGlobalhandler() != NULL);
@@ -79,7 +79,7 @@ void * ummap(size_t size, size_t segment_size, size_t storage_offset, int protec
 		policy_group_checked = "none";
 
 	//call & ret
-	return getGlobalhandler()->ummap(size, segment_size, storage_offset, protection, flags, driv, pol, policy_group_checked);
+	return getGlobalhandler()->ummap(addr, size, segment_size, storage_offset, protection, flags, driv, pol, policy_group_checked);
 }
 
 /*******************  FUNCTION  *********************/

@@ -52,13 +52,15 @@ class Driver
 		/**
 		 * Let the driver making the memory mapping. This is to be used
 		 * by direct access modes
+		 * @param addr Define the optional address where to map.
 		 * @param size Define the mapping size.
 		 * @param offset Define the offset in file.
 		 * @param read Accept read accesses
 		 * @param write Accept write accesses
+		 * @param mapFixed Force the mapping address to addr.
 		 * @return NULL if the caller has to do the mapping, an addresse otherwise.
 		**/
-		virtual void * directMmap(size_t size, size_t offset, bool read, bool write, bool exec);
+		virtual void * directMmap(void * addr, size_t size, size_t offset, bool read, bool write, bool exec, bool mapFixed);
 		/**
 		 * Let the driver maling the memory unmaping.
 		 * @param base Base addresse of the mapping.

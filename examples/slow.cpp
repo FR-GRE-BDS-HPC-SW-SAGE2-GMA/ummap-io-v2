@@ -42,7 +42,7 @@ int main(int argc, char ** argv)
 	printf(" - Mapping...\n");
 	ummap_driver_t * driver = ummap_driver_create_uri(driver_uri);
 	ummap_policy_t * policy = ummap_policy_create_uri(policy_uri, true);
-	char * ptr = (char*)ummap(size, segment_size, 0, PROT_READ|PROT_WRITE, 0, driver, policy, "none");
+	char * ptr = (char*)ummap(NULL, size, segment_size, 0, PROT_READ|PROT_WRITE, 0, driver, policy, "none");
 
 	//5 memset
 	int chunks = 20;

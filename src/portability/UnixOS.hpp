@@ -20,7 +20,7 @@ namespace ummapio
 struct UnixOS
 {
 	static void * mmapProtFull(size_t size, bool exec);
-	static void * mmapProtNone(size_t size);
+	static void * mmapProtNone(void * addr, size_t size, bool mapFixed);
 	static void munmap(void * ptr, size_t size);
 	static void mremapForced(void * oldPtr, size_t size, void * newPtr);
 	static void mprotect(void * ptr, size_t size, bool read, bool write, bool exec);

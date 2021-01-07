@@ -74,12 +74,12 @@ void CDriver::sync(void * ptr, size_t offset, size_t size)
 }
 
 /*******************  FUNCTION  *********************/
-void * CDriver::directMmap(size_t size, size_t offset, bool read, bool write, bool exec)
+void * CDriver::directMmap(void * addr, size_t size, size_t offset, bool read, bool write, bool exec, bool mapFixed)
 {
 	if (this->c_driver.direct_mmap == NULL)
 		return NULL;
 	else
-		return this->c_driver.direct_mmap(this->driver_data, size, offset, read, write, exec);
+		return this->c_driver.direct_mmap(addr, this->driver_data, size, offset, read, write, exec, mapFixed);
 }
 
 /*******************  FUNCTION  *********************/

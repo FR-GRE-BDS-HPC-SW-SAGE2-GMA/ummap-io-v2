@@ -22,6 +22,7 @@
 //internal
 #include "Policy.hpp"
 #include "Driver.hpp"
+#include "public-api/ummap.h"
 
 /********************  NAMESPACE  *******************/
 namespace ummapio
@@ -70,7 +71,7 @@ struct SegmentStatus
 class Mapping
 {
 	public:
-		Mapping(size_t size, size_t segmentSize, size_t storageOffset, int protection, Driver * driver, Policy * localPolicy = NULL, Policy * globalPolicy = NULL);
+		Mapping(void * addr, size_t size, size_t segmentSize, size_t storageOffset, int protection, int flags, Driver * driver, Policy * localPolicy = NULL, Policy * globalPolicy = NULL);
 		virtual ~Mapping(void);
 		void onSegmentationFault(void * address, bool isWrite);
 		void flush(bool sync);

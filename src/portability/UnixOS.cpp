@@ -22,14 +22,19 @@
 using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
-void * UnixOS::mmapProtNone(size_t size)
+void * UnixOS::mmapProtNone(void * addr, size_t size, bool mapFixed)
 {
 	//check
 	assert(size % UMMAP_PAGE_SIZE == 0);
 	assert(size > 0);
 
+	//flags
+	int flags = MAP_ANON | MAP_PRIVATE;
+	if (mapFixed)
+		flags |= MAP_FIXED;
+
 	//call
-	void * ptr = ::mmap(NULL, size, PROT_NONE, MAP_ANON | MAP_PRIVATE, 0, 0);
+	void * ptr = ::mmap(addr, size, PROT_NONE, flags, 0, 0);
 
 	//post check
 	assumeArg(ptr != MAP_FAILED, "Fail to call mmap with size=%1 : %2").arg(size).argStrErrno().end();
