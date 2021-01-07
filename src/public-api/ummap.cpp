@@ -274,6 +274,7 @@ void umsync(void * ptr, size_t size, bool evict)
 ummap_driver_t * ummap_driver_create_uri(const char * uri)
 {
 	Driver * driver = getGlobalhandler()->getUriHandler().buildDriver(uri);
+	driver->setAutoclean(true);
 	return (ummap_driver_t*)driver;
 }
 
