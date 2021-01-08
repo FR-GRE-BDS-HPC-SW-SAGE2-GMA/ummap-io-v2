@@ -26,13 +26,13 @@ class IocRessource : public Ressource
 		virtual ~IocRessource(void);
 		static void setRessourceInfo(const std::string & server, const std::string & port);
 		#ifdef HAVE_IOC_CLIENT
-			static struct ioc_client_t * getClient(void);
+			static ioc_client_t * getClient(void);
 		#endif
 	private:
 		static std::string server;
 		static std::string port;
 		#ifdef HAVE_IOC_CLIENT
-			static struct ioc_client_t * client;
+			static ioc_client_t * client;
 		#endif //HAVE_IOC_CLIENT
 };
 

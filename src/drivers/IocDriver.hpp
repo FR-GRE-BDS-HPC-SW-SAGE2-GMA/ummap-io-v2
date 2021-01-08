@@ -24,14 +24,14 @@ namespace ummapio
 class IocDriver : public Driver
 {
 	public:
-		IocDriver(struct ioc_client_t * client, int64_t high, int64_t low, bool create = true);
+		IocDriver(ioc_client_t * client, int64_t high, int64_t low, bool create = true);
 		virtual ~IocDriver(void) override;
 		virtual ssize_t pwrite(const void * buffer, size_t size, size_t offset) override;
 		virtual ssize_t pread(void * buffer, size_t size, size_t offset) override;
 		virtual void sync(void * ptr, size_t offset, size_t size) override;
 	private:
 		/** Keep track of the client struct to communicate. **/
-		struct ioc_client_t * client;
+		ioc_client_t * client;
 		/** High part of the object ID **/
 		int64_t high;
 		/** Low part of the object ID **/

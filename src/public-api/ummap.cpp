@@ -27,6 +27,7 @@
 	#include "../drivers/IocDriver.hpp"
 #endif
 #include "../policies/FifoPolicy.hpp"
+#include "../policies/FifoWindowPolicy.hpp"
 #include "../policies/LifoPolicy.hpp"
 #include "ummap.h"
 
@@ -83,7 +84,7 @@ void * ummap(void * addr, size_t size, size_t segment_size, size_t storage_offse
 }
 
 /*******************  FUNCTION  *********************/
-int umunmap(void * ptr, int sync)
+int umunmap(void * ptr, bool sync)
 {
 	//check
 	assert(getGlobalhandler() != NULL);
@@ -195,7 +196,7 @@ ummap_driver_t * ummap_driver_create_memory(size_t size)
 
 /*******************  FUNCTION  *********************/
 #ifdef HAVE_IOC_CLIENT
-	ummap_driver_t * ummap_driver_create_ioc(struct ioc_client_t * client, int64_t high, int64_t low, bool create)
+	ummap_driver_t * ummap_driver_create_ioc(ioc_client_t * client, int64_t high, int64_t low, bool create)
 	{
 		Driver * driver = new IocDriver(client, high, low, create);
 		driver->setAutoclean(true);
@@ -254,6 +255,13 @@ void ummap_policy_group_destroy(const char * name)
 ummap_policy_t * ummap_policy_create_fifo(size_t max_size, bool local)
 {
 	Policy * policy = new FifoPolicy(max_size, local);
+	return (ummap_policy_t*)policy;
+}
+
+/*******************  FUNCTION  *********************/
+ummap_policy_t * ummap_policy_create_fifo_window(size_t max_size, size_t window_size, bool local)
+{
+	Policy * policy = new FifoWindowPolicy(max_size, window_size, local);
 	return (ummap_policy_t*)policy;
 }
 
