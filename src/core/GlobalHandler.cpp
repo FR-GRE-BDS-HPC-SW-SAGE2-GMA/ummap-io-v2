@@ -244,7 +244,7 @@ void * GlobalHandler::ummap(void * addr, size_t size, size_t segmentSize, size_t
 	}
 
 	//create mapping
-	Mapping * mapping = new Mapping(NULL, size, segmentSize, storageOffset, protection, UMMAP_DEFAULT, driver, localPolicy, globalPolicy);
+	Mapping * mapping = new Mapping(NULL, size, segmentSize, storageOffset, protection, flags, driver, localPolicy, globalPolicy);
 	this->mappingRegistry.registerMapping(mapping);
 	
 	//return

@@ -145,7 +145,8 @@ Policy * UriHandler::buildPolicy(const std::string & uri, bool local)
 	}
 
 	//set
-	policy->setUri(realUri);
+	if (policy != NULL)
+		policy->setUri(realUri);
 
 	//ret
 	return policy;

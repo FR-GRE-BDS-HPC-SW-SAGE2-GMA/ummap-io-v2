@@ -55,7 +55,7 @@ int main(int argc, char **argv)
     void *baseptr = NULL;
 
     ummap_init();
-    baseptr = ummap(size, segsize, offset, PROT_READ|PROT_WRITE, 0, ummap_driver_create_clovis(id.u_hi, id.u_lo, false) , NULL, "none");
+    baseptr = ummap(NULL, size, segsize, offset, PROT_READ|PROT_WRITE, 0, ummap_driver_create_clovis(id.u_hi, id.u_lo, false) , NULL, "none");
     char *index = (char *)baseptr;
 
     // Write the whole object with 1GB of data in it
