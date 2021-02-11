@@ -6,6 +6,7 @@
 
 /********************  HEADERS  *********************/
 //internal
+#include "../common/Debug.hpp"
 #include "IocDriver.hpp"
 
 /********************  NAMESPACE  *******************/
@@ -42,4 +43,19 @@ ssize_t IocDriver::pread(void * buffer, size_t size, size_t offset)
 void IocDriver::sync(void * ptr, size_t offset, size_t size)
 {
 	ioc_client_obj_flush(this->client, this->high, this->low, offset, size);
+}
+
+/*******************  FUNCTION  *********************/
+int64_t IocDriver::establish_mapping(size_t offset, size_t size, bool write)
+{
+	int id = ioc_client_obj_range_register(this->client, this->high, this->low, offset, size, write);
+	assume(id >= 0, "Fail to register range to establish IOC mapping, conflict with another segment already in using on this range in non compatible write mode.");
+	return id;
+}
+
+/*******************  FUNCTION  *********************/
+void IocDriver::erase_mapping(int64_t data, size_t offset, size_t size, bool write)
+{
+	int res = ioc_client_obj_range_unregister(this->client, (int32_t)data, this->high, this->low, offset, size, write);
+	assume(res == 0, "Fail to unregister the given mapping on the IOC server !");
 }

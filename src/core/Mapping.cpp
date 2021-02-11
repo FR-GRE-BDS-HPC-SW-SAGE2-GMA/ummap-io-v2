@@ -51,6 +51,9 @@ Mapping::Mapping(void *addr, size_t size, size_t segmentSize, size_t storageOffs
 	assumeArg(mapSize % UMMAP_PAGE_SIZE == 0, "Size should be multiple of page size (%1), got '%2'").arg(UMMAP_PAGE_SIZE).arg(size).end();
 	assumeArg(mapSize % segmentSize == 0, "Size should be multiple of segment size (%1), got '%2'").arg(segmentSize).arg(size).end();
 
+	//pre check
+	this->mappingDriverId = driver->establish_mapping(storageOffset, size, protection & PROT_WRITE);
+
 	//warning
 	if (localPolicy != NULL && globalPolicy != NULL)
 		localPolicy->forceUsingGroupMutex(globalPolicy->getLocalMutex());
@@ -119,6 +122,9 @@ Mapping::Mapping(void *addr, size_t size, size_t segmentSize, size_t storageOffs
 **/
 Mapping::~Mapping(void)
 {
+	//unregister mapping
+	driver->erase_mapping(this->mappingDriverId, this->storageOffset, this->size, this->protection & PROT_WRITE);
+
 	//unmap
 	if (driver->directMunmap(this->baseAddress, size, storageOffset) == false)
 		OS::munmap(this->baseAddress, this->getAlignedSize());

@@ -76,6 +76,20 @@ class Driver
 		 * @param offset Define the offset in file.
 		**/
 		virtual bool directMSync(void * base, size_t size, size_t offset);
+		/**
+		 * Notify the driver that we stablish a new mapping 
+		 * @param offset Offset of the mapping in the storage.
+		 * @param size Size of the mapping.
+		 * @param write If the mapping is in write mode.
+		**/
+		virtual int64_t establish_mapping(size_t offset, size_t size, bool write);
+		/**
+		 * Notify the driver that erase a mapping 
+		 * @param offset Offset of the mapping in the storage.
+		 * @param size Size of the mapping.
+		 * @param write If the mapping is in write mode.
+		**/
+		virtual void erase_mapping(int64_t data, size_t offset, size_t size, bool write);
 		void setAutoclean(bool status = true);
 		bool hasAutoclean(void) const;
 		void setUri(const std::string & uri);

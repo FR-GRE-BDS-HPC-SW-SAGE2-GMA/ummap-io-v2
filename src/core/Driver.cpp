@@ -85,3 +85,15 @@ bool Driver::directMSync(void * base, size_t size, size_t offset)
 {
 	return false;
 }
+
+/*******************  FUNCTION  *********************/
+int64_t Driver::establish_mapping(size_t offset, size_t size, bool write)
+{
+	return 0;
+}
+
+/*******************  FUNCTION  *********************/
+void Driver::erase_mapping(int64_t data, size_t offset, size_t size, bool write)
+{
+	//nothing to do
+}

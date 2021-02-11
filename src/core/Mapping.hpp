@@ -123,6 +123,8 @@ class Mapping
 		size_t storageOffset;
 		/** Table of segment status.**/
 		SegmentStatus * segmentStatus;
+		/** Keep track of driver ID to identify the mapping. **/
+		int64_t mappingDriverId;
 		/** 
 		 * Table of mutex to protect the various segment. This avoid to contention on a uniq
 		 * mutex.

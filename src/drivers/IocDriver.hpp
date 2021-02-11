@@ -29,6 +29,8 @@ class IocDriver : public Driver
 		virtual ssize_t pwrite(const void * buffer, size_t size, size_t offset) override;
 		virtual ssize_t pread(void * buffer, size_t size, size_t offset) override;
 		virtual void sync(void * ptr, size_t offset, size_t size) override;
+		virtual int64_t establish_mapping(size_t offset, size_t size, bool write) override;
+		virtual void erase_mapping(int64_t data, size_t offset, size_t size, bool write) override;
 	private:
 		/** Keep track of the client struct to communicate. **/
 		ioc_client_t * client;
