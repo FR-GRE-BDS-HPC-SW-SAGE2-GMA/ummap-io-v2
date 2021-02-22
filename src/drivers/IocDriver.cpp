@@ -36,6 +36,11 @@ ssize_t IocDriver::pwrite(const void * buffer, size_t size, size_t offset)
 /*******************  FUNCTION  *********************/
 ssize_t IocDriver::pread(void * buffer, size_t size, size_t offset)
 {
+	//pre first-touch
+	for (size_t i = 0 ; i < size; i += 4096)
+		((char*)buffer)[i] = 0;
+
+	//read
 	return ioc_client_obj_read(this->client, this->high, this->low, buffer, size, offset);
 }
 
