@@ -258,7 +258,7 @@ void * GlobalHandler::ummap(void * addr, size_t size, size_t segmentSize, size_t
  * inside the targeted segments.
  * @param sync Apply a sync before unmapping the segment.
 **/
-int GlobalHandler::umunmap(void * ptr, bool sync)
+int GlobalHandler::uunmap(void * ptr, bool sync)
 {
 	//get mapping
 	Mapping * mapping = this->mappingRegistry.getMapping(ptr);

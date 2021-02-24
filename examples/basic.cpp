@@ -50,7 +50,7 @@ int main(int argc, char ** argv)
 
 	//unmap
 	printf(" - Unmapping...\n");
-	umunmap(ptr, 0);
+	uunmap(ptr, 0);
 
 	//fini
 	printf(" - Finalize...\n");

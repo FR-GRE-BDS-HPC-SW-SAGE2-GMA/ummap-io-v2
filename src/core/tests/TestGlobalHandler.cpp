@@ -212,7 +212,7 @@ TEST(TestGlobalHandler, mmap_and_unmap)
 	handler.ummap(NULL, 8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, 0, new DummyDriver(16), NULL, "none");
 
 	//destroy 1
-	ASSERT_EQ(0, handler.umunmap(ptr1,0 ));
+	ASSERT_EQ(0, handler.uunmap(ptr1,0 ));
 }
 
 /*******************  FUNCTION  *********************/
@@ -229,7 +229,7 @@ TEST(TestGlobalHandler, mmap_and_policy)
 	handler.ummap(NULL, 8*UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, 0, new DummyDriver(16), NULL, "global");
 
 	//destroy 1
-	ASSERT_EQ(0, handler.umunmap(ptr1, 0));
+	ASSERT_EQ(0, handler.uunmap(ptr1, 0));
 }
 
 

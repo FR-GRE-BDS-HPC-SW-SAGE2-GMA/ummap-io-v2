@@ -51,7 +51,7 @@ TEST_F(TestPublicAPI, map_unmap_simple)
 	memset(ptr1, 10, 8*4096);
 
 	//unmap 1 and let the other for cleaup
-	umunmap(ptr1, 0);
+	uunmap(ptr1, 0);
 }
 
 /*******************  FUNCTION  *********************/
@@ -66,7 +66,7 @@ TEST_F(TestPublicAPI, map_unmap_multi)
 	memset(ptr2, 10, 8*4096);
 
 	//unmap 1 and let the other for cleaup
-	umunmap(ptr1, 0);
+	uunmap(ptr1, 0);
 }
 
 /*******************  FUNCTION  *********************/
@@ -86,7 +86,7 @@ TEST_F(TestPublicAPI, map_driver_fopen)
 
 	//unmap 1 and let the other for cleaup
 	umsync(ptr1, 0, 0);
-	umunmap(ptr1, 0);
+	uunmap(ptr1, 0);
 
 	//check
 	FILE * fp = fopen(fname, "r");
@@ -120,7 +120,7 @@ TEST_F(TestPublicAPI, map_driver_dax_fopen)
 
 	//unmap 1 and let the other for cleaup
 	umsync(ptr1, 0, 0);
-	umunmap(ptr1, 0);
+	uunmap(ptr1, 0);
 
 	//check
 	FILE * fp = fopen(fname, "r");
@@ -159,7 +159,7 @@ TEST_F(TestPublicAPI, map_driver_fd)
 
 	//unmap 1 and let the other for cleaup
 	umsync(ptr1, 0, 0);
-	umunmap(ptr1, 0);
+	uunmap(ptr1, 0);
 
 	//check
 	fp = fopen(fname, "r");
@@ -198,7 +198,7 @@ TEST_F(TestPublicAPI, map_driver_dax_fd)
 
 	//unmap 1 and let the other for cleaup
 	umsync(ptr1, 0, 0);
-	umunmap(ptr1, 0);
+	uunmap(ptr1, 0);
 
 	//check
 	fp = fopen(fname, "r");
@@ -238,7 +238,7 @@ TEST_F(TestPublicAPI, map_driver_dax_fd_offset)
 
 	//unmap 1 and let the other for cleaup
 	umsync(ptr1, 0, 0);
-	umunmap(ptr1, 0);
+	uunmap(ptr1, 0);
 
 	//check
 	fp = fopen(fname, "r");
@@ -262,7 +262,7 @@ TEST_F(TestPublicAPI, map_driver_memory_ok)
 	memset(ptr1, 10, 8*4096);
 
 	//unmap 1 and let the other for cleaup
-	umunmap(ptr1, 0);
+	uunmap(ptr1, 0);
 }
 
 /*******************  FUNCTION  *********************/
@@ -272,7 +272,7 @@ TEST_F(TestPublicAPI, map_driver_memory_not_ok)
 	ASSERT_DEATH(memset(ptr1, 10, 8*4096),"overpass");
 
 	//unmap 1 and let the other for cleaup
-	umunmap(ptr1, 0);
+	uunmap(ptr1, 0);
 }
 
 /*******************  FUNCTION  *********************/
@@ -286,7 +286,7 @@ TEST_F(TestPublicAPI, map_driver_dummy)
 		ASSERT_EQ(10, ((char*)ptr1)[i]);
 
 	//unmap 1 and let the other for cleaup
-	umunmap(ptr1, 0);
+	uunmap(ptr1, 0);
 }
 
 /*******************  FUNCTION  *********************/
@@ -319,7 +319,7 @@ TEST_F(TestPublicAPI, policy_group)
 	memset(ptr1, 0 , 8*4096);
 
 	//unmap
-	umunmap(ptr1, 0);
+	uunmap(ptr1, 0);
 }
 
 /*******************  FUNCTION  *********************/
@@ -337,7 +337,7 @@ TEST_F(TestPublicAPI, lbm_bugguy_case_1)
 		((char*)ptr1)[i] = 34;
 
 	//unam
-	umunmap(ptr1, 0);
+	uunmap(ptr1, 0);
 }
 
 /*******************  FUNCTION  *********************/
@@ -355,7 +355,7 @@ void test_create_uri(const char * uri)
 		((char*)ptr1)[i] = 34;
 
 	//unam
-	umunmap(ptr1, 0);
+	uunmap(ptr1, 0);
 }
 
 /*******************  FUNCTION  *********************/

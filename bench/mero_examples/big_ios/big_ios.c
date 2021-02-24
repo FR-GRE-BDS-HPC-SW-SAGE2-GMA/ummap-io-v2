@@ -64,7 +64,7 @@ int main(int argc, char **argv)
         index[i] = 'A';
     }
     umsync(index, size, 0);
-    umunmap(index, 0);
+    uunmap(index, 0);
 
     ummap_finalize();
 
