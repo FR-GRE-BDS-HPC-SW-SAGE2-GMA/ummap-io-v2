@@ -195,14 +195,17 @@ ummap_driver_t * ummap_driver_create_memory(size_t size)
 }
 
 /*******************  FUNCTION  *********************/
-#ifdef HAVE_IOC_CLIENT
-	ummap_driver_t * ummap_driver_create_ioc(ioc_client_t * client, int64_t high, int64_t low, bool create)
-	{
+ummap_driver_t * ummap_driver_create_ioc(ioc_client_t * client, int64_t high, int64_t low, bool create)
+{
+	#ifdef HAVE_IOC_CLIENT
 		Driver * driver = new IocDriver(client, high, low, create);
 		driver->setAutoclean(true);
 		return (ummap_driver_t*)driver;
-	}
-#endif
+	#else
+		UMMAP_FATAL("Ummap-io was build without support of IOC, cannot create the requested driver !");
+		return NULL;
+	#endif
+}
 
 /*******************  FUNCTION  *********************/
 ummap_driver_t * ummap_driver_create_c(const ummap_c_driver_t * driver, void * driver_data)
@@ -334,4 +337,72 @@ void ummap_config_clovis_init_options(const char * ressource_file, int index)
 void ummap_config_ioc_init_options(const char * server, const char * port)
 {
 	IocRessource::setRessourceInfo(server, port);
+}
+
+/*******************  FUNCTION  *********************/
+int ummap_cow_ioc(void * addr, int64_t high, int64_t low, bool alloc_exist)
+{
+	#ifdef HAVE_IOC_CLIENT
+		//check
+		assert(addr != NULL);
+
+		//get mapping
+		Mapping * mapping = getGlobalhandler()->getMapping(addr);
+		assumeArg(mapping != NULL, "Fail to find the requested mapping for address %p !").arg(addr).end();
+
+		//get the driver
+		Driver * driver = mapping->getDriver();
+		assume(driver != NULL, "Get an unknown NULL driver !");
+
+		//try to cast to IOC driver
+		IocDriver * iocDriver = dynamic_cast<IocDriver*>(driver);
+		assume(iocDriver != NULL, "Get an invalid unknown driver type, not IOC, cannot COW !");
+
+		//call copy on write on the driver.
+		mapping->unregisterRange();
+		int status = iocDriver->cow(high, low, alloc_exist);
+		mapping->registerRange();
+
+		//return
+		return status;
+	#else
+		UMMAP_FATAL("Ummap-io was built without IOC support, cannot apply COW on the requested mapping !");
+		return -1;
+	#endif
+}
+
+/*******************  FUNCTION  *********************/
+int ummap_switch_ioc(void * addr, int64_t high, int64_t low, bool drop_clean)
+{
+	#ifdef HAVE_IOC_CLIENT
+		//check
+		assert(addr != NULL);
+
+		//get mapping
+		Mapping * mapping = getGlobalhandler()->getMapping(addr);
+		assumeArg(mapping != NULL, "Fail to find the requested mapping for address %p !").arg(addr).end();
+
+		//get the driver
+		Driver * driver = mapping->getDriver();
+		assume(driver != NULL, "Get an unknown NULL driver !");
+
+		//try to cast to IOC driver
+		IocDriver * iocDriver = dynamic_cast<IocDriver*>(driver);
+		assume(iocDriver != NULL, "Get an invalid unknown driver type, not IOC, cannot COW !");
+
+		//call copy on write on the driver.
+		mapping->unregisterRange();
+		iocDriver->switchDestination(high, low);
+		mapping->registerRange();
+
+		//if drop
+		if (drop_clean)
+			mapping->dropClean();
+
+		//return
+		return 0;
+	#else
+		UMMAP_FATAL("Ummap-io was built without IOC support, cannot apply COW on the requested mapping !");
+		return -1;
+	#endif
 }

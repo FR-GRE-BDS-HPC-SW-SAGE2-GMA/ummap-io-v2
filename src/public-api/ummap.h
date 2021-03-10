@@ -355,6 +355,30 @@ void ummap_config_clovis_init_options(const char * ressource_file, int index);
 **/
 void ummap_config_ioc_init_options(const char * server, const char * port);
 
+/*****************  COW OPERATIONS  *****************/
+/**
+ * Replace the underlying object with a copy on write version.
+ * @param addr An adress in the mapping to impact.
+ * @param high The high part of the new object ID.
+ * @param low The low pard of the new object ID.
+ * @param allow_exist Allow to COW on an object which already exist.
+ * @return 0 on success, negative value in case of error.
+ * @warning CAUTION, this does not support multiple mappings sharing the same driver.
+**/
+int ummap_cow_ioc(void * addr, int64_t high, int64_t low, bool alloc_exist);
+
+/****************  SWITCH OPERATIONS  ***************/
+/**
+ * Change the object ID of the given IOC driver to another object.
+ * @param addr An adress in the mapping to impact.
+ * @param high The high part of the next object ID.
+ * @param low The low part of the next object ID.
+ * @param reload_cloean If true drop the clean pages so they will be reloaded from the object.
+ * @return 0 on success, negative value on error.
+ * @warning CAUTION, this does not support multiple mappings sharing the same driver.
+**/
+int ummap_switch_ioc(void * addr, int64_t high, int64_t low, bool drop_clean);
+
 #ifdef __cplusplus
 }
 #endif

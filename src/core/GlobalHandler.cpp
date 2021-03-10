@@ -357,6 +357,20 @@ void GlobalHandler::flush(void * ptr, size_t size, bool evict)
 }
 
 /*******************  FUNCTION  *********************/
+Mapping * GlobalHandler::getMapping(void * addr)
+{
+	//check
+	assume(addr != NULL, "Get an invalid NULL address to get access to a mapping !");
+
+	//get mapping
+	Mapping * mapping = this->mappingRegistry.getMapping(addr);
+	assumeArg(mapping != NULL, "Fail to find the requested mapping for address %p !").arg(addr).end();
+
+	//ret
+	return mapping;
+}
+
+/*******************  FUNCTION  *********************/
 /**
  * Setup the global handler pointer.
  * @param handler Handler to register.

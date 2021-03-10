@@ -53,6 +53,7 @@ class GlobalHandler
 		bool onSegFault(void * addr, bool isWrite);
 		void deleteAllMappings(void);
 		UriHandler & getUriHandler(void);
+		Mapping * getMapping(void * addr);
 	private:
 		/** Registry of all active mappings in use. **/
 		MappingRegistry mappingRegistry;

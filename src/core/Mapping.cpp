@@ -51,13 +51,6 @@ Mapping::Mapping(void *addr, size_t size, size_t segmentSize, size_t storageOffs
 	assumeArg(mapSize % UMMAP_PAGE_SIZE == 0, "Size should be multiple of page size (%1), got '%2'").arg(UMMAP_PAGE_SIZE).arg(size).end();
 	assumeArg(mapSize % segmentSize == 0, "Size should be multiple of segment size (%1), got '%2'").arg(segmentSize).arg(size).end();
 
-	//pre check
-	this->mappingDriverId = driver->establish_mapping(storageOffset, size, protection & PROT_WRITE);
-
-	//warning
-	if (localPolicy != NULL && globalPolicy != NULL)
-		localPolicy->forceUsingGroupMutex(globalPolicy->getLocalMutex());
-
 	//set
 	this->driver = driver;
 	this->localPolicy = localPolicy;
@@ -66,6 +59,13 @@ Mapping::Mapping(void *addr, size_t size, size_t segmentSize, size_t storageOffs
 	this->size = size;
 	this->storageOffset = storageOffset;
 	this->threadSafe = true;
+
+	//pre check
+	this->registerRange();
+
+	//warning
+	if (localPolicy != NULL && globalPolicy != NULL)
+		localPolicy->forceUsingGroupMutex(globalPolicy->getLocalMutex());
 
 	//no thread safe
 	if (flags & UMMAP_THREAD_UNSAFE)
@@ -123,7 +123,7 @@ Mapping::Mapping(void *addr, size_t size, size_t segmentSize, size_t storageOffs
 Mapping::~Mapping(void)
 {
 	//unregister mapping
-	driver->erase_mapping(this->mappingDriverId, this->storageOffset, this->size, this->protection & PROT_WRITE);
+	this->unregisterRange();
 
 	//unmap
 	if (driver->directMunmap(this->baseAddress, size, storageOffset) == false)
@@ -145,6 +145,26 @@ Mapping::~Mapping(void)
 	//destroy driver dup()
 	if (this->driver->hasAutoclean())
 		delete this->driver;
+}
+
+/*******************  FUNCTION  *********************/
+/**
+ * Unregister the mapping range on the driver.
+**/
+void Mapping::unregisterRange(void)
+{
+	driver->erase_mapping(this->mappingDriverId, this->storageOffset, this->size, this->protection & PROT_WRITE);
+	this->mappingDriverId = -1;
+}
+
+/*******************  FUNCTION  *********************/
+/**
+ * Register the mapping range on the driver.
+**/
+void Mapping::registerRange(void)
+{
+	this->mappingDriverId = driver->establish_mapping(storageOffset, size, protection & PROT_WRITE);	
+	assume(this->mappingDriverId >= 0, "Faild to register range of the given mapping !");
 }
 
 /*******************  FUNCTION  *********************/
@@ -397,6 +417,45 @@ size_t Mapping::readWriteSize(size_t offset)
 
 /*******************  FUNCTION  *********************/
 /**
+ * Drop the clean pages from the memory.
+**/
+void Mapping::dropClean(void)
+{
+	//CRITICAL SECTION
+	{
+		//lock the whole segment
+		for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
+			this->segmentMutexes[i].lock();
+
+		//loop on all
+		for (size_t i = 0 ; i < this->segments ; i++) {
+			//get segment
+			SegmentStatus & status = this->segmentStatus[i];
+
+			//check if drop
+			if (status.mapped && status.dirty == false) {
+				//calc addr
+				void * addr = this->baseAddress + this->segmentSize * i;
+
+				//protect
+				OS::mprotect(addr, segmentSize, false, false, protection & PROT_EXEC);
+
+				//unamp
+				OS::madviseDontNeed(addr, segmentSize);
+
+				//mark unmapped
+				status.mapped = false;
+			}
+		}
+
+		//unlock the whole segment
+		for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
+			this->segmentMutexes[i].unlock();
+	}
+}
+
+/*******************  FUNCTION  *********************/
+/**
  * Apply a sync operation.
  * @param offset Sync from the given offset.
  * @param size Define the range of the memory to sync.
@@ -555,6 +614,14 @@ size_t Mapping::getSegmentSize(void) const
 	return this->segmentSize;
 }
 
+/*******************  FUNCTION  *********************/
+/**
+ * Return the address of the current driver in use.
+**/
+Driver * Mapping::getDriver(void)
+{
+	return this->driver;
+}
 
 /*******************  FUNCTION  *********************/
 #ifdef HAVE_HTOPML

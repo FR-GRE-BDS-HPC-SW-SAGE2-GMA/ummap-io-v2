@@ -134,6 +134,34 @@ TEST(TestMapping, storage_offset)
 }
 
 /*******************  FUNCTION  *********************/
+TEST(TestMapping, dropClean)
+{
+	//setup
+	size_t size = 8 * UMMAP_PAGE_SIZE;
+	GMockDriver driver;
+	Mapping mapping(NULL, size, UMMAP_PAGE_SIZE, 128, PROT_READ|PROT_WRITE, UMMAP_DEFAULT, &driver, NULL, NULL);
+
+	//get
+	char * ptr = (char*)mapping.getAddress();
+
+	//access
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 128)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	mapping.onSegmentationFault(ptr, false);
+
+	//access
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 128 + UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	mapping.onSegmentationFault(ptr+UMMAP_PAGE_SIZE, true);
+
+	//drop
+	mapping.dropClean();
+
+	//access again
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 128)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	mapping.onSegmentationFault(ptr, false);
+	mapping.onSegmentationFault(ptr+UMMAP_PAGE_SIZE, false);
+}
+
+/*******************  FUNCTION  *********************/
 TEST(TestMapping, storage_offset_and_non_full)
 {
 	//setup

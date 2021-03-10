@@ -85,6 +85,10 @@ class Mapping
 		size_t getAlignedSize(void) const;
 		size_t getSegmentSize(void) const;
 		void disableThreadSafety();
+		Driver * getDriver(void);
+		void unregisterRange(void);
+		void registerRange(void);
+		void dropClean(void);
 	public:
 		#ifdef HAVE_HTOPML
 		friend void convertToJson(htopml::JsonState & json,const Mapping & value);

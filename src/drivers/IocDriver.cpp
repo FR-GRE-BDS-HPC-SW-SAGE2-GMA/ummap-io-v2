@@ -64,3 +64,44 @@ void IocDriver::erase_mapping(int64_t data, size_t offset, size_t size, bool wri
 	int res = ioc_client_obj_range_unregister(this->client, (int32_t)data, this->high, this->low, offset, size, write);
 	assume(res == 0, "Fail to unregister the given mapping on the IOC server !");
 }
+
+/*******************  FUNCTION  *********************/
+/**
+ * Apply a copy on write operation on the current object handled by the driver and switched to it.
+ * @param high The high part of the new object ID.
+ * @param low The low part of the new object ID.
+ * @param allowExist Allow to cow on a pre-existing object.
+ * @return 0 on success, negative value on error.
+**/
+int IocDriver::cow(int64_t high, int64_t low, bool allowExist)
+{
+	//trivial
+	if (this->high == high && this->low == low)
+		return 0;
+	
+	//aooly cow
+	int status = ioc_client_obj_cow(this->client, this->high, this->low, high, low, allowExist);
+	assumeArg(status == 0, "Failed to apply COW (%1:%2 -> %2:%3) operation of the given driver !")
+		.arg(this->high).arg(this->low)
+		.arg(high).arg(low)
+		.end();
+
+	//remember new ID
+	this->high = high;
+	this->low = low;
+
+	//ret
+	return status;
+}
+
+/*******************  FUNCTION  *********************/
+/**
+ * Switch the current object ID without more actions.
+ * @param high The high part of the new object ID.
+ * @param low The low part of the new object ID.
+**/
+void IocDriver::switchDestination(int64_t high, int64_t low)
+{
+	this->high = high;
+	this->low = low;
+}
