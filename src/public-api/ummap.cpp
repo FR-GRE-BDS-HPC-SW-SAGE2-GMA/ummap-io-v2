@@ -340,7 +340,13 @@ void ummap_config_ioc_init_options(const char * server, const char * port)
 }
 
 /*******************  FUNCTION  *********************/
-int ummap_cow_ioc(void * addr, int64_t high, int64_t low, bool alloc_exist)
+int ummap_cow_uri(void * addr, const char * uri, bool allow_exist)
+{
+	return getGlobalhandler()->getUriHandler().applyCow(addr, uri, allow_exist);
+}
+
+/*******************  FUNCTION  *********************/
+int ummap_cow_ioc(void * addr, int64_t high, int64_t low, bool allow_exist)
 {
 	#ifdef HAVE_IOC_CLIENT
 		//check
@@ -360,7 +366,7 @@ int ummap_cow_ioc(void * addr, int64_t high, int64_t low, bool alloc_exist)
 
 		//call copy on write on the driver.
 		mapping->unregisterRange();
-		int status = iocDriver->cow(high, low, alloc_exist);
+		int status = iocDriver->cow(high, low, allow_exist);
 		mapping->registerRange();
 
 		//return
@@ -405,4 +411,10 @@ int ummap_switch_ioc(void * addr, int64_t high, int64_t low, bool drop_clean)
 		UMMAP_FATAL("Ummap-io was built without IOC support, cannot apply COW on the requested mapping !");
 		return -1;
 	#endif
+}
+
+/*******************  FUNCTION  *********************/
+int ummap_switch_uri(void * addr, const char * uri, bool drop_clean)
+{
+	return getGlobalhandler()->getUriHandler().applySwitch(addr, uri, drop_clean);
 }

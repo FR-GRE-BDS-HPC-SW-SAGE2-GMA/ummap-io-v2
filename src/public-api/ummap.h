@@ -365,7 +365,16 @@ void ummap_config_ioc_init_options(const char * server, const char * port);
  * @return 0 on success, negative value in case of error.
  * @warning CAUTION, this does not support multiple mappings sharing the same driver.
 **/
-int ummap_cow_ioc(void * addr, int64_t high, int64_t low, bool alloc_exist);
+int ummap_cow_ioc(void * addr, int64_t high, int64_t low, bool allow_exist);
+/**
+ * Replace the underlying object with a copy on write version.
+ * @param addr An adress in the mapping to impact.
+ * @param uri The new URI to apply on the driver.
+ * @param allow_exist Allow to COW on an object which already exist.
+ * @return 0 on success, negative value in case of error.
+ * @warning CAUTION, this does not support multiple mappings sharing the same driver.
+**/
+int ummap_cow_uri(void * addr, const char * uri, bool allow_exist);
 
 /****************  SWITCH OPERATIONS  ***************/
 /**
@@ -373,11 +382,20 @@ int ummap_cow_ioc(void * addr, int64_t high, int64_t low, bool alloc_exist);
  * @param addr An adress in the mapping to impact.
  * @param high The high part of the next object ID.
  * @param low The low part of the next object ID.
- * @param reload_cloean If true drop the clean pages so they will be reloaded from the object.
+ * @param drop_clean If true drop the clean pages so they will be reloaded from the object.
  * @return 0 on success, negative value on error.
  * @warning CAUTION, this does not support multiple mappings sharing the same driver.
 **/
 int ummap_switch_ioc(void * addr, int64_t high, int64_t low, bool drop_clean);
+/**
+ * Replace the underlying object with a copy on write version.
+ * @param addr An adress in the mapping to impact.
+ * @param uri The new URI to apply on the driver.
+ * @param drop_clean If true drop the clean pages so they will be reloaded from the object.
+ * @return 0 on success, negative value in case of error.
+ * @warning CAUTION, this does not support multiple mappings sharing the same driver.
+**/
+int ummap_switch_uri(void * addr, const char * uri, bool drop_clean);
 
 #ifdef __cplusplus
 }

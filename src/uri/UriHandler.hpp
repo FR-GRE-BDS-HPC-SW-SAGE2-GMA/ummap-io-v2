@@ -32,12 +32,15 @@ class UriHandler
 		void registerVariable(const std::string & name, size_t value);
 		Driver * buildDriver(const std::string & uri);
 		Policy * buildPolicy(const std::string & uri, bool local);
+		int applyCow(void * addr, const std::string & uri, bool allowExist);
+		int applySwitch(void * addr, const std::string & uri, bool dropClean);
 		std::string replaceVariables(std::string value);
 	private:
 		Driver * buildDriverFOpen(const std::string & fname, const std::string & mode);
 		Driver * buildDriverFOpenMmap(const std::string & fname, const std::string & mode);
 		Driver * buildDriverMero(const Uri & uri);
 		Driver * buildDriverIoc(const Uri & uri);
+		ObjectId getIocObjectId(const Uri & uri);
 	private:
 		std::mutex variablesMutes;
 		std::map<std::string, std::string> variables;

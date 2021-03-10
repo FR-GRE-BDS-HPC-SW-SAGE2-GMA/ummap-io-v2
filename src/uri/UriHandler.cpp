@@ -23,6 +23,7 @@
 #include "../policies/FifoPolicy.hpp"
 #include "../policies/FifoWindowPolicy.hpp"
 #include "../policies/LifoPolicy.hpp"
+#include "../public-api/ummap.h"
 #include "MeroRessource.hpp"
 #include "IocRessource.hpp"
 #include "Uri.hpp"
@@ -67,6 +68,63 @@ void UriHandler::registerVariable(const std::string & name, size_t value)
 		this->variablesMutes.lock();
 		this->variables[name] = buffer;
 		this->variablesMutes.unlock();
+	}
+}
+
+/*******************  FUNCTION  *********************/
+/**
+ * Apply the copy on write operation on the given address for the given new URI.
+ * @param addr An adress in the mapping to impact.
+ * @param uri The new URI to apply on the driver.
+ * @param allow_exist Allow to COW on an object which already exist.
+ * @return 0 on success, negative value on error.
+**/
+int UriHandler::applyCow(void * addr, const std::string & uri, bool allowExist)
+{
+	//check
+	assert(uri.empty() == false);
+
+	//replace
+	std::string realUri = this->replaceVariables(uri);
+
+	//parse
+	Uri parser(realUri);
+
+	//cases
+	std::string type = parser.getType();
+
+	//apply
+	if (type == "meroioc" || type == "clovisioc" || type == "ioc" || type == "iocfile" ) {
+		ObjectId id = getIocObjectId(uri);
+		return ummap_cow_ioc(addr, id.high, id.low, allowExist);
+	} else {
+		UMMAP_FATAL_ARG("Invalid ressource type to run COW operation : %1").arg(uri).end();
+		return -1;
+	}
+}
+
+/*******************  FUNCTION  *********************/
+int UriHandler::applySwitch(void * addr, const std::string & uri, bool dropClean)
+{
+		//check
+	assert(uri.empty() == false);
+
+	//replace
+	std::string realUri = this->replaceVariables(uri);
+
+	//parse
+	Uri parser(realUri);
+
+	//cases
+	std::string type = parser.getType();
+
+	//apply
+	if (type == "meroioc" || type == "clovisioc" || type == "ioc" || type == "iocfile" ) {
+		ObjectId id = getIocObjectId(uri);
+		return ummap_switch_ioc(addr, id.high, id.low, dropClean);
+	} else {
+		UMMAP_FATAL_ARG("Invalid ressource type to run switch operation : %1").arg(uri).end();
+		return -1;
 	}
 }
 
@@ -261,15 +319,15 @@ Driver * UriHandler::buildDriverMero(const Uri & uri)
 }
 
 /*******************  FUNCTION  *********************/
-//ioc://1234:1234
-Driver * UriHandler::buildDriverIoc(const Uri & uri)
+ObjectId UriHandler::getIocObjectId(const Uri & uri)
 {
-	//check
-	assert(uri.getType() == "meroioc" || uri.getType() == "clovisioc" || uri.getType() == "ioc" || uri.getType() == "iocfile");
-
-	//id
+	//vars
 	ObjectId id;
+
+	//get path
 	const std::string & path = uri.getPath();
+
+	//cases
 	if (path == "auto") {
 		const std::string & listing = uri.getParam("listing");
 		const std::string & name = uri.getParam("name");
@@ -280,8 +338,21 @@ Driver * UriHandler::buildDriverIoc(const Uri & uri)
 		UMMAP_FATAL_ARG("Invalid object ID in mero URI : %1")
 			.arg(uri.getURI())
 			.end();
-		return NULL;
 	}
+
+	//ret
+	return id;
+}
+
+/*******************  FUNCTION  *********************/
+//ioc://1234:1234
+Driver * UriHandler::buildDriverIoc(const Uri & uri)
+{
+	//check
+	assert(uri.getType() == "meroioc" || uri.getType() == "clovisioc" || uri.getType() == "ioc" || uri.getType() == "iocfile");
+
+	//id
+	ObjectId id = this->getIocObjectId(uri);
 
 	//init mero
 	this->ressourceHandler.checkRessource<IocRessource>("ioc");
