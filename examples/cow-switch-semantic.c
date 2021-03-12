@@ -16,10 +16,9 @@
 
 /*********************  CONSTS  *********************/
 //consts
-const size_t SEGMENTS = 16;
-const size_t SEGMENT_SIZE = 1024*1024;
-const size_t SIZE = SEGMENTS * SEGMENT_SIZE;
-
+#define SEGMENTS 16
+#define SEGMENT_SIZE (1024*1024)
+#define SIZE (SEGMENTS * SEGMENT_SIZE)
 
 /*******************  FUNCTION  *********************/
 void fill_segment(char * ptr, size_t seg_id, int value)
@@ -30,7 +29,8 @@ void fill_segment(char * ptr, size_t seg_id, int value)
 /*******************  FUNCTION  *********************/
 void check_segment(char * ptr, size_t seg_id, int value)
 {
-	for (size_t i = 0 ; i < SEGMENT_SIZE ; i++) {
+	size_t i;
+	for (i = 0 ; i < SEGMENT_SIZE ; i++) {
 		const size_t index = seg_id * SEGMENT_SIZE + i;
 		const int cur = ptr[index];
 		if (cur != value) {
@@ -44,14 +44,15 @@ void check_segment(char * ptr, size_t seg_id, int value)
 int main(int argc, char ** argv)
 {
 	//check
-	if (argc < 3) {
-		printf("%s {orig_uri} {cow_uri}\n", argv[0]);
+	if (argc < 4) {
+		printf("%s {server_addr} {orig_uri} {cow_uri}\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 
 	//extract
-	const char * orig_uri = argv[1];
-	const char * cow_uri = argv[2];
+	const char * server_addr = argv[1];
+	const char * orig_uri = argv[2];
+	const char * cow_uri = argv[3];
 	const char * switch_uri = orig_uri;
 
 	//init
@@ -59,7 +60,7 @@ int main(int argc, char ** argv)
 	ummap_init();
 
 	//setup config
-	ummap_config_ioc_init_options("localhost", "8556");
+	ummap_config_ioc_init_options(server_addr, "8556");
 
 	////////////////////////////// STEP 1 : map & fill ////////////////////////////////
 	//map orig

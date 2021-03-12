@@ -19,10 +19,9 @@
 
 /*********************  CONSTS  *********************/
 //consts
-const size_t SEGMENTS = 512;
-const size_t SEGMENT_SIZE = 1024*1024;
-const size_t SIZE = SEGMENTS * SEGMENT_SIZE;
-
+#define SEGMENTS 1024
+#define SEGMENT_SIZE (1024*1024)
+#define SIZE (SEGMENTS * SEGMENT_SIZE)
 
 /*******************  FUNCTION  *********************/
 void fill_segment(char * ptr, size_t seg_id, size_t cnt, int value)
@@ -33,7 +32,8 @@ void fill_segment(char * ptr, size_t seg_id, size_t cnt, int value)
 /*******************  FUNCTION  *********************/
 void check_segment(char * ptr, size_t seg_id, size_t cnt, int value)
 {
-	for (size_t i = 0 ; i < SEGMENT_SIZE * cnt ; i++) {
+	size_t i;
+	for (i = 0 ; i < SEGMENT_SIZE * cnt ; i++) {
 		const size_t index = seg_id * SEGMENT_SIZE + i;
 		const int cur = ptr[index];
 		if (cur != value) {
@@ -55,22 +55,23 @@ void check_segment(char * ptr, size_t seg_id, size_t cnt, int value)
 int main(int argc, char ** argv)
 {
 	//check
-	if (argc < 4) {
-		printf("%s {orig_uri} {copy_uri} {cow_uri}\n", argv[0]);
+	if (argc < 5) {
+		printf("%s {server_addr} {orig_uri} {copy_uri} {switch_uri}\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 
 	//extract
-	const char * orig_uri = argv[1];
-	const char * copy_uri = argv[2];
-	const char * cow_uri = argv[3];
+	const char * server_addr = argv[1];
+	const char * orig_uri = argv[2];
+	const char * copy_uri = argv[3];
+	const char * switch_uri = argv[4];
 
 	//init
 	printf(" - Init...\n");
 	ummap_init();
 
 	//setup config
-	ummap_config_ioc_init_options("localhost", "8556");
+	ummap_config_ioc_init_options(server_addr, "8556");
 
 	////////////////////////////// STEP 1 : map & fill ////////////////////////////////
 	//map orig
@@ -80,11 +81,12 @@ int main(int argc, char ** argv)
 
 	//memset & unamp sync
 	MEASURE("memset", memset(ptr, 10, SIZE));
+	MEASURE("umsync", umsync(ptr, 0,false));
 	MEASURE("uunmap", uunmap(ptr, true));
 
 	////////////////////////// STEP 2 : map & check & write touch //////////////////////
 	//remap to access just a part
-	printf (" - Remap to write just a part...\n");
+	printf (" - Remap to write just a part to make it dirty...\n");
 	driver = ummap_driver_create_uri(orig_uri);
 	ptr = (char*)ummap(NULL, SIZE, SEGMENT_SIZE, 0, PROT_READ | PROT_WRITE, 0, driver, NULL, "none");
 
@@ -102,17 +104,19 @@ int main(int argc, char ** argv)
 	MEASURE("memcpy 1/3->1/3", memcpy(ptr_copy, ptr + SIZE / 3, SIZE / 3));
 	MEASURE("fill_segment 1/3->2/3", fill_segment(ptr_copy, SEGMENTS / 3, SEGMENTS / 3, 30));
 	MEASURE("fill_segment 1/3->2/3", fill_segment(ptr_copy, SEGMENTS / 3, SEGMENTS / 3, 30));
+	MEASURE("umsync", umsync(ptr_copy, 0,false));
 	MEASURE("uunmap", uunmap(ptr_copy, true));
 
-	//////////////////////// STEP 4: make a cow and flush /////////////////////////////
-	printf (" - Make a COW copy...\n");
+	//////////////////////// STEP 4: make a switch and flush //////////////////////////
+	printf (" - Make a SWITCH copy...\n");
 
-	//make cow
-	MEASURE("make cow", ummap_switch_uri(ptr, cow_uri, true));
+	//make switch
+	MEASURE("make switch", ummap_switch_uri(ptr, switch_uri, true));
 
 	//copy
 	MEASURE("fill_segment 1/3->2/3", fill_segment(ptr, SEGMENTS / 3, SEGMENTS / 3, 30));
 	MEASURE("fill_segment 1/3->2/3", fill_segment(ptr, SEGMENTS / 3, SEGMENTS / 3, 30));
+	MEASURE("umsync", umsync(ptr, 0,false));
 
 	///////////////////// STEP 5 : unmap orig ////////////////////////////////////////
 	printf (" - Unmap orig\n");
