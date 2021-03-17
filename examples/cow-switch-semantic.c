@@ -66,7 +66,7 @@ int main(int argc, char ** argv)
 	//map orig
 	printf(" - Mapping orig step 1...\n");
 	ummap_driver_t * driver = ummap_driver_create_uri(orig_uri);
-	char * ptr = (char*)ummap(NULL, SIZE, SEGMENT_SIZE, 0, PROT_READ | PROT_WRITE, 0, driver, NULL, "none");
+	char * ptr = (char*)ummap(NULL, SIZE, SEGMENT_SIZE, 0, PROT_READ | PROT_WRITE, UMMAP_NO_FIRST_READ, driver, NULL, "none");
 
 	//memset & unamp sync
 	memset(ptr, 10, SIZE);

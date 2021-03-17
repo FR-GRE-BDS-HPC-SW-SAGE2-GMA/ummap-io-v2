@@ -78,7 +78,7 @@ int main(int argc, char ** argv)
 	//map orig
 	printf(" - Mapping orig step 1...\n");
 	ummap_driver_t * driver = ummap_driver_create_uri(orig_uri);
-	char * ptr = (char*)ummap(NULL, SIZE, SEGMENT_SIZE, 0, PROT_READ | PROT_WRITE, 0, driver, NULL, "none");
+	char * ptr = (char*)ummap(NULL, SIZE, SEGMENT_SIZE, 0, PROT_READ | PROT_WRITE, UMMAP_NO_FIRST_READ, driver, NULL, "none");
 
 	//memset & unamp sync
 	MEASURE("memset", memset(ptr, 10, SIZE));
@@ -118,9 +118,6 @@ int main(int argc, char ** argv)
 	MEASURE("fill_segment 1/3->2/3", fill_segment(ptr, SEGMENTS / 3, SEGMENTS / 3, 30));
 	MEASURE("fill_segment 1/3->2/3", fill_segment(ptr, SEGMENTS / 3, SEGMENTS / 3, 30));
 	MEASURE("umsync", umsync(ptr, 0,false));
-
-	///////////////////// STEP 5 : unmap orig ////////////////////////////////////////
-	printf (" - Unmap orig\n");
 	MEASURE("uunmap", uunmap(ptr, true));
 
 	//fini
