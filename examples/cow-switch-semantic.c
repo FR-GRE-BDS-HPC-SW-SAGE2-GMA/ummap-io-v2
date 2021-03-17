@@ -69,7 +69,7 @@ int main(int argc, char ** argv)
 
 	//memset & unamp sync
 	memset(ptr, 10, SIZE);
-	uunmap(ptr, true);
+	umunmap(ptr, true);
 
 	////////////////////////// STEP 2 : map & check & write touch //////////////////////
 	//remap to access just a part
@@ -90,7 +90,7 @@ int main(int argc, char ** argv)
 	check_segment(ptr, 5, 10);
 
 	//unmap & flush
-	uunmap(ptr, true);
+	umunmap(ptr, true);
 
 	/////////////////////////////// STEP 4 : remap cow & check /////////////////////////
 	//mmap & check
@@ -113,7 +113,7 @@ int main(int argc, char ** argv)
 	check_segment(ptr, 4, 10);
 	check_segment(ptr, 5, 10);
 	check_segment(ptr, 8, 30);
-	uunmap(ptr, true);
+	umunmap(ptr, true);
 
 	////////////////////////////// STEP 6 : remap orig & final check /////////////////////
 	driver = ummap_driver_create_uri(switch_uri);
@@ -123,7 +123,7 @@ int main(int argc, char ** argv)
 	check_segment(ptr, 4, 10);
 	check_segment(ptr, 5, 10);
 	check_segment(ptr, 8, 30);
-	uunmap(ptr, false);
+	umunmap(ptr, false);
 
 	//fini
 	printf(" - Finalize...\n");

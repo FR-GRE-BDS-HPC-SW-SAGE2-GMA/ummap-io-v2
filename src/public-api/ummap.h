@@ -150,7 +150,7 @@ void * ummap(void * addr, size_t size, size_t segment_size, size_t storage_offse
  * @param ptr Base address of the mapping or an address inside the mapping.
  * @param sync If true make a synchronization by flusing data before unmapping or not if false.
 **/
-int uunmap(void * ptr, bool sync);
+int umunmap(void * ptr, bool sync);
 /**
  * Apply a sync operation to flush data to the storage.
  * @param ptr Base address of the mapping or an address inside the mapping.
