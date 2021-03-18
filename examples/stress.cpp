@@ -65,7 +65,7 @@ int main(int argc, char ** argv)
 
 		//unmap
 		printf(" - Unmapping...\n");
-		uunmap(ptr, 0);
+		umunmap(ptr, 0);
 	}
 
 	//fini

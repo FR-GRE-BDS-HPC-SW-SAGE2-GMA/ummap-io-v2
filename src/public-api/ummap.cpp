@@ -84,7 +84,7 @@ void * ummap(void * addr, size_t size, size_t segment_size, size_t storage_offse
 }
 
 /*******************  FUNCTION  *********************/
-int uunmap(void * ptr, bool sync)
+int umunmap(void * ptr, bool sync)
 {
 	//check
 	assert(getGlobalhandler() != NULL);
