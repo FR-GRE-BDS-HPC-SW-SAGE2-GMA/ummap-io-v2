@@ -61,6 +61,7 @@ class GlobalHandler
 		UriHandler & getUriHandler(void);
 		Mapping * getMapping(void * addr);
 		template <class T> int applyCow(const char * driverName, void * addr, std::function<int(Mapping * mapping, T * driver)> action);
+		template <class T> int applySwitch(const char * driverName, void * addr, bool dropClean, std::function<void(T * driver)> action);
 	private:
 		/** Registry of all active mappings in use. **/
 		MappingRegistry mappingRegistry;
@@ -108,6 +109,37 @@ int GlobalHandler::applyCow(const char * driverName, void * addr, std::function<
 
 	//return
 	return status;
+}
+
+template <class T>
+int GlobalHandler::applySwitch(const char * driverName, void * addr, bool dropClean, std::function<void(T * driver)> action)
+{
+	//check
+	assert(addr != NULL);
+
+	//get mapping
+	Mapping * mapping = getGlobalhandler()->getMapping(addr);
+	assumeArg(mapping != NULL, "Fail to find the requested mapping for address %p !").arg(addr).end();
+
+	//get the driver
+	Driver * driver = mapping->getDriver();
+	assume(driver != NULL, "Get an unknown NULL driver !");
+
+	//try to cast to IOC driver
+	T * castDriver = dynamic_cast<T*>(driver);
+	assumeArg(castDriver != NULL, "Get an invalid unknown driver type, not %1, cannot COW !").arg(driverName).end();
+
+	//call copy on write on the driver.
+	mapping->unregisterRange();
+	action(castDriver);
+	mapping->registerRange();
+
+	//if drop
+	if (dropClean)
+		mapping->dropClean();
+
+	//return
+	return 0;
 }
 
 }
