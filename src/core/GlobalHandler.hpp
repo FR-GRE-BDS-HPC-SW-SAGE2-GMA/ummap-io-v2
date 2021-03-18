@@ -8,8 +8,14 @@
 #define UMMAP_GLOBAL_HANDLER_HPP
 
 /********************  HEADERS  *********************/
+//std
+#include <cassert>
 #include <map>
+#include <functional>
+//unix
 #include <signal.h>
+//internal
+#include "common/Debug.hpp"
 #include "MappingRegistry.hpp"
 #include "PolicyRegistry.hpp"
 #include "../uri/UriHandler.hpp"
@@ -54,6 +60,7 @@ class GlobalHandler
 		void deleteAllMappings(void);
 		UriHandler & getUriHandler(void);
 		Mapping * getMapping(void * addr);
+		template <class T> int applyCow(const char * driverName, void * addr, std::function<int(Mapping * mapping, T * driver)> action);
 	private:
 		/** Registry of all active mappings in use. **/
 		MappingRegistry mappingRegistry;
@@ -74,6 +81,34 @@ void segfaultHandler(int sig, siginfo_t *si, void *context);
 void setGlobalHandler(GlobalHandler * handler);
 void clearGlobalHandler(void);
 GlobalHandler * getGlobalhandler(void);
+
+/*******************  FUNCTION  *********************/
+template <class T> 
+int GlobalHandler::applyCow(const char * driverName, void * addr, std::function<int(Mapping * mapping, T * driver)> action)
+{
+	//check
+	assert(addr != NULL);
+
+	//get mapping
+	Mapping * mapping = getGlobalhandler()->getMapping(addr);
+	assumeArg(mapping != NULL, "Fail to find the requested mapping for address %p !").arg(addr).end();
+
+	//get the driver
+	Driver * driver = mapping->getDriver();
+	assume(driver != NULL, "Get an unknown NULL driver !");
+
+	//try to cast to IOC driver
+	T * castDriver = dynamic_cast<T*>(driver);
+	assumeArg(castDriver != NULL, "Get an invalid unknown driver type, not %1, cannot COW !").arg(driverName).end();
+
+	//call copy on write on the driver.
+	mapping->unregisterRange();
+	int status = action(mapping, castDriver);
+	mapping->registerRange();
+
+	//return
+	return status;
+}
 
 }
 
