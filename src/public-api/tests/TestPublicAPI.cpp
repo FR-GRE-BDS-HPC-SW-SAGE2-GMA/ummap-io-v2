@@ -377,6 +377,42 @@ TEST_F(TestPublicAPI, create_policy_uri)
 }
 
 /*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, cow_fopen)
+{
+	//driver
+	const size_t segmentSize = 4096;
+	const size_t size = 8*segmentSize;
+
+	//create & memset
+	ummap_driver_t * driver = ummap_driver_create_fopen("/tmp/ummap-io-api-test-cow-fopen-1.raw", "w+");
+	void * ptr = ummap(NULL, size, segmentSize, 0, PROT_READ|PROT_WRITE, 0, driver, NULL, "none");
+	memset(ptr, 1, size);
+	umsync(ptr, size, false);
+
+	//cow
+	int status = ummap_cow_fopen(ptr, "/tmp/ummap-io-api-test-cow-fopen-2.raw", "w+", true);
+	ASSERT_EQ(0, status);
+
+	//write again & flush
+	memset(ptr, 2, size/2);
+	umunmap(ptr, true);
+
+	//map again orign & check
+	ummap_driver_t * driver2 = ummap_driver_create_fopen("/tmp/ummap-io-api-test-cow-fopen-1.raw", "r");
+	char* ptr2 = (char*)ummap(NULL, size, segmentSize, 0, PROT_READ, 0, driver2, NULL, "none");
+	for (size_t i = 0 ; i < size ; i++)
+		ASSERT_EQ(1, ptr2[i]);
+	
+	//map again orign & check
+	ummap_driver_t * driver3 = ummap_driver_create_fopen("/tmp/ummap-io-api-test-cow-fopen-2.raw", "r");
+	char * ptr3 = (char*)ummap(NULL, size, segmentSize, 0, PROT_READ, 0, driver3, NULL, "none");
+	for (size_t i = 0 ; i < size / 2 ; i++)
+		ASSERT_EQ(2, ptr3[i]);
+	for (size_t i = size / 2 ; i < size ; i++)
+		ASSERT_EQ(1, ptr3[i]);
+}
+
+/*******************  FUNCTION  *********************/
 TEST_F(TestPublicAPI, cow_uri)
 {
 	//vars

@@ -367,6 +367,16 @@ void ummap_config_ioc_init_options(const char * server, const char * port);
 **/
 int ummap_cow_fopen(void * addr, const char * file_path, const char * mode, bool allow_exist);
 /**
+ * Replace the underlying file with a copy version.
+ * @param addr An adress in the mapping to impact.
+ * @param fd File descriptor to be used to access to the file. It will make a dup()
+ * so you can safely close the file descriptor on your side.
+ * @param allow_exist Allow to COW on an object which already exist.
+ * @return 0 on success, negative value in case of error.
+ * @warning CAUTION, this does not support multiple mappings sharing the same driver.
+**/
+int ummap_cow_fd(void * addr, int fd, bool allow_exist);
+/**
  * Replace the underlying object with a copy on write version.
  * @param addr An adress in the mapping to impact.
  * @param high The high part of the new object ID.

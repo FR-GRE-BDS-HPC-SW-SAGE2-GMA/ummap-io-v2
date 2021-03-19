@@ -39,16 +39,16 @@ FDDriver::~FDDriver(void)
 }
 
 /*******************  FUNCTION  *********************/
-void FDDriver::setFd(int fd)
+void FDDriver::setFd(int newFd)
 {
 	//check
-	assert(fd > 0);
+	assert(newFd > 0);
 
 	//close old
-	close(fd);
+	close(this->fd);
 
 	//dup and set
-	int dupFD = ::dup(fd);
+	int dupFD = ::dup(newFd);
 	assumeArg(dupFD > 0, "Fail to dup() the file descriptor : %1").argStrErrno().end();
 	this->fd = dupFD;
 }
