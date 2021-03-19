@@ -91,6 +91,7 @@ class Mapping
 		void registerRange(void);
 		void dropClean(void);
 		void copyToDriver(Driver * newDriver, size_t storageSize);
+		void directMmapCow(Driver * newDriver);
 	public:
 		#ifdef HAVE_HTOPML
 		friend void convertToJson(htopml::JsonState & json,const Mapping & value);

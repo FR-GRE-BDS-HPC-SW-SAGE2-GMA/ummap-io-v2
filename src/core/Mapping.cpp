@@ -148,6 +148,23 @@ Mapping::~Mapping(void)
 }
 
 /*******************  FUNCTION  *********************/
+void Mapping::directMmapCow(Driver * newDriver)
+{
+	//allocate a new one
+	char * newAddr = (char*)newDriver->directMmap(this->baseAddress, this->size, this->storageOffset, this->protection & PROT_READ, this->protection & PROT_WRITE, this->protection & PROT_EXEC, false);
+	assume(newAddr != NULL, "Try to call directMmapCow() on a driver not supporting direct mmap !");
+
+	//copy
+	memcpy(newAddr, baseAddress, this->size);
+
+	//msync old before erase
+	msync(baseAddress, size, MS_SYNC);
+
+	//mremap to erase
+	OS::mremapForced(newAddr, size, baseAddress);
+}
+
+/*******************  FUNCTION  *********************/
 /**
  * Unregister the mapping range on the driver.
 **/

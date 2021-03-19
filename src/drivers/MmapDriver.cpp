@@ -43,6 +43,7 @@ MmapDriver::MmapDriver(int fd, bool allowNotAligned)
 /*******************  FUNCTION  *********************/
 MmapDriver::~MmapDriver(void)
 {
+	close(fd);
 }
 
 /*******************  FUNCTION  *********************/
@@ -171,4 +172,23 @@ void MmapDriver::checkAndSetAlign(size_t & size, size_t & offset, size_t & addrO
 	//align size
 	if (size % UMMAP_PAGE_SIZE != 0)
 		size += UMMAP_PAGE_SIZE - (size % UMMAP_PAGE_SIZE);
+}
+
+/*******************  FUNCTION  *********************/
+/**
+ * Used to change the file descriptor in use for copy on write actions.
+ * @param fd The new file descriptor.
+**/
+void MmapDriver::setFd(int newFd)
+{
+	//check
+	assert(newFd > 0);
+
+	//close old
+	close(this->fd);
+
+	//dup and set
+	int dupFD = ::dup(newFd);
+	assumeArg(dupFD > 0, "Fail to dup() the file descriptor : %1").argStrErrno().end();
+	this->fd = dupFD;
 }

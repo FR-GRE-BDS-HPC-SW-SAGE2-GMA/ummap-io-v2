@@ -35,6 +35,7 @@ class MmapDriver : public Driver
 		virtual void * directMmap(void * addr, size_t size, size_t offset, bool read, bool write, bool exec, bool mapFixed) override;
 		virtual bool directMunmap(void * base, size_t size, size_t offset) override;
 		virtual bool directMSync(void * base, size_t size, size_t offset) override;
+		void setFd(int newFd);
 	private:
 		void checkAndSetAlign(size_t & size, size_t & offset, size_t &addrOffset);
 	private:

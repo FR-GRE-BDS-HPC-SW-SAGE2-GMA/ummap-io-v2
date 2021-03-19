@@ -159,6 +159,7 @@ void Debug::end()
 			//buf << cstLevelPrefix[level] << '[' << std::setw(3) << std::setfill('0') << rank << std::setfill(' ') << "] " << *this << cstPostfix << std::endl;
 			buf << cstLevelPrefix[level] << *this << cstPostfix << std::endl;
 			std::cerr << buf.str();
+			abort();
 			exit(EXIT_FAILURE);
 			break;
 	}

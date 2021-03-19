@@ -67,6 +67,7 @@ TEST_F(TestPublicAPI, map_unmap_multi)
 
 	//unmap 1 and let the other for cleaup
 	umunmap(ptr1, 0);
+	umunmap(ptr2, 0);
 }
 
 /*******************  FUNCTION  *********************/
@@ -410,6 +411,54 @@ TEST_F(TestPublicAPI, cow_fopen)
 		ASSERT_EQ(2, ptr3[i]);
 	for (size_t i = size / 2 ; i < size ; i++)
 		ASSERT_EQ(1, ptr3[i]);
+	
+	//unmap
+	umunmap(ptr2, size);
+	umunmap(ptr3, size);
+}
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, cow_dax_fopen)
+{
+	//driver
+	const size_t segmentSize = 4096;
+	const size_t size = 8*segmentSize;
+
+	//truncate files
+	truncate64("/tmp/ummap-io-api-test-cow-fopen-1.raw", size);
+	truncate64("/tmp/ummap-io-api-test-cow-fopen-2.raw", size);
+
+	//create & memset
+	ummap_driver_t * driver = ummap_driver_create_dax_fopen("/tmp/ummap-io-api-test-cow-fopen-1.raw", "r+", true);
+	void * ptr = ummap(NULL, size, segmentSize, 0, PROT_READ|PROT_WRITE, 0, driver, NULL, "none");
+	memset(ptr, 1, size);
+	umsync(ptr, size, false);
+
+	//cow
+	int status = ummap_cow_dax_fopen(ptr, "/tmp/ummap-io-api-test-cow-fopen-2.raw", "r+", true);
+	ASSERT_EQ(0, status);
+
+	//write again & flush
+	memset(ptr, 2, size/2);
+	umunmap(ptr, true);
+
+	//map again orign & check
+	ummap_driver_t * driver2 = ummap_driver_create_dax_fopen("/tmp/ummap-io-api-test-cow-fopen-1.raw", "r", true);
+	char* ptr2 = (char*)ummap(NULL, size, segmentSize, 0, PROT_READ, 0, driver2, NULL, "none");
+	for (size_t i = 0 ; i < size ; i++)
+		ASSERT_EQ(1, ptr2[i]);
+	
+	//map again orign & check
+	ummap_driver_t * driver3 = ummap_driver_create_dax_fopen("/tmp/ummap-io-api-test-cow-fopen-2.raw", "r", true);
+	char * ptr3 = (char*)ummap(NULL, size, segmentSize, 0, PROT_READ, 0, driver3, NULL, "none");
+	for (size_t i = 0 ; i < size / 2 ; i++)
+		ASSERT_EQ(2, ptr3[i]);
+	for (size_t i = size / 2 ; i < size ; i++)
+		ASSERT_EQ(1, ptr3[i]);
+
+	//unmap
+	umunmap(ptr2, size);
+	umunmap(ptr3, size);
 }
 
 /*******************  FUNCTION  *********************/

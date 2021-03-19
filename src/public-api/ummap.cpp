@@ -435,6 +435,56 @@ int ummap_cow_fopen(void * addr, const char * file_path, const char * mode, bool
 }
 
 /*******************  FUNCTION  *********************/
+int ummap_cow_dax_fopen(void *addr, const char * file_path, const char * mode, bool allow_exist)
+{
+	//check exist
+	if (allow_exist == false) {
+		assumeArg(access( file_path, F_OK ) != 0, "Try to cow on an existing file (%1), but allow_exist is set to false !")
+			.arg(file_path)
+			.end();
+	}
+
+	//open
+	FILE * fp = fopen(file_path, mode);
+	assumeArg(fp != NULL, "Fail to open file '%1': %2")
+		.arg(file_path)
+		.argStrErrno()
+		.end();
+
+	//cow
+	int fd = fileno(fp);
+	int status = ummap_cow_dax(addr, fd, allow_exist);
+
+	//close
+	fclose(fp);
+
+	//ret
+	return status;
+}
+
+/*******************  FUNCTION  *********************/
+int ummap_cow_dax(void * addr, int fd, bool allow_exist)
+{
+	//apply cow
+	return getGlobalhandler()->applyCow<MmapDriver>("MMAP", addr, [fd](Mapping * mapping, MmapDriver * driver){
+		//allocate a new driver
+		MmapDriver * new_driver = new MmapDriver(fd, true);
+
+		//map a new segment
+		mapping->directMmapCow(new_driver);
+
+		//replace in driver
+		driver->setFd(fd);
+
+		//delete temp driver
+		delete new_driver;
+
+		//ok
+		return 0;
+	});
+}
+
+/*******************  FUNCTION  *********************/
 int ummap_cow_ioc(void * addr, int64_t high, int64_t low, bool allow_exist)
 {
 	#ifdef HAVE_IOC_CLIENT
