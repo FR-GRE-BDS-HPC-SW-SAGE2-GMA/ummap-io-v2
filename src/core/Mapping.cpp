@@ -688,6 +688,15 @@ void Mapping::copyMappedPart(char * buffer, Driver * newDriver, size_t storageSi
 }
 
 /*******************  FUNCTION  *********************/
+/**
+ * Return the current offset in the object storage.
+**/
+size_t Mapping::getStorageOffset(void) const
+{
+	return this->storageOffset;
+}
+
+/*******************  FUNCTION  *********************/
 void Mapping::copyToDriver(Driver * newDriver, size_t storageSize)
 {
 	//check

@@ -84,6 +84,7 @@ class Mapping
 		size_t getSize(void) const;
 		size_t getAlignedSize(void) const;
 		size_t getSegmentSize(void) const;
+		size_t getStorageOffset(void) const;
 		void disableThreadSafety();
 		Driver * getDriver(void);
 		void unregisterRange(void);

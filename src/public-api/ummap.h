@@ -385,6 +385,16 @@ int ummap_cow_fd(void * addr, int fd, bool allow_exist);
  * @return 0 on success, negative value in case of error.
  * @warning CAUTION, this does not support multiple mappings sharing the same driver.
 **/
+int ummap_cow_clovis(void * addr, int64_t high, int64_t low, bool allow_exist);
+/**
+ * Replace the underlying object with a copy on write version.
+ * @param addr An adress in the mapping to impact.
+ * @param high The high part of the new object ID.
+ * @param low The low pard of the new object ID.
+ * @param allow_exist Allow to COW on an object which already exist.
+ * @return 0 on success, negative value in case of error.
+ * @warning CAUTION, this does not support multiple mappings sharing the same driver.
+**/
 int ummap_cow_ioc(void * addr, int64_t high, int64_t low, bool allow_exist);
 /**
  * Replace the underlying object with a copy on write version.

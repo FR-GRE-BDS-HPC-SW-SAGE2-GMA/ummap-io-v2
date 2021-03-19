@@ -51,6 +51,7 @@ class ClovisDriver : public Driver
 		virtual ssize_t pwrite(const void * buffer, size_t size, size_t offset) override;
 		virtual ssize_t pread(void * buffer, size_t size, size_t offset) override;
 		virtual void sync(void * ptr, size_t offset, size_t size) override;
+		void setObjectId(int64_t high, int64_t low);
 	private:
 		/** Keep track of the object ID to be memory mapped.**/
 		struct m0_uint128 m_object_id;

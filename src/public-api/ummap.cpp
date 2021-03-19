@@ -352,6 +352,33 @@ int ummap_cow_uri(void * addr, const char * uri, bool allow_exist)
 }
 
 /*******************  FUNCTION  *********************/
+int ummap_cow_clovis(void * addr, int64_t high, int64_t low, bool allow_exist)
+{
+	#ifdef HAVE_MERO
+		return getGlobalhandler()->applyCow<ClovisDriver>("Clovis", addr, [high, low](Mapping * mapping, ClovisDriver * driver){
+			//create new driver
+			ummap_driver_t * new_driver = ummap_driver_create_clovis(high, low, allow_exist);
+
+			//copy data
+			const size_t size = mapping->getStorageOffset() + mapping->getSize();
+			mapping->copyToDriver(new_driver, size);
+
+			//apply
+			driver->setObjectId(high, low);
+
+			//clear
+			ummap_driver_destroy(new_driver);
+
+			//ok
+			return 0;
+		}
+	#else
+		UMMAP_FATAL("Try to cow a clovis driver, but ummap was compiled without mero !");
+		return -1;
+	#endif
+}
+
+/*******************  FUNCTION  *********************/
 int ummap_cow_fd(void * addr, int fd, bool allow_exist)
 {
 	//apply cow
