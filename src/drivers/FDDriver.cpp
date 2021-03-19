@@ -39,6 +39,21 @@ FDDriver::~FDDriver(void)
 }
 
 /*******************  FUNCTION  *********************/
+void FDDriver::setFd(int fd)
+{
+	//check
+	assert(fd > 0);
+
+	//close old
+	close(fd);
+
+	//dup and set
+	int dupFD = ::dup(fd);
+	assumeArg(dupFD > 0, "Fail to dup() the file descriptor : %1").argStrErrno().end();
+	this->fd = dupFD;
+}
+
+/*******************  FUNCTION  *********************/
 ssize_t FDDriver::pwrite(const void * buffer, size_t size, size_t offset)
 {
 	//checks

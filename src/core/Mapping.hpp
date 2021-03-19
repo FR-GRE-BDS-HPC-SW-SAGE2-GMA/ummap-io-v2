@@ -89,7 +89,7 @@ class Mapping
 		void unregisterRange(void);
 		void registerRange(void);
 		void dropClean(void);
-		void copyAndChangeDriver(Driver * newDriver, size_t storageSize);
+		void copyToDriver(Driver * newDriver, size_t storageSize);
 	public:
 		#ifdef HAVE_HTOPML
 		friend void convertToJson(htopml::JsonState & json,const Mapping & value);
@@ -99,7 +99,7 @@ class Mapping
 		const bool * getMutexRange(size_t offset, size_t size, bool * buffer, size_t bufferSize) const;
 		size_t readWriteSize(size_t offset);
 		void copyExtraNotMappedPart(char * buffer, Driver * newDriver, size_t offset, size_t size);
-		void copyMappedpart(char * buffer, Driver * newDriver);
+		void copyMappedPart(char * buffer, Driver * newDriver, size_t storageSize);
 	private:
 		/** Driver to access the storage and read/write data from it. **/
 		Driver * driver;

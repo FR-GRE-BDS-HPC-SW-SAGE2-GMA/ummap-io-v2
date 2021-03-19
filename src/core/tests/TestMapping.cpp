@@ -308,7 +308,7 @@ TEST(TestMapping, globalPolicy)
 }
 
 /*******************  FUNCTION  *********************/
-TEST(TestMapping, copyAndChangeDriver_aligned)
+TEST(TestMapping, copyToDriver_aligned)
 {
 	//setup
 	size_t segments = 4;
@@ -348,10 +348,10 @@ TEST(TestMapping, copyAndChangeDriver_aligned)
 	EXPECT_CALL(newDriver, pwrite(_, UMMAP_PAGE_SIZE, _)).Times(8).WillRepeatedly(Return(UMMAP_PAGE_SIZE));
 
 	//call
-	mapping.copyAndChangeDriver(&newDriver, 8*UMMAP_PAGE_SIZE);
+	mapping.copyToDriver(&newDriver, 8*UMMAP_PAGE_SIZE);
 }
 
-TEST(TestMapping, copyAndChangeDriver_not_aligned)
+TEST(TestMapping, copyToDriver_not_aligned)
 {
 	//setup
 	size_t segments = 4;
@@ -395,6 +395,6 @@ TEST(TestMapping, copyAndChangeDriver_not_aligned)
 	EXPECT_CALL(newDriver, pwrite(_, 1024, _)).Times(1).WillRepeatedly(Return(1024));
 
 	//call
-	//mapping.copyAndChangeDriver(&newDriver, 2*UMMAP_PAGE_SIZE-512 + size);
-	mapping.copyAndChangeDriver(&newDriver, 8*UMMAP_PAGE_SIZE);
+	//mapping.copyToDriver(&newDriver, 2*UMMAP_PAGE_SIZE-512 + size);
+	mapping.copyToDriver(&newDriver, 8*UMMAP_PAGE_SIZE);
 }

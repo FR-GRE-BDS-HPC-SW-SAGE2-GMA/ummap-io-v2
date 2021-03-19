@@ -5,10 +5,16 @@
 *****************************************************/
 
 /********************  HEADERS  *********************/
+//std
 #include <cassert>
 #include <cstdio>
 #include <cstring>
 #include <cerrno>
+//unix
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+//local
 #include <config.h>
 #include "../common/Debug.hpp"
 #include "../core/GlobalHandler.hpp"
@@ -343,6 +349,48 @@ void ummap_config_ioc_init_options(const char * server, const char * port)
 int ummap_cow_uri(void * addr, const char * uri, bool allow_exist)
 {
 	return getGlobalhandler()->getUriHandler().applyCow(addr, uri, allow_exist);
+}
+
+/*******************  FUNCTION  *********************/
+int ummap_cow_fopen(void * addr, const char * file_path, const char * mode, bool allow_exist)
+{
+	//check exist
+	if (allow_exist == false) {
+		assumeArg(access( file_path, F_OK ) != 0, "Try to cow on an existing file (%s), but allow_exist is set to false !")
+			.arg(file_path)
+			.end();
+	}
+
+	//apply cow
+	return getGlobalhandler()->applyCow<FDDriver>("FD", addr, [file_path, mode, allow_exist](Mapping * mapping, FDDriver * driver){
+		//get file size
+		struct stat st;
+		int status = fstat(driver->getFd(), &st);
+		assumeArg(status != 0, "Fail to fstat the original file: %s").argStrErrno().end();
+		size_t origSize = st.st_size;
+
+		//open
+		FILE * fp = fopen(file_path, mode);
+		assumeArg(fp != NULL, "Fail to open file '%1': %2")
+			.arg(file_path)
+			.argStrErrno()
+			.end();
+		
+		//create driver
+		FDDriver * newDiver = new FDDriver(fileno(fp));
+
+		//copy to new driver
+		mapping->copyToDriver(newDiver,origSize);
+
+		//set fd
+		driver->setFd(fileno(fp));
+
+		//close
+		fclose(fp);
+
+		//ok
+		return 0;
+	});
 }
 
 /*******************  FUNCTION  *********************/

@@ -648,7 +648,7 @@ void Mapping::copyExtraNotMappedPart(char * buffer, Driver * newDriver, size_t o
 }
 
 /*******************  FUNCTION  *********************/
-void Mapping::copyMappedpart(char * buffer, Driver * newDriver)
+void Mapping::copyMappedPart(char * buffer, Driver * newDriver, size_t storageSize)
 {
 	//vars
 	ssize_t status;
@@ -657,12 +657,17 @@ void Mapping::copyMappedpart(char * buffer, Driver * newDriver)
 	assert(newDriver != NULL);
 	assert(buffer != NULL);
 
+	//real copy size if end of mapping was never flushed to the origin file
+	size_t sizeToDump = this->size;
+	if (sizeToDump < storageSize)
+		sizeToDump = storageSize;
+
 	//copy part in mapping.
-	for (size_t i = 0 ; i < this->size ; i += this->segmentSize) {
+	for (size_t i = 0 ; i < sizeToDump ; i += this->segmentSize) {
 		//compute copy size
 		size_t copySize = this->segmentSize;
-		if (i + this->segmentSize > this->size)
-			copySize = this->size - i;
+		if (i + this->segmentSize > sizeToDump)
+			copySize = sizeToDump - i;
 		
 		//get segment info
 		SegmentStatus & curStatus = this->segmentStatus[i/this->segmentSize];
@@ -683,7 +688,7 @@ void Mapping::copyMappedpart(char * buffer, Driver * newDriver)
 }
 
 /*******************  FUNCTION  *********************/
-void Mapping::copyAndChangeDriver(Driver * newDriver, size_t storageSize)
+void Mapping::copyToDriver(Driver * newDriver, size_t storageSize)
 {
 	//check
 	assume(newDriver != NULL, "Got invalid NULL driver !");
@@ -696,19 +701,12 @@ void Mapping::copyAndChangeDriver(Driver * newDriver, size_t storageSize)
 	this->copyExtraNotMappedPart(buffer, newDriver, 0, this->storageOffset);
 
 	//copy mapped part
-	this->copyMappedpart(buffer, newDriver);
+	this->copyMappedPart(buffer, newDriver, storageSize);
 
 	//copy extract part after the mapped one if needed
 	const size_t endOffset = this->storageOffset+this->size;
 	const size_t endSize = storageSize - endOffset;
 	this->copyExtraNotMappedPart(buffer, newDriver, endOffset, endSize);
-	
-	//delete old driver if needed
-	if (this->driver->hasAutoclean())
-		delete this->driver;
-
-	//change driver
-	this->driver = newDriver;
 }
 
 /*******************  FUNCTION  *********************/

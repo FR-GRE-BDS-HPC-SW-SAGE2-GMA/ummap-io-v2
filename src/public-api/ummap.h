@@ -357,6 +357,16 @@ void ummap_config_ioc_init_options(const char * server, const char * port);
 
 /*****************  COW OPERATIONS  *****************/
 /**
+ * Replace the underlying file with a copy version.
+ * @param addr An adress in the mapping to impact.
+ * @param file_path Path of the file to map.
+ * @param mode Open mode like for fopen().
+ * @param allow_exist Allow to COW on an object which already exist.
+ * @return 0 on success, negative value in case of error.
+ * @warning CAUTION, this does not support multiple mappings sharing the same driver.
+**/
+int ummap_cow_fopen(void * addr, const char * file_path, const char * mode, bool allow_exist);
+/**
  * Replace the underlying object with a copy on write version.
  * @param addr An adress in the mapping to impact.
  * @param high The high part of the new object ID.
