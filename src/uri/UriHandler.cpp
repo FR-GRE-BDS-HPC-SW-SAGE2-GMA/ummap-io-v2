@@ -97,6 +97,9 @@ int UriHandler::applyCow(void * addr, const std::string & uri, bool allowExist)
 	if (type == "meroioc" || type == "clovisioc" || type == "ioc" || type == "iocfile" ) {
 		ObjectId id = getIocObjectId(uri);
 		return ummap_cow_ioc(addr, id.high, id.low, allowExist);
+	} else if (type == "dummy") {
+		//we do nothing
+		return 0;
 	} else {
 		UMMAP_FATAL_ARG("Invalid ressource type to run COW operation : %1").arg(uri).end();
 		return -1;
@@ -122,6 +125,9 @@ int UriHandler::applySwitch(void * addr, const std::string & uri, bool dropClean
 	if (type == "meroioc" || type == "clovisioc" || type == "ioc" || type == "iocfile" ) {
 		ObjectId id = getIocObjectId(uri);
 		return ummap_switch_ioc(addr, id.high, id.low, dropClean);
+	} else if (type == "dummy") {
+		//we do nothing
+		return 0;
 	} else {
 		UMMAP_FATAL_ARG("Invalid ressource type to run switch operation : %1").arg(uri).end();
 		return -1;

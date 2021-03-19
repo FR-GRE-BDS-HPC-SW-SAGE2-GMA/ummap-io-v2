@@ -375,3 +375,33 @@ TEST_F(TestPublicAPI, create_policy_uri)
 	policy = ummap_policy_create_uri("fifo://4096", true);
 	ummap_policy_destroy(policy);
 }
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, cow_uri)
+{
+	//vars
+	ummap_driver_t * driver;
+	const size_t segmentSize = 4096;
+	const size_t size = 8*segmentSize;
+	
+	//dummy
+	driver = ummap_driver_create_uri("dummy://0");
+	void * ptr = ummap(NULL, size, segmentSize, 0, PROT_READ|PROT_WRITE, 0, driver, NULL, "none");
+	ummap_cow_uri(ptr, "dummy://0", true);
+	umunmap(ptr, false);
+}
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, switch_uri)
+{
+	//vars
+	ummap_driver_t * driver;
+	const size_t segmentSize = 4096;
+	const size_t size = 8*segmentSize;
+	
+	//dummy
+	driver = ummap_driver_create_uri("dummy://0");
+	void * ptr = ummap(NULL, size, segmentSize, 0, PROT_READ|PROT_WRITE, 0, driver, NULL, "none");
+	ummap_switch_uri(ptr, "dummy://0", false);
+	umunmap(ptr, false);
+}
