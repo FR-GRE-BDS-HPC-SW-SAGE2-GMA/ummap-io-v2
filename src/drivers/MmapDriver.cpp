@@ -43,7 +43,8 @@ MmapDriver::MmapDriver(int fd, bool allowNotAligned)
 /*******************  FUNCTION  *********************/
 MmapDriver::~MmapDriver(void)
 {
-	close(fd);
+	if (fd != 0)
+		close(fd);
 }
 
 /*******************  FUNCTION  *********************/
