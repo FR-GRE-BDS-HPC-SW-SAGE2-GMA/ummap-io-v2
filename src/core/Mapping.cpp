@@ -676,7 +676,7 @@ void Mapping::copyMappedPart(char * buffer, Driver * newDriver, size_t storageSi
 
 	//real copy size if end of mapping was never flushed to the origin file
 	size_t sizeToDump = this->size;
-	if (sizeToDump < storageSize)
+	if (sizeToDump > storageSize)
 		sizeToDump = storageSize;
 
 	//copy part in mapping.
@@ -718,7 +718,7 @@ void Mapping::copyToDriver(Driver * newDriver, size_t storageSize)
 {
 	//check
 	assume(newDriver != NULL, "Got invalid NULL driver !");
-	assume(storageSize >= this->storageOffset + this->size, "Try to copy and change driver with a size which is smaller than the mapping size !");
+	assume(storageSize >= this->storageOffset, "Try to copy and change driver with a size which is smaller than the mapping size !");
 
 	//allocate buffer
 	char * buffer = new char[this->segmentSize];
@@ -727,7 +727,7 @@ void Mapping::copyToDriver(Driver * newDriver, size_t storageSize)
 	this->copyExtraNotMappedPart(buffer, newDriver, 0, this->storageOffset);
 
 	//copy mapped part
-	this->copyMappedPart(buffer, newDriver, storageSize);
+	this->copyMappedPart(buffer, newDriver, storageSize - this->storageOffset);
 
 	//copy extract part after the mapped one if needed
 	const size_t endOffset = this->storageOffset+this->size;

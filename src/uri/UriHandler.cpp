@@ -141,6 +141,13 @@ int UriHandler::applySwitch(void * addr, const std::string & uri, bool dropClean
 	} else if (type == "mem") {
 		//we do nothing
 		return 0;
+	} else if (type == "mapanon") {
+		//we do nothing
+		return 0;
+	} else if (type == "file") {
+		return ummap_switch_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "w+").c_str(), dropClean);
+	} else if (type == "mmap" || type == "dax") {
+		return ummap_switch_dax_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "w+").c_str(), dropClean);
 	} else {
 		UMMAP_FATAL_ARG("Invalid ressource type to run switch operation : %1").arg(uri).end();
 		return -1;

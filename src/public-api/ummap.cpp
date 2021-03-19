@@ -499,6 +499,64 @@ int ummap_cow_ioc(void * addr, int64_t high, int64_t low, bool allow_exist)
 }
 
 /*******************  FUNCTION  *********************/
+int ummap_switch_fopen(void * addr, const char * file_path, const char * mode, bool drop_clean)
+{
+	//open
+	FILE * fp = fopen(file_path, mode);
+	assumeArg(fp != NULL, "Fail to open file '%1': %2")
+		.arg(file_path)
+		.argStrErrno()
+		.end();
+
+	//call
+	int fd = fileno(fp);
+	int status = getGlobalhandler()->applySwitch<FDDriver>("FD", addr, drop_clean, [fd](FDDriver * driver){
+		return driver->setFd(fd);
+	});
+
+	//close
+	fclose(fp);
+
+	//ok
+	return status;
+}
+
+/*******************  FUNCTION  *********************/
+int ummap_switch_fd(void * addr, int fd, bool drop_clean)
+{
+	//call
+	return getGlobalhandler()->applySwitch<FDDriver>("FD", addr, drop_clean, [fd](FDDriver * driver){
+		return driver->setFd(fd);
+	});
+}
+
+/*******************  FUNCTION  *********************/
+int ummap_switch_dax(void * addr, int fd, bool drop_clean)
+{
+	return ummap_cow_dax(addr, fd, true);
+}
+
+/*******************  FUNCTION  *********************/
+int ummap_switch_dax_fopen(void *addr, const char * file_path, const char * mode, bool drop_clean)
+{
+	return ummap_cow_dax_fopen(addr, file_path, mode, true);
+}
+
+/*******************  FUNCTION  *********************/
+int ummap_switch_clovis(void * addr, int64_t high, int64_t low, bool drop_clean)
+{
+	#ifdef HAVE_MERO
+		//call
+		return getGlobalhandler()->applySwitch<ClovisDriver>("IOC", addr, drop_clean, [high, low](ClovisDriver * driver){
+			return driver->setObjectId(high, low);
+		});
+	#else
+		UMMAP_FATAL("Ummap-io was built without Mero support, cannot apply COW on the requested mapping !");
+		return -1;
+	#endif
+}
+
+/*******************  FUNCTION  *********************/
 int ummap_switch_ioc(void * addr, int64_t high, int64_t low, bool drop_clean)
 {
 	#ifdef HAVE_IOC_CLIENT

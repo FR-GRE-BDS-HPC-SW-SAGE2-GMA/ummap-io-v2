@@ -428,6 +428,56 @@ int ummap_cow_uri(void * addr, const char * uri, bool allow_exist);
 
 /****************  SWITCH OPERATIONS  ***************/
 /**
+ * Replace the underlying file with a copy version.
+ * @param addr An adress in the mapping to impact.
+ * @param file_path Path of the file to map.
+ * @param mode Open mode like for fopen().
+ * @param drop_clean If true drop the clean pages so they will be reloaded from the object.
+ * @return 0 on success, negative value in case of error.
+ * @warning CAUTION, this does not support multiple mappings sharing the same driver.
+**/
+int ummap_switch_fopen(void * addr, const char * file_path, const char * mode, bool drop_clean);
+/**
+ * Replace the underlying file with a copy version.
+ * @param addr An adress in the mapping to impact.
+ * @param fd File descriptor to be used to access to the file. It will make a dup()
+ * so you can safely close the file descriptor on your side.
+ * @param drop_clean If true drop the clean pages so they will be reloaded from the object.
+ * @return 0 on success, negative value in case of error.
+ * @warning CAUTION, this does not support multiple mappings sharing the same driver.
+**/
+int ummap_switch_fd(void * addr, int fd, bool drop_clean);
+/**
+ * Replace the underlying file with a copy version.
+ * @param addr An adress in the mapping to impact.
+ * @param fd File descriptor to be used to access to the file. It will make a dup()
+ * so you can safely close the file descriptor on your side.
+ * @param drop_clean Has not effect on this function.
+ * @return 0 on success, negative value in case of error.
+ * @warning CAUTION, this does not support multiple mappings sharing the same driver.
+**/
+int ummap_switch_dax(void * addr, int fd, bool drop_clean);
+/**
+ * Replace the underlying file with a copy version.
+ * @param addr An adress in the mapping to impact.
+ * @param file_path Path of the file to map.
+ * @param mode Open mode like for fopen().
+ * @param drop_clean Has no effect on this function.
+ * @return 0 on success, negative value in case of error.
+ * @warning CAUTION, this does not support multiple mappings sharing the same driver.
+**/
+int ummap_switch_dax_fopen(void *addr, const char * file_path, const char * mode, bool drop_clean);
+/**
+ * Replace the underlying object with a copy on write version.
+ * @param addr An adress in the mapping to impact.
+ * @param high The high part of the new object ID.
+ * @param low The low pard of the new object ID.
+ * @param drop_clean If true drop the clean pages so they will be reloaded from the object.
+ * @return 0 on success, negative value in case of error.
+ * @warning CAUTION, this does not support multiple mappings sharing the same driver.
+**/
+int ummap_switch_clovis(void * addr, int64_t high, int64_t low, bool drop_clean);
+/**
  * Change the object ID of the given IOC driver to another object.
  * @param addr An adress in the mapping to impact.
  * @param high The high part of the next object ID.
