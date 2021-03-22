@@ -109,7 +109,7 @@ void * MmapDriver::directMmap(void * addr, size_t size, size_t offset, bool read
 		//if size is too small we extend
 		if (origSize < offset + size){
 			status = ftruncate(this->fd,  offset+size);
-			assumeArg(status == 0, "Fail to truncate the file brefore memory mapping it: %1").argStrErrno().end();
+			//assumeArg(status == 0, "Fail to truncate the file brefore memory mapping it: %1").argStrErrno().end();
 		}
 	}
 
