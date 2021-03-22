@@ -11,6 +11,8 @@
 //unix
 #include <unistd.h>
 #include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 //internal
 #include "../portability/OS.hpp"
 #include "../common/Debug.hpp"
@@ -95,6 +97,21 @@ void * MmapDriver::directMmap(void * addr, size_t size, size_t offset, bool read
 	//alignement
 	size_t addrOffset = 0;
 	this->checkAndSetAlign(size, offset, addrOffset);
+
+	//truncate if needed
+	if (write) {
+		//get file size
+		struct stat st;
+		int status = fstat(this->fd, &st);
+		assumeArg(status == 0, "Fail to fstat the file before memory mapping it: %1").argStrErrno().end();
+		size_t origSize = st.st_size;
+
+		//if size is too small we extend
+		if (origSize < offset + size){
+			status = ftruncate(this->fd,  offset+size);
+			assumeArg(status == 0, "Fail to truncate the file brefore memory mapping it: %1").argStrErrno().end();
+		}
+	}
 
 	//prot
 	int prot = 0;
