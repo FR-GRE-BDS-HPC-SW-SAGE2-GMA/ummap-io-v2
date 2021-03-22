@@ -117,7 +117,7 @@ int UriHandler::applyCow(void * addr, const std::string & uri, bool allowExist)
 }
 
 /*******************  FUNCTION  *********************/
-int UriHandler::applySwitch(void * addr, const std::string & uri, bool dropClean)
+int UriHandler::applySwitch(void * addr, const std::string & uri, ummap_switch_clean_t cleanAction)
 {
 		//check
 	assert(uri.empty() == false);
@@ -134,7 +134,7 @@ int UriHandler::applySwitch(void * addr, const std::string & uri, bool dropClean
 	//apply
 	if (type == "meroioc" || type == "clovisioc" || type == "ioc" || type == "iocfile" ) {
 		ObjectId id = getIocObjectId(uri);
-		return ummap_switch_ioc(addr, id.high, id.low, dropClean);
+		return ummap_switch_ioc(addr, id.high, id.low, cleanAction);
 	} else if (type == "dummy") {
 		//we do nothing
 		return 0;
@@ -145,9 +145,9 @@ int UriHandler::applySwitch(void * addr, const std::string & uri, bool dropClean
 		//we do nothing
 		return 0;
 	} else if (type == "file") {
-		return ummap_switch_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "w+").c_str(), dropClean);
+		return ummap_switch_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "w+").c_str(), cleanAction);
 	} else if (type == "mmap" || type == "dax") {
-		return ummap_switch_dax_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "w+").c_str(), dropClean);
+		return ummap_switch_dax_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "w+").c_str(), cleanAction);
 	} else {
 		UMMAP_FATAL_ARG("Invalid ressource type to run switch operation : %1").arg(uri).end();
 		return -1;

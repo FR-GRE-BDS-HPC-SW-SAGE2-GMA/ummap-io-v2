@@ -90,6 +90,7 @@ class Mapping
 		void unregisterRange(void);
 		void registerRange(void);
 		void dropClean(void);
+		void markCleanAsDirty(void);
 		void copyToDriver(Driver * newDriver, size_t storageSize);
 		void directMmapCow(Driver * newDriver);
 	public:

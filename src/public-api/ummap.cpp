@@ -499,7 +499,7 @@ int ummap_cow_ioc(void * addr, int64_t high, int64_t low, bool allow_exist)
 }
 
 /*******************  FUNCTION  *********************/
-int ummap_switch_fopen(void * addr, const char * file_path, const char * mode, bool drop_clean)
+int ummap_switch_fopen(void * addr, const char * file_path, const char * mode, ummap_switch_clean_t clean_action)
 {
 	//open
 	FILE * fp = fopen(file_path, mode);
@@ -510,7 +510,7 @@ int ummap_switch_fopen(void * addr, const char * file_path, const char * mode, b
 
 	//call
 	int fd = fileno(fp);
-	int status = getGlobalhandler()->applySwitch<FDDriver>("FD", addr, drop_clean, [fd](FDDriver * driver){
+	int status = getGlobalhandler()->applySwitch<FDDriver>("FD", addr, clean_action, [fd](FDDriver * driver){
 		return driver->setFd(fd);
 	});
 
@@ -522,28 +522,28 @@ int ummap_switch_fopen(void * addr, const char * file_path, const char * mode, b
 }
 
 /*******************  FUNCTION  *********************/
-int ummap_switch_fd(void * addr, int fd, bool drop_clean)
+int ummap_switch_fd(void * addr, int fd, ummap_switch_clean_t clean_action)
 {
 	//call
-	return getGlobalhandler()->applySwitch<FDDriver>("FD", addr, drop_clean, [fd](FDDriver * driver){
+	return getGlobalhandler()->applySwitch<FDDriver>("FD", addr, clean_action, [fd](FDDriver * driver){
 		return driver->setFd(fd);
 	});
 }
 
 /*******************  FUNCTION  *********************/
-int ummap_switch_dax(void * addr, int fd, bool drop_clean)
+int ummap_switch_dax(void * addr, int fd, ummap_switch_clean_t clean_action)
 {
 	return ummap_cow_dax(addr, fd, true);
 }
 
 /*******************  FUNCTION  *********************/
-int ummap_switch_dax_fopen(void *addr, const char * file_path, const char * mode, bool drop_clean)
+int ummap_switch_dax_fopen(void *addr, const char * file_path, const char * mode, ummap_switch_clean_t clean_action)
 {
 	return ummap_cow_dax_fopen(addr, file_path, mode, true);
 }
 
 /*******************  FUNCTION  *********************/
-int ummap_switch_clovis(void * addr, int64_t high, int64_t low, bool drop_clean)
+int ummap_switch_clovis(void * addr, int64_t high, int64_t low, ummap_switch_clean_t clean_action)
 {
 	#ifdef HAVE_MERO
 		//call
@@ -557,11 +557,11 @@ int ummap_switch_clovis(void * addr, int64_t high, int64_t low, bool drop_clean)
 }
 
 /*******************  FUNCTION  *********************/
-int ummap_switch_ioc(void * addr, int64_t high, int64_t low, bool drop_clean)
+int ummap_switch_ioc(void * addr, int64_t high, int64_t low, ummap_switch_clean_t clean_action)
 {
 	#ifdef HAVE_IOC_CLIENT
 		//call
-		return getGlobalhandler()->applySwitch<IocDriver>("IOC", addr, drop_clean, [high, low](IocDriver * driver){
+		return getGlobalhandler()->applySwitch<IocDriver>("IOC", addr, clean_action, [high, low](IocDriver * driver){
 			return driver->switchDestination(high, low);
 		});
 	#else
@@ -571,7 +571,7 @@ int ummap_switch_ioc(void * addr, int64_t high, int64_t low, bool drop_clean)
 }
 
 /*******************  FUNCTION  *********************/
-int ummap_switch_uri(void * addr, const char * uri, bool drop_clean)
+int ummap_switch_uri(void * addr, const char * uri, ummap_switch_clean_t clean_action)
 {
-	return getGlobalhandler()->getUriHandler().applySwitch(addr, uri, drop_clean);
+	return getGlobalhandler()->getUriHandler().applySwitch(addr, uri, clean_action);
 }

@@ -473,6 +473,42 @@ void Mapping::dropClean(void)
 
 /*******************  FUNCTION  *********************/
 /**
+ * Drop the clean pages from the memory.
+**/
+void Mapping::markCleanAsDirty(void)
+{
+	//CRITICAL SECTION
+	{
+		//lock the whole segment
+		for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
+			this->segmentMutexes[i].lock();
+
+		//loop on all
+		for (size_t i = 0 ; i < this->segments ; i++) {
+			//get segment
+			SegmentStatus & status = this->segmentStatus[i];
+
+			//check if drop
+			if (status.mapped && status.dirty == false && (protection & PROT_WRITE)) {
+				//calc addr
+				void * addr = this->baseAddress + this->segmentSize * i;
+
+				//protect
+				OS::mprotect(addr, segmentSize, true, true, protection & PROT_EXEC);
+
+				//mark unmapped
+				status.dirty = true;
+			}
+		}
+
+		//unlock the whole segment
+		for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
+			this->segmentMutexes[i].unlock();
+	}
+}
+
+/*******************  FUNCTION  *********************/
+/**
  * Apply a sync operation.
  * @param offset Sync from the given offset.
  * @param size Define the range of the memory to sync.

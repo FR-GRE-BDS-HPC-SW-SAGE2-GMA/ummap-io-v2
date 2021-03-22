@@ -491,12 +491,12 @@ TEST_F(TestPublicAPI, switch_uri)
 	//dummy
 	driver = ummap_driver_create_uri("dummy://0");
 	void * ptr = ummap(NULL, size, segmentSize, 0, PROT_READ|PROT_WRITE, 0, driver, NULL, "none");
-	ummap_switch_uri(ptr, "dummy://0", false);
+	ummap_switch_uri(ptr, "dummy://0", UMMAP_NO_ACTION);
 	umunmap(ptr, false);
 
 	//memory
 	driver = ummap_driver_create_uri("mem://32MB");
 	ptr = ummap(NULL, size, segmentSize, 0, PROT_READ|PROT_WRITE, 0, driver, NULL, "none");
-	ummap_switch_uri(ptr, "mem://32MB", false);
+	ummap_switch_uri(ptr, "mem://32MB", UMMAP_NO_ACTION);
 	umunmap(ptr, false);
 }

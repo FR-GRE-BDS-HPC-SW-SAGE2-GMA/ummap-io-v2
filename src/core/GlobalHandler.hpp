@@ -61,7 +61,7 @@ class GlobalHandler
 		UriHandler & getUriHandler(void);
 		Mapping * getMapping(void * addr);
 		template <class T> int applyCow(const char * driverName, void * addr, std::function<int(Mapping * mapping, T * driver)> action);
-		template <class T> int applySwitch(const char * driverName, void * addr, bool dropClean, std::function<void(T * driver)> action);
+		template <class T> int applySwitch(const char * driverName, void * addr, ummap_switch_clean_t cleanAction, std::function<void(T * driver)> action);
 	private:
 		/** Registry of all active mappings in use. **/
 		MappingRegistry mappingRegistry;
@@ -112,7 +112,7 @@ int GlobalHandler::applyCow(const char * driverName, void * addr, std::function<
 }
 
 template <class T>
-int GlobalHandler::applySwitch(const char * driverName, void * addr, bool dropClean, std::function<void(T * driver)> action)
+int GlobalHandler::applySwitch(const char * driverName, void * addr, ummap_switch_clean_t cleanAction, std::function<void(T * driver)> action)
 {
 	//check
 	assert(addr != NULL);
@@ -135,8 +135,20 @@ int GlobalHandler::applySwitch(const char * driverName, void * addr, bool dropCl
 	mapping->registerRange();
 
 	//if drop
-	if (dropClean)
-		mapping->dropClean();
+	switch (cleanAction) {
+		case UMMAP_NO_ACTION:
+			break;
+		case UMMAP_DROP_CLEAN:
+			mapping->dropClean();
+			break;
+		case UMMAP_MARK_CLEAN_DIRTY:
+			mapping->markCleanAsDirty();
+			break;
+		default:
+			UMMAP_FATAL_ARG("Invalid clean action for switch operation, got %1").arg(cleanAction).end();
+			break;
+	}
+		
 
 	//return
 	return 0;
