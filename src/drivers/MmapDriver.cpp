@@ -11,6 +11,8 @@
 //unix
 #include <unistd.h>
 #include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 //internal
 #include "../portability/OS.hpp"
 #include "../common/Debug.hpp"
@@ -43,6 +45,8 @@ MmapDriver::MmapDriver(int fd, bool allowNotAligned)
 /*******************  FUNCTION  *********************/
 MmapDriver::~MmapDriver(void)
 {
+	if (fd != 0)
+		close(fd);
 }
 
 /*******************  FUNCTION  *********************/
@@ -93,6 +97,21 @@ void * MmapDriver::directMmap(void * addr, size_t size, size_t offset, bool read
 	//alignement
 	size_t addrOffset = 0;
 	this->checkAndSetAlign(size, offset, addrOffset);
+
+	//truncate if needed
+	if (write && fd != 0) {
+		//get file size
+		struct stat st;
+		int status = fstat(this->fd, &st);
+		assumeArg(status == 0, "Fail to fstat the file before memory mapping it: %1").argStrErrno().end();
+		size_t origSize = st.st_size;
+
+		//if size is too small we extend
+		if (origSize < offset + size){
+			status = ftruncate(this->fd,  offset+size);
+			assumeArg(status == 0, "Fail to truncate the file brefore memory mapping it: %1").argStrErrno().end();
+		}
+	}
 
 	//prot
 	int prot = 0;
@@ -171,4 +190,23 @@ void MmapDriver::checkAndSetAlign(size_t & size, size_t & offset, size_t & addrO
 	//align size
 	if (size % UMMAP_PAGE_SIZE != 0)
 		size += UMMAP_PAGE_SIZE - (size % UMMAP_PAGE_SIZE);
+}
+
+/*******************  FUNCTION  *********************/
+/**
+ * Used to change the file descriptor in use for copy on write actions.
+ * @param fd The new file descriptor.
+**/
+void MmapDriver::setFd(int newFd)
+{
+	//check
+	assert(newFd > 0);
+
+	//close old
+	close(this->fd);
+
+	//dup and set
+	int dupFD = ::dup(newFd);
+	assumeArg(dupFD > 0, "Fail to dup() the file descriptor : %1").argStrErrno().end();
+	this->fd = dupFD;
 }

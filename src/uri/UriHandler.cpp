@@ -97,6 +97,19 @@ int UriHandler::applyCow(void * addr, const std::string & uri, bool allowExist)
 	if (type == "meroioc" || type == "clovisioc" || type == "ioc" || type == "iocfile" ) {
 		ObjectId id = getIocObjectId(uri);
 		return ummap_cow_ioc(addr, id.high, id.low, allowExist);
+	} else if (type == "dummy") {
+		//we do nothing
+		return 0;
+	} else if (type == "mem") {
+		//we do nothing
+		return 0;
+	} else if (type == "mapanon") {
+		//we do nothing
+		return 0;
+	} else if (type == "file") {
+		return ummap_cow_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "w+").c_str(), allowExist);
+	} else if (type == "mmap" || type == "dax") {
+		return ummap_cow_dax_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "w+").c_str(), allowExist);
 	} else {
 		UMMAP_FATAL_ARG("Invalid ressource type to run COW operation : %1").arg(uri).end();
 		return -1;
@@ -104,7 +117,7 @@ int UriHandler::applyCow(void * addr, const std::string & uri, bool allowExist)
 }
 
 /*******************  FUNCTION  *********************/
-int UriHandler::applySwitch(void * addr, const std::string & uri, bool dropClean)
+int UriHandler::applySwitch(void * addr, const std::string & uri, ummap_switch_clean_t cleanAction)
 {
 		//check
 	assert(uri.empty() == false);
@@ -121,7 +134,20 @@ int UriHandler::applySwitch(void * addr, const std::string & uri, bool dropClean
 	//apply
 	if (type == "meroioc" || type == "clovisioc" || type == "ioc" || type == "iocfile" ) {
 		ObjectId id = getIocObjectId(uri);
-		return ummap_switch_ioc(addr, id.high, id.low, dropClean);
+		return ummap_switch_ioc(addr, id.high, id.low, cleanAction);
+	} else if (type == "dummy") {
+		//we do nothing
+		return 0;
+	} else if (type == "mem") {
+		//we do nothing
+		return 0;
+	} else if (type == "mapanon") {
+		//we do nothing
+		return 0;
+	} else if (type == "file") {
+		return ummap_switch_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "w+").c_str(), cleanAction);
+	} else if (type == "mmap" || type == "dax") {
+		return ummap_switch_dax_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "w+").c_str(), cleanAction);
 	} else {
 		UMMAP_FATAL_ARG("Invalid ressource type to run switch operation : %1").arg(uri).end();
 		return -1;

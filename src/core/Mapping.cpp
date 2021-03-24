@@ -148,6 +148,23 @@ Mapping::~Mapping(void)
 }
 
 /*******************  FUNCTION  *********************/
+void Mapping::directMmapCow(Driver * newDriver)
+{
+	//allocate a new one
+	char * newAddr = (char*)newDriver->directMmap(this->baseAddress, this->size, this->storageOffset, this->protection & PROT_READ, this->protection & PROT_WRITE, this->protection & PROT_EXEC, false);
+	assume(newAddr != NULL, "Try to call directMmapCow() on a driver not supporting direct mmap !");
+
+	//copy
+	memcpy(newAddr, baseAddress, this->size);
+
+	//msync old before erase
+	msync(baseAddress, size, MS_SYNC);
+
+	//mremap to erase
+	OS::mremapForced(newAddr, size, baseAddress);
+}
+
+/*******************  FUNCTION  *********************/
 /**
  * Unregister the mapping range on the driver.
 **/
@@ -456,6 +473,42 @@ void Mapping::dropClean(void)
 
 /*******************  FUNCTION  *********************/
 /**
+ * Drop the clean pages from the memory.
+**/
+void Mapping::markCleanAsDirty(void)
+{
+	//CRITICAL SECTION
+	{
+		//lock the whole segment
+		for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
+			this->segmentMutexes[i].lock();
+
+		//loop on all
+		for (size_t i = 0 ; i < this->segments ; i++) {
+			//get segment
+			SegmentStatus & status = this->segmentStatus[i];
+
+			//check if drop
+			if (status.mapped && status.dirty == false && (protection & PROT_WRITE)) {
+				//calc addr
+				void * addr = this->baseAddress + this->segmentSize * i;
+
+				//protect
+				OS::mprotect(addr, segmentSize, true, true, protection & PROT_EXEC);
+
+				//mark unmapped
+				status.dirty = true;
+			}
+		}
+
+		//unlock the whole segment
+		for (int i = 0 ; i < this->segmentMutexesCnt ; i++)
+			this->segmentMutexes[i].unlock();
+	}
+}
+
+/*******************  FUNCTION  *********************/
+/**
  * Apply a sync operation.
  * @param offset Sync from the given offset.
  * @param size Define the range of the memory to sync.
@@ -621,6 +674,101 @@ size_t Mapping::getSegmentSize(void) const
 Driver * Mapping::getDriver(void)
 {
 	return this->driver;
+}
+
+/*******************  FUNCTION  *********************/
+void Mapping::copyExtraNotMappedPart(char * buffer, Driver * newDriver, size_t offset, size_t size)
+{
+	//cars
+	ssize_t status;
+
+	//check
+	assert(newDriver != NULL);
+	assert(buffer != NULL);
+
+	//copy part before mapping
+	for (size_t i = 0 ; i < size ; i+= this->segmentSize) {
+		//compute copy size
+		size_t copySize = this->segmentSize;
+		if (i + this->segmentSize > size)
+			copySize = size - i;
+		//copy
+		status = this->driver->pread(buffer, copySize, offset+i);
+		assume(status == copySize, "Failed to read data from the original driver !");
+		status = newDriver->pwrite(buffer, copySize, offset+i);
+		assume(status == copySize, "Failed to write data from the target driver !");
+	}
+}
+
+/*******************  FUNCTION  *********************/
+void Mapping::copyMappedPart(char * buffer, Driver * newDriver, size_t storageSize)
+{
+	//vars
+	ssize_t status;
+
+	//check
+	assert(newDriver != NULL);
+	assert(buffer != NULL);
+
+	//real copy size if end of mapping was never flushed to the origin file
+	size_t sizeToDump = this->size;
+	if (sizeToDump > storageSize)
+		sizeToDump = storageSize;
+
+	//copy part in mapping.
+	for (size_t i = 0 ; i < sizeToDump ; i += this->segmentSize) {
+		//compute copy size
+		size_t copySize = this->segmentSize;
+		if (i + this->segmentSize > sizeToDump)
+			copySize = sizeToDump - i;
+		
+		//get segment info
+		SegmentStatus & curStatus = this->segmentStatus[i/this->segmentSize];
+		
+		//apply copy mode if already have synced data in memory
+		const size_t offset = this->storageOffset + i;
+		if (curStatus.mapped == true && curStatus.dirty == false) {
+			char * addr = this->baseAddress + offset;
+			status = newDriver->pwrite(addr, copySize, offset);
+			assume(status == copySize, "Failed to write data from the target driver !");
+		} else {
+			status = this->driver->pread(buffer, copySize, offset);
+			assume(status == copySize, "Failed to read data from the original driver !");
+			status = newDriver->pwrite(buffer, copySize, offset);
+			assume(status == copySize, "Failed to write data from the target driver !");
+		}
+	}
+}
+
+/*******************  FUNCTION  *********************/
+/**
+ * Return the current offset in the object storage.
+**/
+size_t Mapping::getStorageOffset(void) const
+{
+	return this->storageOffset;
+}
+
+/*******************  FUNCTION  *********************/
+void Mapping::copyToDriver(Driver * newDriver, size_t storageSize)
+{
+	//check
+	assume(newDriver != NULL, "Got invalid NULL driver !");
+	assume(storageSize >= this->storageOffset, "Try to copy and change driver with a size which is smaller than the mapping size !");
+
+	//allocate buffer
+	char * buffer = new char[this->segmentSize];
+
+	//copy first part
+	this->copyExtraNotMappedPart(buffer, newDriver, 0, this->storageOffset);
+
+	//copy mapped part
+	this->copyMappedPart(buffer, newDriver, storageSize - this->storageOffset);
+
+	//copy extract part after the mapped one if needed
+	const size_t endOffset = this->storageOffset+this->size;
+	const size_t endSize = storageSize - endOffset;
+	this->copyExtraNotMappedPart(buffer, newDriver, endOffset, endSize);
 }
 
 /*******************  FUNCTION  *********************/

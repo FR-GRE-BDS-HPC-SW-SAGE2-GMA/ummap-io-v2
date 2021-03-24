@@ -83,7 +83,7 @@ int main(int argc, char ** argv)
 	//memset & unamp sync
 	MEASURE("memset", memset(ptr, 10, SIZE));
 	MEASURE("umsync", umsync(ptr, 0,false));
-	MEASURE("uunmap", uunmap(ptr, true));
+	MEASURE("uunmap", umunmap(ptr, true));
 
 	////////////////////////// STEP 2 : map & check & write touch //////////////////////
 	//remap to access just a part
@@ -106,7 +106,7 @@ int main(int argc, char ** argv)
 	MEASURE("fill_segment 1/3->2/3", fill_segment(ptr_copy, SEGMENTS / 3, SEGMENTS / 3, 30));
 	MEASURE("fill_segment 1/3->2/3", fill_segment(ptr_copy, SEGMENTS / 3, SEGMENTS / 3, 30));
 	MEASURE("umsync", umsync(ptr_copy, 0,false));
-	MEASURE("uunmap", uunmap(ptr_copy, true));
+	MEASURE("uunmap", umunmap(ptr_copy, true));
 
 	//////////////////////// STEP 4: make a cow and flush /////////////////////////////
 	printf (" - Make a COW copy...\n");
@@ -118,7 +118,7 @@ int main(int argc, char ** argv)
 	MEASURE("fill_segment 1/3->2/3", fill_segment(ptr, SEGMENTS / 3, SEGMENTS / 3, 30));
 	MEASURE("fill_segment 1/3->2/3", fill_segment(ptr, SEGMENTS / 3, SEGMENTS / 3, 30));
 	MEASURE("umsync", umsync(ptr, 0,false));
-	MEASURE("uunmap", uunmap(ptr, true));
+	MEASURE("uunmap", umunmap(ptr, true));
 
 	//fini
 	printf(" - Finalize...\n");

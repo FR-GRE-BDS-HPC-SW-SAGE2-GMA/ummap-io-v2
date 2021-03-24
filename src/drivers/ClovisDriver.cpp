@@ -217,3 +217,9 @@ void ClovisDriver::sync(void * ptr, size_t offset, size_t size)
 	//cerr << "[Failed] Sync op for the Clovis driver is not implemented" << endl;
 	// Not a problem as the clovis are already synchronous 
 }
+
+/*******************  FUNCTION  *********************/
+void ClovisDriver::setObjectId(int64_t high, int64_t low)
+{
+	this->m_object_id.u_hi(high, low);
+}

@@ -5,10 +5,16 @@
 *****************************************************/
 
 /********************  HEADERS  *********************/
+//std
 #include <cassert>
 #include <cstdio>
 #include <cstring>
 #include <cerrno>
+//unix
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+//local
 #include <config.h>
 #include "../common/Debug.hpp"
 #include "../core/GlobalHandler.hpp"
@@ -346,31 +352,146 @@ int ummap_cow_uri(void * addr, const char * uri, bool allow_exist)
 }
 
 /*******************  FUNCTION  *********************/
+int ummap_cow_clovis(void * addr, int64_t high, int64_t low, bool allow_exist)
+{
+	#ifdef HAVE_MERO
+		return getGlobalhandler()->applyCow<ClovisDriver>("Clovis", addr, [high, low](Mapping * mapping, ClovisDriver * driver){
+			//create new driver
+			ummap_driver_t * new_driver = ummap_driver_create_clovis(high, low, allow_exist);
+
+			//copy data
+			const size_t size = mapping->getStorageOffset() + mapping->getSize();
+			mapping->copyToDriver(new_driver, size);
+
+			//apply
+			driver->setObjectId(high, low);
+
+			//clear
+			ummap_driver_destroy(new_driver);
+
+			//ok
+			return 0;
+		}
+	#else
+		UMMAP_FATAL("Try to cow a clovis driver, but ummap was compiled without mero !");
+		return -1;
+	#endif
+}
+
+/*******************  FUNCTION  *********************/
+int ummap_cow_fd(void * addr, int fd, bool allow_exist)
+{
+	//apply cow
+	return getGlobalhandler()->applyCow<FDDriver>("FD", addr, [fd](Mapping * mapping, FDDriver * driver){
+		//get file size
+		struct stat st;
+		int status = fstat(driver->getFd(), &st);
+		assumeArg(status == 0, "Fail to fstat the original file: %1").argStrErrno().end();
+		size_t origSize = st.st_size;
+
+		//create driver
+		FDDriver * newDriver = new FDDriver(fd);
+
+		//copy to new driver
+		mapping->copyToDriver(newDriver,origSize);
+
+		//set fd
+		driver->setFd(fd);
+
+		//clear
+		delete newDriver;
+
+		//ok
+		return 0;
+	});
+}
+
+/*******************  FUNCTION  *********************/
+int ummap_cow_fopen(void * addr, const char * file_path, const char * mode, bool allow_exist)
+{
+	//check exist
+	if (allow_exist == false) {
+		assumeArg(access( file_path, F_OK ) != 0, "Try to cow on an existing file (%1), but allow_exist is set to false !")
+			.arg(file_path)
+			.end();
+	}
+
+	//open
+	FILE * fp = fopen(file_path, mode);
+	assumeArg(fp != NULL, "Fail to open file '%1': %2")
+		.arg(file_path)
+		.argStrErrno()
+		.end();
+
+	//cow
+	int fd = fileno(fp);
+	int status = ummap_cow_fd(addr, fd, allow_exist);
+
+	//close
+	fclose(fp);
+
+	//ret
+	return status;
+}
+
+/*******************  FUNCTION  *********************/
+int ummap_cow_dax_fopen(void *addr, const char * file_path, const char * mode, bool allow_exist)
+{
+	//check exist
+	if (allow_exist == false) {
+		assumeArg(access( file_path, F_OK ) != 0, "Try to cow on an existing file (%1), but allow_exist is set to false !")
+			.arg(file_path)
+			.end();
+	}
+
+	//open
+	FILE * fp = fopen(file_path, mode);
+	assumeArg(fp != NULL, "Fail to open file '%1': %2")
+		.arg(file_path)
+		.argStrErrno()
+		.end();
+
+	//cow
+	int fd = fileno(fp);
+	int status = ummap_cow_dax(addr, fd, allow_exist);
+
+	//close
+	fclose(fp);
+
+	//ret
+	return status;
+}
+
+/*******************  FUNCTION  *********************/
+int ummap_cow_dax(void * addr, int fd, bool allow_exist)
+{
+	//apply cow
+	return getGlobalhandler()->applyCow<MmapDriver>("MMAP", addr, [fd](Mapping * mapping, MmapDriver * driver){
+		//allocate a new driver
+		MmapDriver * new_driver = new MmapDriver(fd, true);
+
+		//map a new segment
+		mapping->directMmapCow(new_driver);
+
+		//replace in driver
+		driver->setFd(fd);
+
+		//delete temp driver
+		delete new_driver;
+
+		//ok
+		return 0;
+	});
+}
+
+/*******************  FUNCTION  *********************/
 int ummap_cow_ioc(void * addr, int64_t high, int64_t low, bool allow_exist)
 {
 	#ifdef HAVE_IOC_CLIENT
-		//check
-		assert(addr != NULL);
-
-		//get mapping
-		Mapping * mapping = getGlobalhandler()->getMapping(addr);
-		assumeArg(mapping != NULL, "Fail to find the requested mapping for address %p !").arg(addr).end();
-
-		//get the driver
-		Driver * driver = mapping->getDriver();
-		assume(driver != NULL, "Get an unknown NULL driver !");
-
-		//try to cast to IOC driver
-		IocDriver * iocDriver = dynamic_cast<IocDriver*>(driver);
-		assume(iocDriver != NULL, "Get an invalid unknown driver type, not IOC, cannot COW !");
-
-		//call copy on write on the driver.
-		mapping->unregisterRange();
-		int status = iocDriver->cow(high, low, allow_exist);
-		mapping->registerRange();
-
-		//return
-		return status;
+		//call
+		return getGlobalhandler()->applyCow<IocDriver>("IOC", addr, [high, low, allow_exist](Mapping * mapping, IocDriver * driver){
+			return driver->cow(high, low, allow_exist);
+		});
 	#else
 		UMMAP_FATAL("Ummap-io was built without IOC support, cannot apply COW on the requested mapping !");
 		return -1;
@@ -378,35 +499,71 @@ int ummap_cow_ioc(void * addr, int64_t high, int64_t low, bool allow_exist)
 }
 
 /*******************  FUNCTION  *********************/
-int ummap_switch_ioc(void * addr, int64_t high, int64_t low, bool drop_clean)
+int ummap_switch_fopen(void * addr, const char * file_path, const char * mode, ummap_switch_clean_t clean_action)
+{
+	//open
+	FILE * fp = fopen(file_path, mode);
+	assumeArg(fp != NULL, "Fail to open file '%1': %2")
+		.arg(file_path)
+		.argStrErrno()
+		.end();
+
+	//call
+	int fd = fileno(fp);
+	int status = getGlobalhandler()->applySwitch<FDDriver>("FD", addr, clean_action, [fd](FDDriver * driver){
+		return driver->setFd(fd);
+	});
+
+	//close
+	fclose(fp);
+
+	//ok
+	return status;
+}
+
+/*******************  FUNCTION  *********************/
+int ummap_switch_fd(void * addr, int fd, ummap_switch_clean_t clean_action)
+{
+	//call
+	return getGlobalhandler()->applySwitch<FDDriver>("FD", addr, clean_action, [fd](FDDriver * driver){
+		return driver->setFd(fd);
+	});
+}
+
+/*******************  FUNCTION  *********************/
+int ummap_switch_dax(void * addr, int fd, ummap_switch_clean_t clean_action)
+{
+	return ummap_cow_dax(addr, fd, true);
+}
+
+/*******************  FUNCTION  *********************/
+int ummap_switch_dax_fopen(void *addr, const char * file_path, const char * mode, ummap_switch_clean_t clean_action)
+{
+	return ummap_cow_dax_fopen(addr, file_path, mode, true);
+}
+
+/*******************  FUNCTION  *********************/
+int ummap_switch_clovis(void * addr, int64_t high, int64_t low, ummap_switch_clean_t clean_action)
+{
+	#ifdef HAVE_MERO
+		//call
+		return getGlobalhandler()->applySwitch<ClovisDriver>("IOC", addr, drop_clean, [high, low](ClovisDriver * driver){
+			return driver->setObjectId(high, low);
+		});
+	#else
+		UMMAP_FATAL("Ummap-io was built without Mero support, cannot apply COW on the requested mapping !");
+		return -1;
+	#endif
+}
+
+/*******************  FUNCTION  *********************/
+int ummap_switch_ioc(void * addr, int64_t high, int64_t low, ummap_switch_clean_t clean_action)
 {
 	#ifdef HAVE_IOC_CLIENT
-		//check
-		assert(addr != NULL);
-
-		//get mapping
-		Mapping * mapping = getGlobalhandler()->getMapping(addr);
-		assumeArg(mapping != NULL, "Fail to find the requested mapping for address %p !").arg(addr).end();
-
-		//get the driver
-		Driver * driver = mapping->getDriver();
-		assume(driver != NULL, "Get an unknown NULL driver !");
-
-		//try to cast to IOC driver
-		IocDriver * iocDriver = dynamic_cast<IocDriver*>(driver);
-		assume(iocDriver != NULL, "Get an invalid unknown driver type, not IOC, cannot COW !");
-
-		//call copy on write on the driver.
-		mapping->unregisterRange();
-		iocDriver->switchDestination(high, low);
-		mapping->registerRange();
-
-		//if drop
-		if (drop_clean)
-			mapping->dropClean();
-
-		//return
-		return 0;
+		//call
+		return getGlobalhandler()->applySwitch<IocDriver>("IOC", addr, clean_action, [high, low](IocDriver * driver){
+			return driver->switchDestination(high, low);
+		});
 	#else
 		UMMAP_FATAL("Ummap-io was built without IOC support, cannot apply COW on the requested mapping !");
 		return -1;
@@ -414,7 +571,7 @@ int ummap_switch_ioc(void * addr, int64_t high, int64_t low, bool drop_clean)
 }
 
 /*******************  FUNCTION  *********************/
-int ummap_switch_uri(void * addr, const char * uri, bool drop_clean)
+int ummap_switch_uri(void * addr, const char * uri, ummap_switch_clean_t clean_action)
 {
-	return getGlobalhandler()->getUriHandler().applySwitch(addr, uri, drop_clean);
+	return getGlobalhandler()->getUriHandler().applySwitch(addr, uri, clean_action);
 }

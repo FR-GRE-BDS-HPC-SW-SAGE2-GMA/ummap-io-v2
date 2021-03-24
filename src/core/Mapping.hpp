@@ -84,11 +84,15 @@ class Mapping
 		size_t getSize(void) const;
 		size_t getAlignedSize(void) const;
 		size_t getSegmentSize(void) const;
+		size_t getStorageOffset(void) const;
 		void disableThreadSafety();
 		Driver * getDriver(void);
 		void unregisterRange(void);
 		void registerRange(void);
 		void dropClean(void);
+		void markCleanAsDirty(void);
+		void copyToDriver(Driver * newDriver, size_t storageSize);
+		void directMmapCow(Driver * newDriver);
 	public:
 		#ifdef HAVE_HTOPML
 		friend void convertToJson(htopml::JsonState & json,const Mapping & value);
@@ -97,6 +101,8 @@ class Mapping
 		void loadAndSwapSegment(size_t offset, bool writeAccess);
 		const bool * getMutexRange(size_t offset, size_t size, bool * buffer, size_t bufferSize) const;
 		size_t readWriteSize(size_t offset);
+		void copyExtraNotMappedPart(char * buffer, Driver * newDriver, size_t offset, size_t size);
+		void copyMappedPart(char * buffer, Driver * newDriver, size_t storageSize);
 	private:
 		/** Driver to access the storage and read/write data from it. **/
 		Driver * driver;

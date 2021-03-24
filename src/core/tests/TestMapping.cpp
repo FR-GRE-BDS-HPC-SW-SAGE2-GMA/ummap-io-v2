@@ -306,3 +306,95 @@ TEST(TestMapping, globalPolicy)
 	EXPECT_CALL(*localPolicy1, freeElementStorage(_));
 	EXPECT_CALL(*localPolicy2, freeElementStorage(_));
 }
+
+/*******************  FUNCTION  *********************/
+TEST(TestMapping, copyToDriver_aligned)
+{
+	//setup
+	size_t segments = 4;
+	size_t size = segments * UMMAP_PAGE_SIZE;
+	GMockDriver driver;
+	Mapping mapping(NULL, size, UMMAP_PAGE_SIZE, 2*UMMAP_PAGE_SIZE, PROT_READ|PROT_WRITE, UMMAP_DEFAULT, &driver, NULL, NULL);
+
+	//get
+	char * ptr = (char*)mapping.getAddress();
+
+	//touch on mapping && we should see two read
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 2*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 3*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 4*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 5*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	for (int i = 0 ; i < segments ; i++)
+		mapping.onSegmentationFault(ptr + i * UMMAP_PAGE_SIZE, false);
+
+	//touch in write one of the page
+	mapping.onSegmentationFault(ptr + 2 * UMMAP_PAGE_SIZE, true);
+
+	//spawn a new driver
+	GMockDriver newDriver;
+
+	//expect read from first part of the mapping
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 0*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 1*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+
+	//expect read of the write touched page
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 4*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+
+	//expect read from the part after the segment
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 6*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 7*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+
+	//expect write of all
+	EXPECT_CALL(newDriver, pwrite(_, UMMAP_PAGE_SIZE, _)).Times(8).WillRepeatedly(Return(UMMAP_PAGE_SIZE));
+
+	//call
+	mapping.copyToDriver(&newDriver, 8*UMMAP_PAGE_SIZE);
+}
+
+TEST(TestMapping, copyToDriver_not_aligned)
+{
+	//setup
+	size_t segments = 4;
+	size_t size = segments * UMMAP_PAGE_SIZE + 1024;
+	GMockDriver driver;
+	Mapping mapping(NULL, size, UMMAP_PAGE_SIZE, 2*UMMAP_PAGE_SIZE-512, PROT_READ|PROT_WRITE, UMMAP_DEFAULT, &driver, NULL, NULL);
+
+	//get
+	char * ptr = (char*)mapping.getAddress();
+
+	//touch on mapping && we should see two read
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 2*UMMAP_PAGE_SIZE-512)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 3*UMMAP_PAGE_SIZE-512)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 4*UMMAP_PAGE_SIZE-512)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 5*UMMAP_PAGE_SIZE-512)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(driver, pread(_, 1024, 6*UMMAP_PAGE_SIZE-512)).Times(1).WillOnce(Return(1024));
+	for (int i = 0 ; i < segments ; i++)
+		mapping.onSegmentationFault(ptr + i * UMMAP_PAGE_SIZE, false);
+	mapping.onSegmentationFault(ptr + segments * UMMAP_PAGE_SIZE + 512, false);
+
+	//touch in write one of the page
+	mapping.onSegmentationFault(ptr + 2 * UMMAP_PAGE_SIZE, true);
+
+	//spawn a new driver
+	GMockDriver newDriver;
+
+	//expect read from first part of the mapping
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 0*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE-512, 1*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE-512));
+
+	//expect read of the write touched page
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 4*UMMAP_PAGE_SIZE-512)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+
+	//expect read from the part after the segment
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 6*UMMAP_PAGE_SIZE+512)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE-512, 7*UMMAP_PAGE_SIZE+512)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE-512));
+
+	//expect write of all
+	EXPECT_CALL(newDriver, pwrite(_, UMMAP_PAGE_SIZE, _)).Times(6).WillRepeatedly(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(newDriver, pwrite(_, UMMAP_PAGE_SIZE-512, _)).Times(2).WillRepeatedly(Return(UMMAP_PAGE_SIZE-512));
+	EXPECT_CALL(newDriver, pwrite(_, 1024, _)).Times(1).WillRepeatedly(Return(1024));
+
+	//call
+	//mapping.copyToDriver(&newDriver, 2*UMMAP_PAGE_SIZE-512 + size);
+	mapping.copyToDriver(&newDriver, 8*UMMAP_PAGE_SIZE);
+}
