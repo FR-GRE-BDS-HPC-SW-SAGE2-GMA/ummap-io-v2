@@ -74,6 +74,12 @@ void LifoPolicy::freeElementStorage(Mapping * mapping)
 /*******************  FUNCTION  *********************/
 void LifoPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool mapped, bool dirty)
 {
+	//vars
+	const int maxIdsToEvict = 128;
+	size_t idsToEvict[maxIdsToEvict];
+	Mapping * mappings[maxIdsToEvict];
+	int cntIdsToEvict = 0;
+
 	//CRITICAL SECTION
 	{
 		//take lock
@@ -104,10 +110,17 @@ void LifoPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool
 				PolicyStorage evictInfos = getStorageInfo(toEvict);
 
 				//calc id
-				size_t id = toEvict - (ListElement*)evictInfos.elements;
+				idsToEvict[cntIdsToEvict] = toEvict - (ListElement*)evictInfos.elements;
 
-				//evict
-				evictInfos.mapping->evict(this, id);
+				//keep track of the mapping
+				mappings[cntIdsToEvict] = evictInfos.mapping;
+
+				//inc counter
+				cntIdsToEvict++;
+
+				//this can append only if sharing policy over segments with different
+				//segment size.
+				assume(cntIdsToEvict < maxIdsToEvict, "Reach maximum pages to evict due to optimization, cannot continue !");
 
 				//update status
 				this->currentMemory -= evictInfos.mapping->getSegmentSize();
@@ -117,6 +130,11 @@ void LifoPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool
 		//insert in list
 		root.insertBefore(cur);
 	}
+
+	//really do the evict out of the critical section to keep multi-threading
+	//to write data
+	for (size_t i = 0 ; i < cntIdsToEvict; i++)
+		mappings[i]->evict(this, idsToEvict[i]);
 }
 
 /*******************  FUNCTION  *********************/

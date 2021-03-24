@@ -126,7 +126,7 @@ void FifoPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool
 
 				//this can append only if sharing policy over segments with different
 				//segment size.
-				assume(cntIdsToEvict < maxIdsToEvict, "Reach maximum pages to evict due to optimiation, cannot puruse !");
+				assume(cntIdsToEvict < maxIdsToEvict, "Reach maximum pages to evict due to optimization, cannot continue !");
 
 				//update status
 				this->currentMemory -= evictInfos.mapping->getSegmentSize();
