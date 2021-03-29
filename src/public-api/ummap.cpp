@@ -282,9 +282,15 @@ ummap_policy_t * ummap_policy_create_lifo(size_t max_size, bool local)
 }
 
 /*******************  FUNCTION  *********************/
+void umflush(void * ptr, size_t size, bool evict)
+{
+	getGlobalhandler()->flush(ptr, size, evict, false);
+}
+
+/*******************  FUNCTION  *********************/
 void umsync(void * ptr, size_t size, bool evict)
 {
-	getGlobalhandler()->flush(ptr, size, evict);
+	getGlobalhandler()->flush(ptr, size, evict, true);
 }
 
 /*******************  FUNCTION  *********************/
