@@ -49,7 +49,7 @@ class GlobalHandler
 		~GlobalHandler(void);
 		void * ummap(void * addr, size_t size, size_t segmentSize, size_t storageOffset, int protection, int flags, Driver * driver, Policy * localPolicy, const std::string & policyGroup);
 		int uunmap(void * ptr, bool sync);
-		void flush(void * ptr, size_t size, bool evict);
+		void flush(void * ptr, size_t size, bool evict, bool sync);
 		void skipFirstRead(void * ptr);
 		void registerPolicy(const std::string & name, Policy * policy);
 		void unregisterPolicy(const std::string & name);

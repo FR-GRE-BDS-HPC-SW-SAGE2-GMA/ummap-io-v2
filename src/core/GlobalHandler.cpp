@@ -314,8 +314,9 @@ UriHandler & GlobalHandler::getUriHandler(void)
  * @param ptr Define the base address from where to start the flush operation.
  * @param size Define the size of the region to flush.
  * @param evict Enable of disable the automatic eviction of the flushed pages.
+ * @param sync Define if we sync to final storage after the flush.
 **/
-void GlobalHandler::flush(void * ptr, size_t size, bool evict)
+void GlobalHandler::flush(void * ptr, size_t size, bool evict, bool sync)
 {
 	//get mapping
 	Mapping * mapping = this->mappingRegistry.getMapping(ptr);
@@ -350,7 +351,9 @@ void GlobalHandler::flush(void * ptr, size_t size, bool evict)
 		"Invalid flush size, not fit in ummap mapping !");
 
 	//apply
-	int flags = UMMAP_FLUSH_SYNC;
+	int flags = 0;
+	if (sync)
+		flags |= UMMAP_FLUSH_SYNC;
 	if (evict)
 		flags |= UMMAP_FLUSH_UNMAP;
 	mapping->flush(offset, size, flags);

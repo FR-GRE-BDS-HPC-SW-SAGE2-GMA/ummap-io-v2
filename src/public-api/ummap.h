@@ -160,7 +160,15 @@ void * ummap(void * addr, size_t size, size_t segment_size, size_t storage_offse
 **/
 int umunmap(void * ptr, bool sync);
 /**
- * Apply a sync operation to flush data to the storage.
+ * Apply a flush operation to flush data from ummap-io memory to the storage.
+ * See umsync() if you also want the data to be also synced to the final storage.
+ * @param ptr Base address of the mapping or an address inside the mapping.
+ * @param size Size of the range to sync of 0 for all.
+ * @param evict If true evict the synced segments after making the sync operation.
+**/
+void umflush(void * ptr, size_t size, bool evict);
+/**
+ * Apply a flush and sync operation to flush data to the storage.
  * @param ptr Base address of the mapping or an address inside the mapping.
  * @param size Size of the range to sync of 0 for all.
  * @param evict If true evict the synced segments after making the sync operation.
