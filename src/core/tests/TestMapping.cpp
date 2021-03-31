@@ -230,6 +230,43 @@ TEST(TestMapping, flush)
 	ASSERT_DEATH(ptr[UMMAP_PAGE_SIZE] = 10, "");
 }
 
+/*******************  FUNCTION  *********************/
+TEST(TestMapping, sync)
+{
+	//setup
+	size_t segments = 8;
+	size_t size = segments * UMMAP_PAGE_SIZE;
+	GMockDriver driver;
+	Mapping mapping(NULL, size, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, UMMAP_DEFAULT, &driver, NULL, NULL);
+
+	//get
+	char * ptr = (char*)mapping.getAddress();
+
+	//we should see two read
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 0)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+
+	//touch to map
+	mapping.onSegmentationFault(ptr + 0 * UMMAP_PAGE_SIZE, true);
+	mapping.onSegmentationFault(ptr + 1 * UMMAP_PAGE_SIZE, true);
+
+	//set values
+	for (size_t i = 0 ; i < 2 * UMMAP_PAGE_SIZE ; i++) 
+		ptr[i] = 64;
+
+	//we should see two write
+	EXPECT_CALL(driver, pwrite(_, UMMAP_PAGE_SIZE, 0)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(driver, pwrite(_, UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(driver, sync(ptr, 0, size)).Times(1);
+
+	//flush
+	mapping.flush(true);
+
+	//cannot access anymore
+	ASSERT_DEATH(ptr[0] = 10, "");
+	ASSERT_DEATH(ptr[UMMAP_PAGE_SIZE] = 10, "");
+}
+
 TEST(TestMapping, policy)
 {
 	//setup

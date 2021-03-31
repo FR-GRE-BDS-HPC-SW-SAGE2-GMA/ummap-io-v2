@@ -176,6 +176,45 @@ TEST_F(TestPublicAPI, map_driver_fd)
 }
 
 /*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, map_driver_fd_flush)
+{
+	//def
+	const char * fname = "/tmp/test-ummap-fopen-driver.txt";
+
+	//open
+	FILE * fp = fopen(fname, "w+");
+	ASSERT_NE(nullptr, fp);
+	int fd = fileno(fp);
+	ftruncate(fd, 8*4096);
+
+	//map 2
+	void * ptr1 = ummap(NULL, 8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_fd(fd), NULL, "none");
+	fclose(fp);
+
+	//we just write, no read pre-existing content
+	ummap_skip_first_read(ptr1);
+
+	//setup
+	memset(ptr1, 'a', 8*4096);
+
+	//unmap 1 and let the other for cleaup
+	umflush(ptr1, 0, 0);
+	umunmap(ptr1, 0);
+
+	//check
+	fp = fopen(fname, "r");
+	ASSERT_NE(nullptr, fp);
+	char buffer[8*4096];
+	ssize_t res = fread(buffer, 1, 8*4096, fp);
+	ASSERT_EQ(8*4096, res);
+	for (int i = 0 ; i < 8*4096 ; i++)
+		ASSERT_EQ('a', buffer[i]) << "Index: " << i;
+	
+	//clear
+	unlink(fname);
+}
+
+/*******************  FUNCTION  *********************/
 TEST_F(TestPublicAPI, map_driver_dax_fd)
 {
 	//def
@@ -199,6 +238,45 @@ TEST_F(TestPublicAPI, map_driver_dax_fd)
 
 	//unmap 1 and let the other for cleaup
 	umsync(ptr1, 0, 0);
+	umunmap(ptr1, 0);
+
+	//check
+	fp = fopen(fname, "r");
+	ASSERT_NE(nullptr, fp);
+	char buffer[8*4096];
+	ssize_t res = fread(buffer, 1, 8*4096, fp);
+	ASSERT_EQ(8*4096, res);
+	for (int i = 0 ; i < 8*4096 ; i++)
+		ASSERT_EQ(10, buffer[i]) << "Index: " << i;
+	
+	//clear
+	unlink(fname);
+}
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, map_driver_dax_fd_umflush)
+{
+	//def
+	const char * fname = "/tmp/test-ummap-dax-fopen-driver.txt";
+
+	//open
+	FILE * fp = fopen(fname, "w+");
+	ASSERT_NE(nullptr, fp);
+	int fd = fileno(fp);
+	ftruncate(fd, 8*4096);
+
+	//map 2
+	void * ptr1 = ummap(NULL, 8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dax_fd(fd, false), NULL, "none");
+	fclose(fp);
+
+	//we just write, no read pre-existing content
+	ummap_skip_first_read(ptr1);
+
+	//setup
+	memset(ptr1, 10, 8*4096);
+
+	//unmap 1 and let the other for cleaup
+	umflush(ptr1, 0, 0);
 	umunmap(ptr1, 0);
 
 	//check
