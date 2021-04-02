@@ -10,6 +10,8 @@
 //local
 #include "../Mapping.hpp"
 #include "../Policy.hpp"
+#include "../../portability/OS.hpp"
+#include "../../drivers/DummyDriver.hpp"
 
 /***************** USING NAMESPACE ******************/
 using namespace ummapio;
@@ -39,11 +41,17 @@ TEST(TestPolicy, Constructor)
 /*******************  FUNCTION  *********************/
 TEST(TestPolicy, contains)
 {
+	//vars
 	const int size = 4096;
 	char * buffer = (char*)malloc(size);
 
+	//mapping
+	DummyDriver driver(0);
+	Mapping mapping(NULL, size, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, UMMAP_DEFAULT, &driver, NULL, NULL);
+
+	//fill
 	PolicyStorage storage = {
-		.mapping = (Mapping *)0x1,
+		.mapping = &mapping,
 		.elements = buffer,
 		.elementCount= size,
 		.elementSize = 1,
@@ -69,16 +77,19 @@ TEST(TestPolicy, register)
 {
 	//build
 	PublicPolicy policy;
-	Mapping * mapping = (Mapping *)0x1;
 	const int size = 4096;
 	char buffer[size];
 
+	//mapping
+	DummyDriver driver(0);
+	Mapping mapping(NULL, size, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, UMMAP_DEFAULT, &driver, NULL, NULL);
+
 	//register
-	policy.registerMapping(mapping, buffer, size, 1);
+	policy.registerMapping(&mapping, buffer, size, 1);
 
 	//check
-	PolicyStorage out1 = policy.getStorageInfo(mapping);
-	EXPECT_EQ(out1.mapping, mapping);
+	PolicyStorage out1 = policy.getStorageInfo(&mapping);
+	EXPECT_EQ(out1.mapping, &mapping);
 	EXPECT_EQ(out1.elements, buffer);
 }
 
@@ -87,19 +98,22 @@ TEST(TestPolicy, getStorageInfo_mapping)
 {
 	//build
 	PublicPolicy policy;
-	Mapping * mapping = (Mapping *)0x1;
 	const int size = 4096;
 	char buffer[size];
 
+	//mapping
+	DummyDriver driver(0);
+	Mapping mapping(NULL, size, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, UMMAP_DEFAULT, &driver, NULL, NULL);
+
 	//register
-	policy.registerMapping(mapping, buffer, size, 1);
+	policy.registerMapping(&mapping, buffer, size, 1);
 
 	//check
-	PolicyStorage out1 = policy.getStorageInfo(mapping);
-	EXPECT_EQ(out1.mapping, mapping);
+	PolicyStorage out1 = policy.getStorageInfo(&mapping);
+	EXPECT_EQ(out1.mapping, &mapping);
 	EXPECT_EQ(out1.elements, buffer);
 
-	ASSERT_DEATH(policy.getStorageInfo(mapping + 1), "Fail to found policy of given mapping !");
+	ASSERT_DEATH(policy.getStorageInfo((&mapping) + 1), "Fail to found policy of given mapping !");
 }
 
 /*******************  FUNCTION  *********************/
@@ -107,21 +121,24 @@ TEST(TestPolicy, getStorageInfo_element)
 {
 	//build
 	PublicPolicy policy;
-	Mapping * mapping = (Mapping *)0x1;
 	const int size = 4096;
 	char buffer[size];
 
+	//mapping
+	DummyDriver driver(0);
+	Mapping mapping(NULL, size, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, UMMAP_DEFAULT, &driver, NULL, NULL);
+
 	//register
-	policy.registerMapping(mapping, buffer, size, 1);
+	policy.registerMapping(&mapping, buffer, size, 1);
 
 	//check
 	PolicyStorage out1 = policy.getStorageInfo(buffer);
-	EXPECT_EQ(out1.mapping, mapping);
+	EXPECT_EQ(out1.mapping, &mapping);
 	EXPECT_EQ(out1.elements, buffer);
 
 	//check
 	PolicyStorage out2 = policy.getStorageInfo(buffer + size - 1);
-	EXPECT_EQ(out2.mapping, mapping);
+	EXPECT_EQ(out2.mapping, &mapping);
 	EXPECT_EQ(out2.elements, buffer);
 
 	ASSERT_DEATH(policy.getStorageInfo(buffer + size), "Fail to found policy storage entry !");
