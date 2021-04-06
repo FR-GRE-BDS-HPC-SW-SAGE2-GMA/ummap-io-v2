@@ -11,6 +11,7 @@
 //internal
 #include "../common/Debug.hpp"
 //local
+#include "Mapping.hpp"
 #include "Policy.hpp"
 
 /***************** USING NAMESPACE ******************/
@@ -74,11 +75,36 @@ void Policy::registerMapping(Mapping * mapping, void * storage, size_t elementCo
 		.extraInfos = extraInfos,
 	};
 
+	//check
+	assumeArg(mapping->getSegmentSize() <= this->maxMemory, "Trying to register a mapping using segment size larger than the policy maximal size: %1 > %2")
+		.arg(mapping->getSegmentSize())
+		.arg(this->maxMemory)
+		.end();
+
 	//register, CRITICAL SECTION
 	{
 		std::lock_guard<std::recursive_mutex> lockGuard(*this->mutexPtr);
 		this->storageRegistry.push_back(entry);
+		assume(checkHasEnoughMem(), "You registry too many mappings to the same policy, "
+			"it does not allow to have at least one segment per mapping, this can crash the node !");
 	}
+}
+
+/*******************  FUNCTION  *********************/
+/**
+ * Check if has enougth room for having at least one page per mapping.
+**/
+bool Policy::checkHasEnoughMem(void)
+{
+	//var
+	size_t sum = 0;
+
+	//loop
+	for (auto & it : this->storageRegistry)
+		sum += it.mapping->getSegmentSize();
+
+	//check
+	return (sum <= this->maxMemory);
 }
 
 /*******************  FUNCTION  *********************/

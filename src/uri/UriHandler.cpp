@@ -214,13 +214,17 @@ Policy * UriHandler::buildPolicy(const std::string & uri, bool local)
 	Policy * policy = NULL;
 	if (type == "fifo") {
 		size_t memsize = fromHumanMemSize(parser.getPath());
+		assumeArg(memsize % 4096 == 0, "The given size is not multiple of the page size: %1 in %2").arg(parser.getPath()).arg(uri).end();
 		policy = new FifoPolicy(memsize, local);
 	} else if (type == "lifo") {
 		size_t memsize = fromHumanMemSize(parser.getPath());
+		assumeArg(memsize % 4096 == 0, "The given size is not multiple of the page size: %1 in %2").arg(parser.getPath()).arg(uri).end();
 		policy = new LifoPolicy(memsize, local);
 	} else if (type == "fifo-window") {
 		size_t memSize = fromHumanMemSize(parser.getPath());
 		size_t slidingSize = fromHumanMemSize(parser.getParam("window"));
+		assumeArg(memSize % 4096 == 0, "The given size is not multiple of the page size: %1 in %2").arg(parser.getPath()).arg(uri).end();
+		assumeArg(slidingSize % 4096 == 0, "The given size is not multiple of the page size: %1 in %2").arg(parser.getParam("window")).arg(uri).end();
 		policy = new FifoWindowPolicy(memSize, slidingSize, local);
 	} else if (type == "none") {
 		policy = NULL;

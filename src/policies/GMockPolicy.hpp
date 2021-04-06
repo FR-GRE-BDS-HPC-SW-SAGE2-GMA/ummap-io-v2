@@ -24,7 +24,7 @@ namespace ummapio
 class GMockPolicy : public Policy
 {
 	public:
-		GMockPolicy(void): Policy(2*4096, true) {};
+		GMockPolicy(void): Policy(64*4096, true) {};
 		virtual ~GMockPolicy(void) {};
 		MOCK_METHOD(void, allocateElementStorage,(Mapping * mapping, size_t segmentCount), (override));
 		MOCK_METHOD(void, notifyTouch,(Mapping * mapping, size_t index, bool isWrite, bool mapped, bool dirty), (override));

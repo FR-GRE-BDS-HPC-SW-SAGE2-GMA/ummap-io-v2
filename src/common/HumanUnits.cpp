@@ -45,14 +45,19 @@ static size_t fromHumanMemSizeNoRegexp(const std::string & value)
 	//apply
 	size_t res = atol(number.c_str());
 	assumeArg(res > 0, "Invalid null size : %1\n").arg(value).end();
-	if (unit == "KB")
+	if (unit == "") {
+		//nothing to do
+	} else if (unit == "KB") {
 		res *= 1024ul;
-	else if (unit == "MB")
+	} else if (unit == "MB") {
 		res *= 1024ul*1024ul;
-	else if (unit == "GB")
+	} else if (unit == "GB") {
 		res *= 1024ul*1024ul*1024ul;
-	else if (unit == "TB")
+	} else if (unit == "TB") {
 		res *= 1024ul*1024ul*1024ul*1024ul;
+	} else {
+		UMMAP_FATAL_ARG("Invalid unit: %1").arg(value).end();
+	}
 
 	//ret
 	return res;

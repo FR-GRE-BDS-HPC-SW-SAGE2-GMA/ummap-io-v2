@@ -96,6 +96,7 @@ class Policy
 	protected:
 		void registerMapping(Mapping * mapping, void * storage, size_t elementCount, size_t elementSize, void * extraInfos = NULL);
 		void unregisterMapping(Mapping * mapping);
+		bool checkHasEnoughMem(void);
 		PolicyStorage getStorageInfo(void * entry);
 		PolicyStorage getStorageInfo(Mapping * mapping);
 		static bool contains(PolicyStorage & storage, void * entry);
