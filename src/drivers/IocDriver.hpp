@@ -31,6 +31,7 @@ class IocDriver : public Driver
 		virtual void sync(void * ptr, size_t offset, size_t size) override;
 		virtual int64_t establish_mapping(size_t offset, size_t size, bool write) override;
 		virtual void erase_mapping(int64_t data, size_t offset, size_t size, bool write) override;
+		virtual bool checkThreadSafety(void);
 		int cow(int64_t high, int64_t low, bool allowExist);
 		void switchDestination(int64_t high, int64_t low);
 	private:

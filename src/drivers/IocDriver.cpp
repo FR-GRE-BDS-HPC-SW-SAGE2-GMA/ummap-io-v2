@@ -5,6 +5,8 @@
 *****************************************************/
 
 /********************  HEADERS  *********************/
+//linux
+#include <sys/utsname.h>
 //internal
 #include "../common/Debug.hpp"
 #include "IocDriver.hpp"
@@ -102,6 +104,40 @@ int IocDriver::cow(int64_t high, int64_t low, bool allowExist)
 **/
 void IocDriver::switchDestination(int64_t high, int64_t low)
 {
+	ioc_client_obj_create(this->client, this->high, this->low);
 	this->high = high;
 	this->low = low;
+}
+
+/*******************  FUNCTION  *********************/
+bool IocDriver::checkThreadSafety(void)
+{
+	//global static variables
+	static bool gblChecked = false;
+	static bool gblHasRecentKernel = false;
+
+	//if need to check
+	if (gblChecked == false) {
+		//get os infos
+		struct utsname buf;
+		int status = uname(&buf);
+		assume(status == 0, "Fail to call uname() to check OS version !");
+
+		//extract
+		int major, minor, release;
+		status = sscanf(buf.release, "%d.%d.%d", &major, &minor, &release);
+		assumeArg(status == 3, "Fail to parse kernel version: %1").arg(buf.release).end();
+
+		//check
+		gblHasRecentKernel = (major > 3);
+
+		//abort not to crash the system
+		if (!gblHasRecentKernel)
+			UMMAP_FATAL("You are using 3.X kernel version. IOC is known to lead to kernel deadlock when using ummap-io thread safety semantic, please use UMMAP_THREAD_UNSAFE !");
+		
+		//mark checked
+		gblChecked = true;
+	}
+
+	return gblHasRecentKernel;
 }

@@ -70,6 +70,10 @@ Mapping::Mapping(void *addr, size_t size, size_t segmentSize, size_t storageOffs
 	//no thread safe
 	if (flags & UMMAP_THREAD_UNSAFE)
 		this->threadSafe = false;
+	
+	//check thread safety
+	if (this->threadSafe)
+		assume(driver->checkThreadSafety(), "Ask for mapping thread safety but the driver does not support it !");
 
 	//if use map fixed
 	bool mapFixed = (flags & UMMAP_FIXED);
@@ -294,7 +298,6 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 			this->loadAndSwapSegment(offset, isWrite);
 			if (isWrite) {
 				status.dirty = true;
-				status.time = time(NULL);
 			}
 		} else if (isWrite) {
 			//this is a write, open write access
@@ -304,7 +307,6 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 			status.dirty = true;
 
 			//update dirty time for latter flush operation
-			status.time = time(NULL);
 		} else {
 			//this is a first touch withou need read, open as readonly
 			OS::mprotect(segmentBase, segmentSize, true, false, protection & PROT_EXEC);
@@ -566,7 +568,12 @@ void Mapping::flush(size_t offset, size_t size, int flags)
 				void * segmentPtr = this->baseAddress + curOffset;
 
 				//mprotect the whole considered segment
-				OS::mprotect(this->baseAddress + curOffset, segmentSize, true, !threadSafe/*TODO*/, protection & PROT_EXEC);
+				//BUG: on centos/redhat7, this mprotect leads to a kernel live lock
+				//     when used with IOC driver. Cannot IB register a segment which
+				//     is read only. It make the process un-killable.
+				//     The problem seems fixed in centos/redhat 8.
+				if (threadSafe)
+					OS::mprotect(this->baseAddress + curOffset, segmentSize, true, !threadSafe/*TODO*/, protection & PROT_EXEC);
 
 				//apply
 				ssize_t res = this->driver->pwrite(segmentPtr, readWriteSize(curOffset), this->storageOffset + curOffset);
@@ -578,7 +585,9 @@ void Mapping::flush(size_t offset, size_t size, int flags)
 				//update status
 				status.dirty = false;
 				status.needRead = true;
+			}
 
+			if (status.mapped) {
 				//if unmap
 				if (unmap) {
 					//protect
@@ -779,7 +788,7 @@ void Mapping::copyToDriver(Driver * newDriver, size_t storageSize)
 void ummapio::convertToJson(htopml::JsonState & json,const SegmentStatus & value)
 {
 	json.openStruct();
-		json.printField("time", value.time);
+		//json.printField("time", value.time);
 		json.printField("mapped", value.mapped);
 		json.printField("dirty", value.dirty);
 		json.printField("needRead", value.needRead);

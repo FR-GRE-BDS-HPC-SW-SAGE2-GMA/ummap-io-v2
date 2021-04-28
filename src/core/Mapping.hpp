@@ -45,7 +45,7 @@ namespace ummapio
 struct SegmentStatus
 {
 	/** Last write access. **/
-	size_t time:56;
+	//size_t time:56;
 	/** Unused **/
 	unsigned int unused:5;
 	/** True if the segment is mapped **/
