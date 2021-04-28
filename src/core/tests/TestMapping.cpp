@@ -29,7 +29,7 @@ TEST(TestMapping, constructor_destructor)
 	//check status
 	for (size_t i = 0 ; i < segments ; i++) {
 		SegmentStatus status = mapping.getSegmentStatus(i);
-		ASSERT_EQ(0, status.time);
+		//ASSERT_EQ(0, status.time);
 		ASSERT_FALSE(status.dirty);
 		ASSERT_FALSE(status.mapped);
 		ASSERT_TRUE(status.needRead);
@@ -68,14 +68,14 @@ TEST(TestMapping, first_touch_read_first)
 
 	//check status
 	SegmentStatus status0 = mapping.getSegmentStatus(0);
-	ASSERT_EQ(0, status0.time);
+	//ASSERT_EQ(0, status0.time);
 	ASSERT_FALSE(status0.dirty);
 	ASSERT_TRUE(status0.mapped);
 	ASSERT_TRUE(status0.needRead);
 
 	//check status
 	SegmentStatus status1 = mapping.getSegmentStatus(UMMAP_PAGE_SIZE);
-	ASSERT_EQ(0, status1.time);
+	//ASSERT_EQ(0, status1.time);
 	ASSERT_FALSE(status1.dirty);
 	ASSERT_FALSE(status1.mapped);
 	ASSERT_TRUE(status1.needRead);
@@ -100,14 +100,14 @@ TEST(TestMapping, first_touch_write_first)
 
 	//check status
 	SegmentStatus status0 = mapping.getSegmentStatus(0);
-	ASSERT_NE(0, status0.time);
+	//ASSERT_NE(0, status0.time);
 	ASSERT_TRUE(status0.dirty);
 	ASSERT_TRUE(status0.mapped);
 	ASSERT_TRUE(status0.needRead);
 
 	//check status
 	SegmentStatus status1 = mapping.getSegmentStatus(UMMAP_PAGE_SIZE);
-	ASSERT_EQ(0, status1.time);
+	//ASSERT_EQ(0, status1.time);
 	ASSERT_FALSE(status1.dirty);
 	ASSERT_FALSE(status1.mapped);
 	ASSERT_TRUE(status1.needRead);

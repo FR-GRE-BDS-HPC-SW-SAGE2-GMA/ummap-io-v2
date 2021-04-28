@@ -294,7 +294,6 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 			this->loadAndSwapSegment(offset, isWrite);
 			if (isWrite) {
 				status.dirty = true;
-				status.time = time(NULL);
 			}
 		} else if (isWrite) {
 			//this is a write, open write access
@@ -304,7 +303,6 @@ void Mapping::onSegmentationFault(void * address, bool isWrite)
 			status.dirty = true;
 
 			//update dirty time for latter flush operation
-			status.time = time(NULL);
 		} else {
 			//this is a first touch withou need read, open as readonly
 			OS::mprotect(segmentBase, segmentSize, true, false, protection & PROT_EXEC);
@@ -779,7 +777,7 @@ void Mapping::copyToDriver(Driver * newDriver, size_t storageSize)
 void ummapio::convertToJson(htopml::JsonState & json,const SegmentStatus & value)
 {
 	json.openStruct();
-		json.printField("time", value.time);
+		//json.printField("time", value.time);
 		json.printField("mapped", value.mapped);
 		json.printField("dirty", value.dirty);
 		json.printField("needRead", value.needRead);
