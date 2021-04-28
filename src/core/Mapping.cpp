@@ -70,6 +70,10 @@ Mapping::Mapping(void *addr, size_t size, size_t segmentSize, size_t storageOffs
 	//no thread safe
 	if (flags & UMMAP_THREAD_UNSAFE)
 		this->threadSafe = false;
+	
+	//check thread safety
+	if (this->threadSafe)
+		assume(driver->checkThreadSafety(), "Ask for mapping thread safety but the driver does not support it !");
 
 	//if use map fixed
 	bool mapFixed = (flags & UMMAP_FIXED);
@@ -564,7 +568,12 @@ void Mapping::flush(size_t offset, size_t size, int flags)
 				void * segmentPtr = this->baseAddress + curOffset;
 
 				//mprotect the whole considered segment
-				OS::mprotect(this->baseAddress + curOffset, segmentSize, true, !threadSafe/*TODO*/, protection & PROT_EXEC);
+				//BUG: on centos/redhat7, this mprotect leads to a kernel live lock
+				//     when used with IOC driver. Cannot IB register a segment which
+				//     is read only. It make the process un-killable.
+				//     The problem seems fixed in centos/redhat 8.
+				if (threadSafe)
+					OS::mprotect(this->baseAddress + curOffset, segmentSize, true, !threadSafe/*TODO*/, protection & PROT_EXEC);
 
 				//apply
 				ssize_t res = this->driver->pwrite(segmentPtr, readWriteSize(curOffset), this->storageOffset + curOffset);

@@ -90,6 +90,10 @@ class Driver
 		 * @param write If the mapping is in write mode.
 		**/
 		virtual void erase_mapping(int64_t data, size_t offset, size_t size, bool write);
+		/**
+		 * Check if thread safety is supported.
+		**/
+		virtual bool checkThreadSafety(void);
 		void setAutoclean(bool status = true);
 		bool hasAutoclean(void) const;
 		void setUri(const std::string & uri);

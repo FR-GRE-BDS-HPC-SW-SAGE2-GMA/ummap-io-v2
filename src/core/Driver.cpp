@@ -97,3 +97,9 @@ void Driver::erase_mapping(int64_t data, size_t offset, size_t size, bool write)
 {
 	//nothing to do
 }
+
+/*******************  FUNCTION  *********************/
+bool Driver::checkThreadSafety(void)
+{
+	return true;
+}
