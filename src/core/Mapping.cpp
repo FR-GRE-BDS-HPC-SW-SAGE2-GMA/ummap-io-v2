@@ -576,7 +576,9 @@ void Mapping::flush(size_t offset, size_t size, int flags)
 				//update status
 				status.dirty = false;
 				status.needRead = true;
+			}
 
+			if (status.mapped) {
 				//if unmap
 				if (unmap) {
 					//protect
