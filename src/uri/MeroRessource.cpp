@@ -6,12 +6,13 @@
 
 /********************  HEADERS  *********************/
 #include <cstdio>
+#include "config.h"
 #include "../common/Debug.hpp"
 #include "../core/GlobalHandler.hpp"
 #include "MeroRessource.hpp"
-#ifdef MERO_FOUND
+#ifdef HAVE_MERO
 	#include "../public-api/clovis_api.h"
-#endif // MERO_FOUND
+#endif // HAVE_MERO
 
 /***************** USING NAMESPACE ******************/
 using namespace ummapio;
@@ -23,7 +24,7 @@ int MeroRessource::ressourceIndex = 0;
 /*******************  FUNCTION  *********************/
 MeroRessource::MeroRessource(void)
 {
-	#ifdef MERO_FOUND
+	#ifdef HAVE_MERO
 		if (clovis_instance == NULL)
 		{
 			int res = c0appz_init(ressourceIndex, (char*)ressourceFile.c_str());
@@ -39,7 +40,7 @@ MeroRessource::MeroRessource(void)
 /*******************  FUNCTION  *********************/
 MeroRessource::~MeroRessource(void)
 {
-	#ifdef MERO_FOUND
+	#ifdef HAVE_MERO
 		if (this->hasInit) {
 			c0appz_free();
 			this->hasInit = false;

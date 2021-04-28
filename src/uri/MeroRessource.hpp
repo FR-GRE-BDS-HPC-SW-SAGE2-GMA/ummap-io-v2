@@ -9,6 +9,7 @@
 
 /********************  HEADERS  *********************/
 #include <string>
+#include "config.h"
 #include "RessourceHandler.hpp"
 
 /********************  NAMESPACE  *******************/
@@ -23,7 +24,7 @@ class MeroRessource : public Ressource
 		virtual ~MeroRessource(void);
 		static void setRessourceInfo(const std::string & ressourceFile, int ressourceIndex);
 	private:
-		#ifdef MERO_FOUND
+		#ifdef HAVE_MERO
 			bool hasInit;
 		#endif
 		static std::string ressourceFile;

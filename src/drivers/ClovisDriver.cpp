@@ -99,8 +99,8 @@ ssize_t ClovisDriver::pwrite(const void * buffer, size_t size, size_t offset)
 	        last_index += data_units_size;
 	    }
 
-	    cout << "[Pending] Send MERO write ops, object ID=" << m_object_id;
-	    cout << ", size=" << block_size << ", bs=" << data_units_size << endl;
+	    //cout << "[Pending] Send MERO write ops, object ID=" << m_object_id;
+	    //cout << ", size=" << block_size << ", bs=" << data_units_size << endl;
 	    
 	    // Send the write ops to MERO and wait for completion 
 	    ret = write_data_to_object(m_object_id, &ext, &data, &attr);
@@ -118,8 +118,8 @@ ssize_t ClovisDriver::pwrite(const void * buffer, size_t size, size_t offset)
     };
 
 	if (ret == 0) {
-		cout << "[Success] Executing the MERO pwrite op, object ID="<< m_object_id << ", size=" << size
-		          << ", offset=" << offset << endl;
+		//cout << "[Success] Executing the MERO pwrite op, object ID="<< m_object_id << ", size=" << size
+		//          << ", offset=" << offset << endl;
 		return size;
 	} else {
 		cerr << "[Failed] Error executing the MERO pwrite op, object ID=" << m_object_id << " , size=" << size
@@ -200,8 +200,8 @@ ssize_t ClovisDriver::pread(void * buffer, size_t size, size_t offset)
     };
 
     if (ret == 0) {
-    	cout << "[Success] Executing the MERO pread op, object ID="<< m_object_id << ", size=" << size
-    	     << ", offset=" << offset << endl;
+    	//cout << "[Success] Executing the MERO pread op, object ID="<< m_object_id << ", size=" << size
+    	//     << ", offset=" << offset << endl;
         return size;
     } else {
         cerr << "[Failed] Error executing the MERO pread op, object ID=" << m_object_id << " , size=" << size
@@ -221,5 +221,6 @@ void ClovisDriver::sync(void * ptr, size_t offset, size_t size)
 /*******************  FUNCTION  *********************/
 void ClovisDriver::setObjectId(int64_t high, int64_t low)
 {
-	this->m_object_id.u_hi(high, low);
+	this->m_object_id.u_hi = high;
+	this->m_object_id.u_lo = low;
 }

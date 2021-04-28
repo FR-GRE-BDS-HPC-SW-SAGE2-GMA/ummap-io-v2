@@ -102,6 +102,7 @@ int IocDriver::cow(int64_t high, int64_t low, bool allowExist)
 **/
 void IocDriver::switchDestination(int64_t high, int64_t low)
 {
+	ioc_client_obj_create(this->client, this->high, this->low);
 	this->high = high;
 	this->low = low;
 }

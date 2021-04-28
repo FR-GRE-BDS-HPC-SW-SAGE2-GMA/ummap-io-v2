@@ -14,7 +14,7 @@
 #include "../drivers/MemoryDriver.hpp"
 #include "../drivers/DummyDriver.hpp"
 #include "../drivers/MmapDriver.hpp"
-#ifdef MERO_FOUND
+#ifdef HAVE_MERO
 #include "../drivers/ClovisDriver.hpp"
 #endif
 #ifdef HAVE_IOC_CLIENT
@@ -95,8 +95,11 @@ int UriHandler::applyCow(void * addr, const std::string & uri, bool allowExist)
 
 	//apply
 	if (type == "meroioc" || type == "clovisioc" || type == "ioc" || type == "iocfile" ) {
-		ObjectId id = getIocObjectId(uri);
+		ObjectId id = getIocObjectId(parser);
 		return ummap_cow_ioc(addr, id.high, id.low, allowExist);
+	} else if (type == "mero" || type == "clovis" || type == "merofile" ) {
+		ObjectId id = getIocObjectId(parser);
+		return ummap_cow_clovis(addr, id.high, id.low, allowExist);
 	} else if (type == "dummy") {
 		//we do nothing
 		return 0;
@@ -133,8 +136,11 @@ int UriHandler::applySwitch(void * addr, const std::string & uri, ummap_switch_c
 
 	//apply
 	if (type == "meroioc" || type == "clovisioc" || type == "ioc" || type == "iocfile" ) {
-		ObjectId id = getIocObjectId(uri);
+		ObjectId id = getIocObjectId(parser);
 		return ummap_switch_ioc(addr, id.high, id.low, cleanAction);
+	} else if (type == "mero" || type == "clovis" || type == "merofile" ) {
+		ObjectId id = getIocObjectId(parser);
+		return ummap_switch_clovis(addr, id.high, id.low, cleanAction);
 	} else if (type == "dummy") {
 		//we do nothing
 		return 0;
@@ -328,8 +334,8 @@ Driver * UriHandler::buildDriverMero(const Uri & uri)
 	this->ressourceHandler.checkRessource<MeroRessource>("mero");
 
 	//build driver
-	#ifdef MERO_FOUND
-		m0_uint128 m0id = {id.high, id.low};
+	#ifdef HAVE_MERO
+		m0_uint128 m0id = {.u_hi = id.high, .u_lo = id.low};
 		return new ClovisDriver(m0id, true);
 	#else
 		if (uri.getType() == "merofile")

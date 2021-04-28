@@ -174,7 +174,7 @@ ummap_driver_t * ummap_driver_create_fd(int fd)
 ummap_driver_t * ummap_driver_create_clovis(int64_t high, int64_t low, bool create)
 {
 	#ifdef HAVE_MERO
-		struct m0_uint128 object_id = {high, low};
+		struct m0_uint128 object_id = {.u_hi = high, .u_lo = low};
 		ClovisDriver * driver = new ClovisDriver(object_id, create);
 		driver->setAutoclean(true);
 		return (ummap_driver_t*)driver;
@@ -361,13 +361,13 @@ int ummap_cow_uri(void * addr, const char * uri, bool allow_exist)
 int ummap_cow_clovis(void * addr, int64_t high, int64_t low, bool allow_exist)
 {
 	#ifdef HAVE_MERO
-		return getGlobalhandler()->applyCow<ClovisDriver>("Clovis", addr, [high, low](Mapping * mapping, ClovisDriver * driver){
+		return getGlobalhandler()->applyCow<ClovisDriver>("Clovis", addr, [high, low, allow_exist](Mapping * mapping, ClovisDriver * driver){
 			//create new driver
 			ummap_driver_t * new_driver = ummap_driver_create_clovis(high, low, allow_exist);
 
 			//copy data
 			const size_t size = mapping->getStorageOffset() + mapping->getSize();
-			mapping->copyToDriver(new_driver, size);
+			mapping->copyToDriver((Driver*)new_driver, size);
 
 			//apply
 			driver->setObjectId(high, low);
@@ -377,7 +377,7 @@ int ummap_cow_clovis(void * addr, int64_t high, int64_t low, bool allow_exist)
 
 			//ok
 			return 0;
-		}
+		});
 	#else
 		UMMAP_FATAL("Try to cow a clovis driver, but ummap was compiled without mero !");
 		return -1;
@@ -553,7 +553,7 @@ int ummap_switch_clovis(void * addr, int64_t high, int64_t low, ummap_switch_cle
 {
 	#ifdef HAVE_MERO
 		//call
-		return getGlobalhandler()->applySwitch<ClovisDriver>("IOC", addr, drop_clean, [high, low](ClovisDriver * driver){
+		return getGlobalhandler()->applySwitch<ClovisDriver>("IOC", addr, clean_action, [high, low](ClovisDriver * driver){
 			return driver->setObjectId(high, low);
 		});
 	#else
