@@ -73,19 +73,22 @@ void IocDriver::erase_mapping(int64_t data, size_t offset, size_t size, bool wri
  * @param high The high part of the new object ID.
  * @param low The low part of the new object ID.
  * @param allowExist Allow to cow on a pre-existing object.
+ * @param offset Base offset of the range to cow.
+ * @param size Size of then range to cow.
  * @return 0 on success, negative value on error.
 **/
-int IocDriver::cow(int64_t high, int64_t low, bool allowExist)
+int IocDriver::cow(int64_t high, int64_t low, bool allowExist, size_t offset, size_t size)
 {
 	//trivial
 	if (this->high == high && this->low == low)
 		return 0;
 	
 	//aooly cow
-	int status = ioc_client_obj_cow(this->client, this->high, this->low, high, low, allowExist);
-	assumeArg(status == 0, "Failed to apply COW (%1:%2 -> %2:%3) operation of the given driver !")
+	int status = ioc_client_obj_cow(this->client, this->high, this->low, high, low, allowExist, offset, size);
+	assumeArg(status == 0, "Failed to apply COW (%1:%2 -> %3:%4) [%5:%6] operation of the given driver !")
 		.arg(this->high).arg(this->low)
 		.arg(high).arg(low)
+		.arg(offset).arg(size)
 		.end();
 
 	//remember new ID

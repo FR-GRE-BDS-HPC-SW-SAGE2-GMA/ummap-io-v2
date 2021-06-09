@@ -496,7 +496,7 @@ int ummap_cow_ioc(void * addr, int64_t high, int64_t low, bool allow_exist)
 	#ifdef HAVE_IOC_CLIENT
 		//call
 		return getGlobalhandler()->applyCow<IocDriver>("IOC", addr, [high, low, allow_exist](Mapping * mapping, IocDriver * driver){
-			return driver->cow(high, low, allow_exist);
+			return driver->cow(high, low, allow_exist, mapping->getStorageOffset(), mapping->getSize());
 		});
 	#else
 		UMMAP_FATAL("Ummap-io was built without IOC support, cannot apply COW on the requested mapping !");

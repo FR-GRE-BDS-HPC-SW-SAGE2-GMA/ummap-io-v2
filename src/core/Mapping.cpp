@@ -769,15 +769,15 @@ void Mapping::copyToDriver(Driver * newDriver, size_t storageSize)
 	char * buffer = new char[this->segmentSize];
 
 	//copy first part
-	this->copyExtraNotMappedPart(buffer, newDriver, 0, this->storageOffset);
+	//this->copyExtraNotMappedPart(buffer, newDriver, 0, this->storageOffset);
 
 	//copy mapped part
 	this->copyMappedPart(buffer, newDriver, storageSize - this->storageOffset);
 
 	//copy extract part after the mapped one if needed
-	const size_t endOffset = this->storageOffset+this->size;
-	const size_t endSize = storageSize - endOffset;
-	this->copyExtraNotMappedPart(buffer, newDriver, endOffset, endSize);
+	//const size_t endOffset = this->storageOffset+this->size;
+	//const size_t endSize = storageSize - endOffset;
+	//this->copyExtraNotMappedPart(buffer, newDriver, endOffset, endSize);
 }
 
 /*******************  FUNCTION  *********************/
