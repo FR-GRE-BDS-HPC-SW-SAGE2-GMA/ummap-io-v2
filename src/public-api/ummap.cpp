@@ -25,7 +25,7 @@
 #include "../drivers/DummyDriver.hpp"
 #include "../drivers/MmapDriver.hpp"
 #include "../drivers/CDriver.hpp"
-#ifdef HAVE_MERO
+#if defined(HAVE_MERO) || defined(HAVE_MOTR)
 	#include "../drivers/ClovisDriver.hpp"
 	#include "clovis_api.h"
 #endif
@@ -173,13 +173,13 @@ ummap_driver_t * ummap_driver_create_fd(int fd)
 /*******************  FUNCTION  *********************/
 ummap_driver_t * ummap_driver_create_clovis(int64_t high, int64_t low, bool create)
 {
-	#ifdef HAVE_MERO
+	#if defined(HAVE_MERO) || defined(HAVE_MOTR)
 		struct m0_uint128 object_id = {.u_hi = high, .u_lo = low};
 		ClovisDriver * driver = new ClovisDriver(object_id, create);
 		driver->setAutoclean(true);
 		return (ummap_driver_t*)driver;
 	#else
-		UMMAP_FATAL("Try to create a clovis driver, but ummap was compiled without mero !");
+		UMMAP_FATAL("Try to create a clovis driver, but ummap was compiled without mero/motr !");
 		return NULL;
 	#endif
 }
@@ -352,6 +352,12 @@ void ummap_config_ioc_init_options(const char * server, const char * port)
 }
 
 /*******************  FUNCTION  *********************/
+void ummap_mero_init(const char * ressourceFile, int ressourceIndex)
+{
+	getGlobalhandler()->initMero(ressourceFile, ressourceIndex);
+}
+
+/*******************  FUNCTION  *********************/
 int ummap_cow_uri(void * addr, const char * uri, bool allow_exist)
 {
 	return getGlobalhandler()->getUriHandler().applyCow(addr, uri, allow_exist);
@@ -360,7 +366,7 @@ int ummap_cow_uri(void * addr, const char * uri, bool allow_exist)
 /*******************  FUNCTION  *********************/
 int ummap_cow_clovis(void * addr, int64_t high, int64_t low, bool allow_exist)
 {
-	#ifdef HAVE_MERO
+	#if defined(HAVE_MERO) || defined(HAVE_MOTR)
 		return getGlobalhandler()->applyCow<ClovisDriver>("Clovis", addr, [high, low, allow_exist](Mapping * mapping, ClovisDriver * driver){
 			//create new driver
 			ummap_driver_t * new_driver = ummap_driver_create_clovis(high, low, allow_exist);
@@ -379,7 +385,7 @@ int ummap_cow_clovis(void * addr, int64_t high, int64_t low, bool allow_exist)
 			return 0;
 		});
 	#else
-		UMMAP_FATAL("Try to cow a clovis driver, but ummap was compiled without mero !");
+		UMMAP_FATAL("Try to cow a clovis driver, but ummap was compiled without mero/motr !");
 		return -1;
 	#endif
 }
@@ -551,13 +557,13 @@ int ummap_switch_dax_fopen(void *addr, const char * file_path, const char * mode
 /*******************  FUNCTION  *********************/
 int ummap_switch_clovis(void * addr, int64_t high, int64_t low, ummap_switch_clean_t clean_action)
 {
-	#ifdef HAVE_MERO
+	#if defined(HAVE_MERO) || defined(HAVE_MOTR)
 		//call
 		return getGlobalhandler()->applySwitch<ClovisDriver>("IOC", addr, clean_action, [high, low](ClovisDriver * driver){
 			return driver->setObjectId(high, low);
 		});
 	#else
-		UMMAP_FATAL("Ummap-io was built without Mero support, cannot apply COW on the requested mapping !");
+		UMMAP_FATAL("Ummap-io was built without Mero/Motr support, cannot apply COW on the requested mapping !");
 		return -1;
 	#endif
 }

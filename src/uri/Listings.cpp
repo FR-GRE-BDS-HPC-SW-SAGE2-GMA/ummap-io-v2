@@ -11,8 +11,8 @@
 #include <ctime>
 //internal
 #include "config.h"
-#ifdef HAVE_MERO
-	#include "../public-api/clovis_api.h"
+#if defined(HAVE_MERO) || defined(HAVE_MOTR)
+	#include "clovis_api.h"
 #endif
 #include "../common/Debug.hpp"
 #include "Listings.hpp"

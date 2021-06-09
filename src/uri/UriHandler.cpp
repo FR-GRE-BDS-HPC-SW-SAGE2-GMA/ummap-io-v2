@@ -14,8 +14,8 @@
 #include "../drivers/MemoryDriver.hpp"
 #include "../drivers/DummyDriver.hpp"
 #include "../drivers/MmapDriver.hpp"
-#ifdef HAVE_MERO
-#include "../drivers/ClovisDriver.hpp"
+#if defined(HAVE_MERO) || defined(HAVE_MOTR)
+	#include "../drivers/ClovisDriver.hpp"
 #endif
 #ifdef HAVE_IOC_CLIENT
 #include "../drivers/IocDriver.hpp"
@@ -334,7 +334,7 @@ Driver * UriHandler::buildDriverMero(const Uri & uri)
 	this->ressourceHandler.checkRessource<MeroRessource>("mero");
 
 	//build driver
-	#ifdef HAVE_MERO
+	#if defined(HAVE_MERO) || defined(HAVE_MOTR)
 		m0_uint128 m0id = {.u_hi = id.high, .u_lo = id.low};
 		return new ClovisDriver(m0id, true);
 	#else
@@ -411,4 +411,11 @@ Driver * UriHandler::buildDriverIoc(const Uri & uri)
 			return NULL;
 		}
 	#endif
+}
+
+/*******************  FUNCTION  *********************/
+void UriHandler::initMero(const std::string & ressourceFile, int ressourceIndex)
+{
+	MeroRessource::setRessourceInfo(ressourceFile, ressourceIndex);
+	this->ressourceHandler.checkRessource<MeroRessource>("mero");
 }

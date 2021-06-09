@@ -24,6 +24,7 @@
 
 //Mero
 #cmakedefine HAVE_MERO
+#cmakedefine HAVE_MOTR
 
 //Ioc client
 #cmakedefine HAVE_IOC_CLIENT

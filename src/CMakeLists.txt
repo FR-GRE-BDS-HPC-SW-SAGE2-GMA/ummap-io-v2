@@ -38,9 +38,6 @@ endif (HTOPML_FOUND)
 if (IOCCLIENT_FOUND)
 	set(HAVE_IOC_CLIENT yes)
 endif (IOCCLIENT_FOUND)
-if (MERO_FOUND)
-	set(HAVE_MERO yes)
-endif (MERO_FOUND)
 
 ######################################################
 #setup config file
@@ -75,14 +72,20 @@ endif (IOCCLIENT_FOUND)
 
 ######################################################
 if(MERO_FOUND)
-	set(UMMAP_INTERNAL_CODE ${UMMAP_INTERNAL_CODE} $<TARGET_OBJECTS:clovis_api>)
+	set(UMMAP_INTERNAL_CODE ${UMMAP_INTERNAL_CODE} $<TARGET_OBJECTS:ummap-extern-mero>)
 endif(MERO_FOUND)
+if(MOTR_FOUND)
+	set(UMMAP_INTERNAL_CODE ${UMMAP_INTERNAL_CODE} $<TARGET_OBJECTS:ummap-extern-motr>)
+endif(MOTR_FOUND)
 
 ######################################################
 add_library(ummap-io SHARED ${UMMAP_INTERNAL_CODE})
 if(MERO_FOUND)
 	set_target_properties(ummap-io PROPERTIES LINK_FLAGS "${MERO_LINK_FLAGS}")
-endif()
+endif(MERO_FOUND)
+if(MOTR_FOUND)
+	set_target_properties(ummap-io PROPERTIES LINK_FLAGS "${MOTR_LINK_FLAGS}")
+endif(MOTR_FOUND)
 if(IOCCLIENT_FOUND)
 	target_link_libraries(ummap-io ${IOCCLIENT_LIBRARY})
 endif()

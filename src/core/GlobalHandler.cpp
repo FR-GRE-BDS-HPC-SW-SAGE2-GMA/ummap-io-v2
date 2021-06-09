@@ -375,6 +375,15 @@ Mapping * GlobalHandler::getMapping(void * addr)
 
 /*******************  FUNCTION  *********************/
 /**
+ * Initialize the Mero/Cotrx API
+**/
+void GlobalHandler::initMero(const std::string & ressourceFile, int ressourceIndex)
+{
+	this->uriHandler.initMero(ressourceFile, ressourceIndex);
+}
+
+/*******************  FUNCTION  *********************/
+/**
  * Setup the global handler pointer.
  * @param handler Handler to register.
 **/
