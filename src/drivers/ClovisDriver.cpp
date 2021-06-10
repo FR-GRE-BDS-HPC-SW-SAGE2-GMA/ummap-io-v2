@@ -55,12 +55,12 @@ ssize_t ClovisDriver::pread(void * buffer, size_t size, size_t offset)
 
 		//check mero block size
 		int pool = 0;
-		size_t m0bs = c0appz_m0bs(object_id.u_hi, object_id.u_lo, size, pool);
+		size_t m0bs = c0appz_m0bs(m_object_id.u_hi, m_object_id.u_lo, size, pool);
 
 		//make read
 		size_t bsz = 4096;
 		size_t cnt = size / bsz;
-		int ret = c0appz_mr((char*)buffer, object_id.u_hi, object_id.u_lo, offset, bsz, cnt, m0bs);
+		int ret = c0appz_mr((char*)buffer, m_object_id.u_hi, m_object_id.u_lo, offset, bsz, cnt, m0bs);
 
 		//check status
 		if (ret == 0) {
@@ -171,12 +171,12 @@ ssize_t ClovisDriver::pwrite(const void * buffer, size_t size, size_t offset)
 
 		//check mero block size
 		int pool = 0;
-		size_t m0bs = c0appz_m0bs(object_id.u_hi, object_id.u_lo, size, pool);
+		size_t m0bs = c0appz_m0bs(m_object_id.u_hi, m_object_id.u_lo, size, pool);
 
 		//make read
 		size_t bsz = 4096;
 		size_t cnt = size / bsz;
-		int ret = c0appz_mw((char*)buffer, object_id.u_hi, object_id.u_lo, offset, bsz, cnt, m0bs);
+		int ret = c0appz_mw((char*)buffer, m_object_id.u_hi, m_object_id.u_lo, offset, bsz, cnt, m0bs);
 
 		//check status
 		if (ret == 0) {
