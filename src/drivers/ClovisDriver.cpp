@@ -42,7 +42,7 @@ ClovisDriver::~ClovisDriver(void)
 }
 
 /****************************************************/
-ssize_t StorageBackendMero::pread(int64_t high, int64_t low, void * buffer, size_t size, size_t offset)
+ssize_t ClovisDriver::pread(void * buffer, size_t size, size_t offset)
 {
 	//check
 	assert(buffer != NULL);
@@ -59,11 +59,6 @@ ssize_t StorageBackendMero::pread(int64_t high, int64_t low, void * buffer, size
 		size_t bsz = 4096;
 		size_t cnt = size / bsz;
 		int ret = c0appz_mr((char*)buffer, high, low, offset, bsz, cnt, m0bs);
-
-		//set object for debug
-		struct m0_uint128 m_object_id;
-		m_object_id.u_hi = high;
-		m_object_id.u_lo = low;
 
 		//check status
 		if (ret == 0) {
@@ -83,10 +78,6 @@ ssize_t StorageBackendMero::pread(int64_t high, int64_t low, void * buffer, size
 		struct m0_indexvec ext;
 		struct m0_bufvec data;
 		struct m0_bufvec attr;
-
-		struct m0_uint128 m_object_id;
-		m_object_id.u_hi = high;
-		m_object_id.u_lo = low;
 
 		char *char_buf = (char *)buffer;
 		int ret = 0;
@@ -167,7 +158,7 @@ ssize_t StorageBackendMero::pread(int64_t high, int64_t low, void * buffer, size
 }
 
 /****************************************************/
-ssize_t ClovisDriver::pwrite(int64_t high, int64_t low, void * buffer, size_t size, size_t offset)
+ssize_t ClovisDriver::pwrite(const void * buffer, size_t size, size_t offset)
 {
 	//check
 	assert(buffer != NULL);
@@ -184,11 +175,6 @@ ssize_t ClovisDriver::pwrite(int64_t high, int64_t low, void * buffer, size_t si
 		size_t bsz = 4096;
 		size_t cnt = size / bsz;
 		int ret = c0appz_mw((char*)buffer, high, low, offset, bsz, cnt, m0bs);
-
-		//set object for debug
-		struct m0_uint128 m_object_id;
-		m_object_id.u_hi = high;
-		m_object_id.u_lo = low;
 
 		//check status
 		if (ret == 0) {
@@ -211,10 +197,6 @@ ssize_t ClovisDriver::pwrite(int64_t high, int64_t low, void * buffer, size_t si
 
 		char *char_buf = (char *) buffer;
 		int ret = 0;
-
-		struct m0_uint128 m_object_id;
-		m_object_id.u_hi = high;
-		m_object_id.u_lo = low;
 
 		// We assume here 2 things:
 		// -> That the object is opened

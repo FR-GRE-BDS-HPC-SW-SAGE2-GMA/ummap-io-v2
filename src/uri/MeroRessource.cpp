@@ -35,7 +35,7 @@ MeroRessource::MeroRessource(void)
 			this->hasInit = false;
 		}
 	#elif defined(HAVE_MOTR)
-		if (clovis_instance == NULL)
+		if (m0_instance == NULL)
 		{
 			c0appz_set_manual_rc((char*)ressourceFile.c_str());
 			int res = c0appz_init(ressourceIndex);

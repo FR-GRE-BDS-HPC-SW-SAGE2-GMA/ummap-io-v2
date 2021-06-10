@@ -40,7 +40,7 @@ int main(int argc, char **argv)
         printf("Using Default Object ID=%lu:%lu\n", id.u_hi, id.u_lo);
     }
 
-    #if define(HAVE_MERO)
+    #if defined(HAVE_MERO)
         int ret = c0appz_init(0, ressource_file);
     #elif defined(HAVE_MOTR)
         c0appz_set_manual_rc(ressource_file);
