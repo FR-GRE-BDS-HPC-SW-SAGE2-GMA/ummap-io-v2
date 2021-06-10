@@ -10,6 +10,8 @@
 #include <cassert>
 #include <iostream>
 //internal
+#include "config.h"
+#include "common/Debug.hpp"
 #include "ClovisDriver.hpp"
 
 /***************** USING NAMESPACE ******************/
@@ -53,16 +55,16 @@ ssize_t ClovisDriver::pread(void * buffer, size_t size, size_t offset)
 
 		//check mero block size
 		int pool = 0;
-		size_t m0bs = c0appz_m0bs(high, low, size, pool);
+		size_t m0bs = c0appz_m0bs(object_id.u_hi, object_id.u_lo, size, pool);
 
 		//make read
 		size_t bsz = 4096;
 		size_t cnt = size / bsz;
-		int ret = c0appz_mr((char*)buffer, high, low, offset, bsz, cnt, m0bs);
+		int ret = c0appz_mr((char*)buffer, object_id.u_hi, object_id.u_lo, offset, bsz, cnt, m0bs);
 
 		//check status
 		if (ret == 0) {
-			IOC_DEBUG_ARG("mero", "Success executing the MERO helperPread op, object ID=%1, offset=%3, size=%2")
+			UMMAP_DEBUG_ARG("mero", "Success executing the MERO helperPread op, object ID=%1, offset=%3, size=%2")
 				.arg(m_object_id)
 				.arg(offset)
 				.arg(size)
@@ -140,7 +142,7 @@ ssize_t ClovisDriver::pread(void * buffer, size_t size, size_t offset)
 		};
 
 		if (ret == 0) {
-			IOC_DEBUG_ARG("mero", "Success executing the MERO helperPread op, object ID=%1, offset=%3, size=%2")
+			UMMAP_DEBUG_ARG("mero", "Success executing the MERO helperPread op, object ID=%1, offset=%3, size=%2")
 				.arg(m_object_id)
 				.arg(offset)
 				.arg(size)
@@ -169,16 +171,16 @@ ssize_t ClovisDriver::pwrite(const void * buffer, size_t size, size_t offset)
 
 		//check mero block size
 		int pool = 0;
-		size_t m0bs = c0appz_m0bs(high, low, size, pool);
+		size_t m0bs = c0appz_m0bs(object_id.u_hi, object_id.u_lo, size, pool);
 
 		//make read
 		size_t bsz = 4096;
 		size_t cnt = size / bsz;
-		int ret = c0appz_mw((char*)buffer, high, low, offset, bsz, cnt, m0bs);
+		int ret = c0appz_mw((char*)buffer, object_id.u_hi, object_id.u_lo, offset, bsz, cnt, m0bs);
 
 		//check status
 		if (ret == 0) {
-			IOC_DEBUG_ARG("mero", "Success executing the MERO helperWrite op, object ID=%1, offset=%3, size=%2")
+			UMMAP_DEBUG_ARG("mero", "Success executing the MERO helperWrite op, object ID=%1, offset=%3, size=%2")
 				.arg(m_object_id)
 				.arg(offset)
 				.arg(size)
@@ -263,7 +265,7 @@ ssize_t ClovisDriver::pwrite(const void * buffer, size_t size, size_t offset)
 		};
 
 		if (ret == 0) {
-			IOC_DEBUG_ARG("mero", "Success executing the MERO helperWrite op, object ID=%1, offset=%3, size=%2")
+			UMMAP_DEBUG_ARG("mero", "Success executing the MERO helperWrite op, object ID=%1, offset=%3, size=%2")
 				.arg(m_object_id)
 				.arg(offset)
 				.arg(size)
