@@ -110,9 +110,9 @@ int UriHandler::applyCow(void * addr, const std::string & uri, bool allowExist)
 		//we do nothing
 		return 0;
 	} else if (type == "file") {
-		return ummap_cow_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "w+").c_str(), allowExist);
+		return ummap_cow_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "a+").c_str(), allowExist);
 	} else if (type == "mmap" || type == "dax") {
-		return ummap_cow_dax_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "w+").c_str(), allowExist);
+		return ummap_cow_dax_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "a+").c_str(), allowExist);
 	} else {
 		UMMAP_FATAL_ARG("Invalid ressource type to run COW operation : %1").arg(uri).end();
 		return -1;
@@ -151,9 +151,9 @@ int UriHandler::applySwitch(void * addr, const std::string & uri, ummap_switch_c
 		//we do nothing
 		return 0;
 	} else if (type == "file") {
-		return ummap_switch_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "w+").c_str(), cleanAction);
+		return ummap_switch_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "a+").c_str(), cleanAction);
 	} else if (type == "mmap" || type == "dax") {
-		return ummap_switch_dax_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "w+").c_str(), cleanAction);
+		return ummap_switch_dax_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "a+").c_str(), cleanAction);
 	} else {
 		UMMAP_FATAL_ARG("Invalid ressource type to run switch operation : %1").arg(uri).end();
 		return -1;
@@ -176,7 +176,7 @@ Driver * UriHandler::buildDriver(const std::string & uri)
 	std::string type = parser.getType();
 	Driver * driver = NULL;
 	if (type == "file") {
-		driver = this->buildDriverFOpen(parser.getPath(), parser.getParam("mode", "w+"));
+		driver = this->buildDriverFOpen(parser.getPath(), parser.getParam("mode", "a+"));
 	} else if (type == "mem") {
 		size_t memsize = fromHumanMemSize(parser.getPath());
 		driver = new MemoryDriver(memsize);
@@ -188,7 +188,7 @@ Driver * UriHandler::buildDriver(const std::string & uri)
 	} else if (type == "meroioc" || type == "clovisioc" || type == "ioc" || type == "iocfile" ) {
 		driver = buildDriverIoc(parser);
 	} else if (type == "mmap" || type == "dax" ) {
-		driver = this->buildDriverFOpenMmap(parser.getPath(), parser.getParam("mode", "w+"));
+		driver = this->buildDriverFOpenMmap(parser.getPath(), parser.getParam("mode", "a+"));
 	} else if (type == "mmapanon") {
 		driver = new MmapDriver(0, true);
 	} else {
@@ -346,7 +346,7 @@ Driver * UriHandler::buildDriverMero(const Uri & uri)
 			//replacement
 			char fname[1024];
 			sprintf(fname, "%lx:%lx", id.high, id.low);
-			return buildDriverFOpen(fname, "w+");
+			return buildDriverFOpen(fname, "a+");
 		} else {
 			UMMAP_FATAL_ARG("Mero is not available, cannot use uri : %1").arg(uri.getURI()).end();
 			return NULL;
@@ -405,7 +405,7 @@ Driver * UriHandler::buildDriverIoc(const Uri & uri)
 			//replacement
 			char fname[1024];
 			sprintf(fname, "%lx:%lx", id.high, id.low);
-			return buildDriverFOpen(fname, "w+");
+			return buildDriverFOpen(fname, "a+");
 		} else {
 			UMMAP_FATAL_ARG("Mero is not available, cannot use uri : %1").arg(uri.getURI()).end();
 			return NULL;
