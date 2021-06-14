@@ -10,9 +10,9 @@
 #include "../common/Debug.hpp"
 #include "../core/GlobalHandler.hpp"
 #include "MeroRessource.hpp"
-#ifdef HAVE_MERO
-	#include "../public-api/clovis_api.h"
-#endif // HAVE_MERO
+#if defined(HAVE_MERO) || defined(HAVE_MOTR)
+	#include "clovis_api.h"
+#endif // HAVE_MERO || HAVE_MOTR
 
 /***************** USING NAMESPACE ******************/
 using namespace ummapio;
@@ -24,10 +24,21 @@ int MeroRessource::ressourceIndex = 0;
 /*******************  FUNCTION  *********************/
 MeroRessource::MeroRessource(void)
 {
-	#ifdef HAVE_MERO
+	#if defined(HAVE_MERO)
 		if (clovis_instance == NULL)
 		{
 			int res = c0appz_init(ressourceIndex, (char*)ressourceFile.c_str());
+			assume(res == 0, "Failed to init mero/clovis API !");
+			setupSegfaultHandler();
+			this->hasInit = true;
+		} else {
+			this->hasInit = false;
+		}
+	#elif defined(HAVE_MOTR)
+		if (m0_instance == NULL)
+		{
+			c0appz_set_manual_rc((char*)ressourceFile.c_str());
+			int res = c0appz_init(ressourceIndex);
 			assume(res == 0, "Failed to init mero/clovis API !");
 			setupSegfaultHandler();
 			this->hasInit = true;
@@ -40,7 +51,7 @@ MeroRessource::MeroRessource(void)
 /*******************  FUNCTION  *********************/
 MeroRessource::~MeroRessource(void)
 {
-	#ifdef HAVE_MERO
+	#if defined(HAVE_MERO) || defined(HAVE_MOTR)
 		if (this->hasInit) {
 			c0appz_free();
 			this->hasInit = false;

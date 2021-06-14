@@ -12,7 +12,7 @@
 #include "../core/Driver.hpp"
 
 extern "C" {
-#include "../public-api/clovis_api.h"
+	#include "clovis_api.h"
 }
 
 /* This value is fixed based on the HW that you run, 

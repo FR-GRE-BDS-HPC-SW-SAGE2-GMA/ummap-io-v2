@@ -36,6 +36,7 @@ class UriHandler
 		int applyCow(void * addr, const std::string & uri, bool allowExist);
 		int applySwitch(void * addr, const std::string & uri, ummap_switch_clean_t cleanAction);
 		std::string replaceVariables(std::string value);
+		void initMero(const std::string & ressourceFile, int ressourceIndex);
 	private:
 		Driver * buildDriverFOpen(const std::string & fname, const std::string & mode);
 		Driver * buildDriverFOpenMmap(const std::string & fname, const std::string & mode);

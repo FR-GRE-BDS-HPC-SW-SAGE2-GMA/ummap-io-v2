@@ -659,7 +659,7 @@ int create_object(struct m0_uint128 id)
 
 	rc = open_entity(&obj.ob_entity);
 	if (!(rc < 0)) {
-		//fprintf(stderr,"Object already exists\n");
+		fprintf(stderr,"Object already exists\n");
 		return 1;
 	}
 

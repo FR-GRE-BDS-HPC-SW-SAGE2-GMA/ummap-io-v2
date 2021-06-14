@@ -12,9 +12,9 @@ set(DRIVERS_SRC DummyDriver.cpp
                 CDriver.cpp)
 
 ######################################################
-if (MERO_FOUND)
+if (MERO_FOUND OR MOTR_FOUND)
 	list(APPEND DRIVERS_SRC ClovisDriver.cpp)
-endif(MERO_FOUND)
+endif(MERO_FOUND OR MOTR_FOUND)
 
 ######################################################
 if (IOCCLIENT_FOUND)
@@ -29,6 +29,9 @@ SET_TARGET_PROPERTIES(ummap-drivers PROPERTIES POSITION_INDEPENDENT_CODE ON)
 if (MERO_FOUND)
 	SET_TARGET_PROPERTIES(ummap-drivers PROPERTIES COMPILE_FLAGS "${MERO_COMPILE_FLAGS}")
 endif(MERO_FOUND)
+if (MOTR_FOUND)
+	SET_TARGET_PROPERTIES(ummap-drivers PROPERTIES COMPILE_FLAGS "${MOTR_COMPILE_FLAGS}")
+endif(MOTR_FOUND)
 
 ######################################################
 if (ENABLE_TESTS)

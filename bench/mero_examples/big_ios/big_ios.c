@@ -40,7 +40,14 @@ int main(int argc, char **argv)
         printf("Using Default Object ID=%lu:%lu\n", id.u_hi, id.u_lo);
     }
 
-    int ret = c0appz_init(0, ressource_file);
+    #if defined(HAVE_MERO)
+        int ret = c0appz_init(0, ressource_file);
+    #elif defined(HAVE_MOTR)
+        c0appz_set_manual_rc(ressource_file);
+        int ret = c0appz_init(0);
+    #else
+        #error "Should choose either mero or motr !"
+    #endif
     if (ret == 0) {
        printf("[Success] Mero Initialized\n");
     } else {
@@ -50,7 +57,7 @@ int main(int argc, char **argv)
     ret = create_object(id);
     // Call ummap
     size_t size = 1000*1024*1024; //1GB
-    size_t segsize = 100*1024*1024; //16MB
+    size_t segsize = 100*1024*1024; //100MB
     off_t offset = 0;
     void *baseptr = NULL;
 

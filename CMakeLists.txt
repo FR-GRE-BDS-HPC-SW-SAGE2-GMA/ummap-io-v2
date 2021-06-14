@@ -30,6 +30,7 @@ find_package(OpenMP REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Htopml QUIET)
 find_package(Mero QUIET)
+find_package(Motr QUIET)
 find_package(IocClient QUIET)
 
 ######################################################
@@ -40,7 +41,18 @@ if(MERO_FOUND)
 	set(MERO_COMPILE_FLAGS "-D_REENTRANT -D_GNU_SOURCE -DM0_INTERNAL='' -DM0_EXTERN=extern -fno-common -I${MERO_INCLUDE_DIRS}")
 	set(MERO_COMPILE_FLAGS "${MERO_COMPILE_FLAGS}  -Wall -Wno-attributes -fno-strict-aliasing -rdynamic")
 	set(MERO_LINK_FLAGS "-lpthread -lrt -lm -lgf_complete -lyaml -luuid -lmero")
+	set(HAVE_MERO yes)
+	include_directories(${CMAKE_SOURCE_DIR}/extern-deps/from-clovis-sample-apps/)
 endif(MERO_FOUND)
+if(MOTR_FOUND)
+	# Compiler/Linker options for MERO example
+	# Note: clovis API files do not compile with -std=c99 option
+	set(MOTR_COMPILE_FLAGS "-D_REENTRANT -D_GNU_SOURCE -DM0_INTERNAL='' -DM0_EXTERN=extern -fno-common -I${MOTR_INCLUDE_DIRS}")
+	set(MOTR_COMPILE_FLAGS "${MOTR_COMPILE_FLAGS}  -Wall -Wno-attributes -fno-strict-aliasing -rdynamic")
+	set(MOTR_LINK_FLAGS "-lpthread -lrt -lm -lyaml -luuid -lmotr")
+	set(HAVE_MOTR yes)
+	include_directories(${CMAKE_SOURCE_DIR}/extern-deps/from-motr-sample-apps/)
+endif(MOTR_FOUND)
 
 ######################################################
 # setup
@@ -59,6 +71,10 @@ add_subdirectory(bench)
 ######################################################
 if (MERO_FOUND)
 	message("MERO installation has been found, the Clovis driver and associated tests are gonna be compiled")
-else (MERO_FOUND)
-	message("MERO installation not found, Clovis driver is not going to be compiled")
 endif(MERO_FOUND)
+if (MOTR_FOUND)
+	message("MOTR installation has been found, the Motr driver and associated tests are gonna be compiled")
+endif(MOTR_FOUND)
+if (NOT MERO_FOUND AND NOT MOTR_FOUND)
+	message("MERO/MOTR installation not found, Clovis/Motr driver is not going to be compiled")
+endif(NOT MERO_FOUND AND NOT MOTR_FOUND)

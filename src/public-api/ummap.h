@@ -370,6 +370,13 @@ void ummap_config_clovis_init_options(const char * ressource_file, int index);
  * @param port Port of the server.
 **/
 void ummap_config_ioc_init_options(const char * server, const char * port);
+/**
+ * Initialize mero to be able to use the direct mero driver.
+ * Notice this is triggered automatically if you are using the URIs,
+ * prefer usage of ummap_config_clovis_init_options() in this case if
+ * you want to setup the config to use.
+**/
+void ummap_mero_init(const char * ressourceFile, int ressourceIndex);
 
 /*****************  COW OPERATIONS  *****************/
 /**

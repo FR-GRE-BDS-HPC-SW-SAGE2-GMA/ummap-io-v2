@@ -62,6 +62,7 @@ class GlobalHandler
 		Mapping * getMapping(void * addr);
 		template <class T> int applyCow(const char * driverName, void * addr, std::function<int(Mapping * mapping, T * driver)> action);
 		template <class T> int applySwitch(const char * driverName, void * addr, ummap_switch_clean_t cleanAction, std::function<void(T * driver)> action);
+		void initMero(const std::string & ressourceFile, int ressourceIndex);
 	private:
 		/** Registry of all active mappings in use. **/
 		MappingRegistry mappingRegistry;
