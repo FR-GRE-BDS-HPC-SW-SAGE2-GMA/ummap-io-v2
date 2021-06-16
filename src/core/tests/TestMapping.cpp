@@ -371,18 +371,18 @@ TEST(TestMapping, copyToDriver_aligned)
 	GMockDriver newDriver;
 
 	//expect read from first part of the mapping
-	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 0*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
-	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 1*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	//EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 0*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	//EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 1*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
 
 	//expect read of the write touched page
 	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 4*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
 
 	//expect read from the part after the segment
-	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 6*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
-	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 7*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	//EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 6*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	//EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 7*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
 
 	//expect write of all
-	EXPECT_CALL(newDriver, pwrite(_, UMMAP_PAGE_SIZE, _)).Times(8).WillRepeatedly(Return(UMMAP_PAGE_SIZE));
+	EXPECT_CALL(newDriver, pwrite(_, UMMAP_PAGE_SIZE, _)).Times(4).WillRepeatedly(Return(UMMAP_PAGE_SIZE));
 
 	//call
 	mapping.copyToDriver(&newDriver, 8*UMMAP_PAGE_SIZE);
@@ -416,19 +416,19 @@ TEST(TestMapping, copyToDriver_not_aligned)
 	GMockDriver newDriver;
 
 	//expect read from first part of the mapping
-	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 0*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
-	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE-512, 1*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE-512));
+	//EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 0*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	//EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE-512, 1*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE-512));
 
 	//expect read of the write touched page
 	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 4*UMMAP_PAGE_SIZE-512)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
 
 	//expect read from the part after the segment
-	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 6*UMMAP_PAGE_SIZE+512)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
-	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE-512, 7*UMMAP_PAGE_SIZE+512)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE-512));
+	//EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 6*UMMAP_PAGE_SIZE+512)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
+	//EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE-512, 7*UMMAP_PAGE_SIZE+512)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE-512));
 
 	//expect write of all
-	EXPECT_CALL(newDriver, pwrite(_, UMMAP_PAGE_SIZE, _)).Times(6).WillRepeatedly(Return(UMMAP_PAGE_SIZE));
-	EXPECT_CALL(newDriver, pwrite(_, UMMAP_PAGE_SIZE-512, _)).Times(2).WillRepeatedly(Return(UMMAP_PAGE_SIZE-512));
+	EXPECT_CALL(newDriver, pwrite(_, UMMAP_PAGE_SIZE, _)).Times(4).WillRepeatedly(Return(UMMAP_PAGE_SIZE));
+	//EXPECT_CALL(newDriver, pwrite(_, UMMAP_PAGE_SIZE-512, _)).Times(2).WillRepeatedly(Return(UMMAP_PAGE_SIZE-512));
 	EXPECT_CALL(newDriver, pwrite(_, 1024, _)).Times(1).WillRepeatedly(Return(1024));
 
 	//call
