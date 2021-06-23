@@ -35,6 +35,7 @@
 #include "../policies/FifoPolicy.hpp"
 #include "../policies/FifoWindowPolicy.hpp"
 #include "../policies/LifoPolicy.hpp"
+#include "../core/PolicyQuotaLocal.hpp"
 #include "ummap.h"
 
 /***************** USING NAMESPACE ******************/
@@ -586,4 +587,41 @@ int ummap_switch_ioc(void * addr, int64_t high, int64_t low, ummap_switch_clean_
 int ummap_switch_uri(void * addr, const char * uri, ummap_switch_clean_t clean_action)
 {
 	return getGlobalhandler()->getUriHandler().applySwitch(addr, uri, clean_action);
+}
+
+/*******************  FUNCTION  *********************/
+ummap_quota_t * ummap_quota_create_local(size_t max_memory)
+{
+	ummap_quota_t * res = (ummap_quota_t *)new PolicyQuotaLocal(max_memory);
+	return res;
+}
+
+/*******************  FUNCTION  *********************/
+void ummap_quota_register_policy(ummap_quota_t * quota, ummap_policy_t * policy)
+{
+	//nothing to do
+	if (quota == NULL || policy == NULL)
+		return;
+	
+	//cast
+	Policy * castedPolicy = (Policy*)policy;
+	PolicyQuota * castedQuota = (PolicyQuota*)quota;
+
+	//call
+	castedQuota->registerPolicy(castedPolicy);
+}
+
+/*******************  FUNCTION  *********************/
+void ummap_quota_unregister_policy(ummap_quota_t * quota, ummap_policy_t * policy)
+{
+	//nothing to do
+	if (quota == NULL || policy == NULL)
+		return;
+	
+	//cast
+	Policy * castedPolicy = (Policy*)policy;
+	PolicyQuota * castedQuota = (PolicyQuota*)quota;
+
+	//call
+	castedQuota->unregisterPolicy(castedPolicy);
 }
