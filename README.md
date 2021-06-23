@@ -17,6 +17,7 @@ Compared to the original prototype, this second version was mostly done to explo
 
  - Multi-threading support.
  - Multiple driver support.
+ - Transparent support of direct FSDAX mappings througth the standard ummap API.
  - The URI system to build the drivers and policies from strings.
  - Mapping a storage segment not aligned to the page size (offset & size).
  - Finer grain eviction policy handling inside the process instead of a global multi-process handling.
