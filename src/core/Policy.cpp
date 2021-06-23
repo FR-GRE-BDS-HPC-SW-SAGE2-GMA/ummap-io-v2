@@ -31,7 +31,6 @@ Policy::Policy(size_t staticMaxMemory, bool local)
 	this->local = local;
 	this->policyQuota = NULL;
 	this->mutexPtr = &this->localMutex;
-	this->quotaAverageLimitForNotif = 0;
 }
 
 /*******************  FUNCTION  *********************/
@@ -262,18 +261,4 @@ void Policy::setDynamicMaxMemory(size_t dynamicMaxMemory)
 size_t Policy::getStaticMaxMemory(void)
 {
 	return this->staticMaxMemory;
-}
-
-/*******************  FUNCTION  *********************/
-/**
- * Enable of disable increase notification for quota management.
- * This is used when we redistribute the quota over policies.
- * If one policy is not fully filled we can reuse that memory
- * on other mappings. When the current policy incread we need
- * to notify the others to shrink down.
- * @param value Setup the new state.
-**/
-void Policy::setNotifyQuotaOnIncrease(size_t averageLimit)
-{
-	this->quotaAverageLimitForNotif = averageLimit;
 }

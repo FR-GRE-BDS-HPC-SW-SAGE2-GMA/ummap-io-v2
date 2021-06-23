@@ -126,6 +126,5 @@ void PolicyQuota::updateNotifyLimit(void)
 	//dispatch
 	for (auto & it : this->policies) {
 		it->setDynamicMaxMemory(this->staticMaxMemory);
-		it->setNotifyQuotaOnIncrease(averageMem);
 	}
 }

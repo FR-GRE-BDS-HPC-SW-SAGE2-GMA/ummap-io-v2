@@ -105,7 +105,6 @@ class Policy
 		std::recursive_mutex * getLocalMutex(void);
 		void setQuota(PolicyQuota * quota);
 		void setDynamicMaxMemory(size_t dyanmicMaxMemory);
-		void setNotifyQuotaOnIncrease(size_t averageLimit);
 		size_t getStaticMaxMemory(void);
 	protected:
 		void registerMapping(Mapping * mapping, void * storage, size_t elementCount, size_t elementSize, void * extraInfos = NULL);
@@ -140,8 +139,6 @@ class Policy
 		std::string uri;
 		/** Keep track of eventual policy quota **/
 		PolicyQuota * policyQuota;
-		/** To remember if we need to first notify quota on size increase. **/
-		size_t quotaAverageLimitForNotif;
 };
 
 }
