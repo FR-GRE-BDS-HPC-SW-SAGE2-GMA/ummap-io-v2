@@ -21,15 +21,17 @@ class PublicPolicy: public Policy
 {
 	public:
 		PublicPolicy(void) : Policy(4096, false) {};
-		virtual void allocateElementStorage(Mapping * mapping, size_t segmentCount) {};
-		virtual void notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool mapped, bool dirty) {};
-		virtual void notifyEvict(Mapping * mapping, size_t index) {};
-		virtual void freeElementStorage(Mapping * mapping) {};
+		virtual void allocateElementStorage(Mapping * mapping, size_t segmentCount) override {};
+		virtual void notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool mapped, bool dirty) override {};
+		virtual void notifyEvict(Mapping * mapping, size_t index) override {};
+		virtual void freeElementStorage(Mapping * mapping) override {};
 		void registerMapping(Mapping * mapping, void * storage, size_t elementCount, size_t elementSize) {Policy::registerMapping(mapping, storage, elementCount, elementSize);};
 		void unregisterMapping(Mapping * mapping) {Policy::unregisterMapping(mapping);};
 		PolicyStorage getStorageInfo(void * entry) {return Policy::getStorageInfo(entry);};
 		PolicyStorage getStorageInfo(Mapping * mapping) {return Policy::getStorageInfo(mapping);};
 		virtual bool contains(PolicyStorage & storage, void * entry) {return Policy::contains(storage, entry);};
+		virtual size_t getCurrentMemory(void) override {return 0;}
+		virtual void shrinkMemory(void) override {};
 };
 
 /*******************  FUNCTION  *********************/

@@ -82,6 +82,7 @@ void FifoPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool
 	size_t idsToEvict[maxIdsToEvict];
 	Mapping * mappings[maxIdsToEvict];
 	int cntIdsToEvict = 0;
+	bool isFirstAccess = false;
 
 	//CRITICAL SECTION
 	{
@@ -96,7 +97,7 @@ void FifoPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool
 		ListElement & cur = elements[index];
 
 		//check if is new touch
-		bool isFirstAccess = cur.isAlone();
+		isFirstAccess = cur.isAlone();
 
 		//remove from list
 		cur.removeFromList();
@@ -109,7 +110,85 @@ void FifoPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool
 			this->currentMemory += mapping->getSegmentSize();
 
 		//if too large, evict one
-		while (this->currentMemory > this->maxMemory) {
+		while (this->currentMemory > this->dynamicMaxMemory) {
+			ListElement * toEvict = this->root.popPrev();
+			if (toEvict != NULL) {
+				//get infos related to segment
+				PolicyStorage evictInfos = getStorageInfo(toEvict);
+
+				//calc id
+				idsToEvict[cntIdsToEvict] = toEvict - (ListElement*)evictInfos.elements;
+
+				//keep track of the mapping
+				mappings[cntIdsToEvict] = evictInfos.mapping;
+
+				//inc counter
+				cntIdsToEvict++;
+
+				//this can append only if sharing policy over segments with different
+				//segment size.
+				assume(cntIdsToEvict < maxIdsToEvict, "Reach maximum pages to evict due to optimization, cannot continue !");
+
+				//update status
+				this->currentMemory -= evictInfos.mapping->getSegmentSize();
+			}
+		}
+	}
+
+	//really do the evict out of the critical section to keep multi-threading
+	//to write data
+	for (size_t i = 0 ; i < cntIdsToEvict; i++)
+		mappings[i]->evict(this, idsToEvict[i]);
+
+	//notif quota to redistribute if needed
+	if (isFirstAccess && this->policyQuota != NULL && this->currentMemory < quotaAverageLimitForNotif)
+		this->policyQuota->update();
+}
+
+/*******************  FUNCTION  *********************/
+void FifoPolicy::notifyEvict(Mapping * mapping, size_t index)
+{
+	//evict
+	//CRITICAL SECTION
+	{
+		//take lock
+		std::lock_guard<std::recursive_mutex> lockGuard(*this->mutexPtr);
+
+		//get storage infos
+		PolicyStorage storage = getStorageInfo(mapping);
+
+		//get element
+		ListElement * elements = static_cast<ListElement*>(storage.elements);
+		ListElement & cur = elements[index];
+
+		//check
+		assert(cur.isInList());
+
+		//decrease memory
+		this->currentMemory -= mapping->getSegmentSize();
+		assert(this->currentMemory >= 0);
+
+		//remove from list
+		cur.removeFromList();
+	}
+}
+
+/*******************  FUNCTION  *********************/
+void FifoPolicy::shrinkMemory(void)
+{
+	//vars
+	const int maxIdsToEvict = 128;
+	size_t idsToEvict[maxIdsToEvict];
+	Mapping * mappings[maxIdsToEvict];
+	int cntIdsToEvict = 0;
+
+	//CRITICAL SECTION
+	{
+		//take lock
+		std::lock_guard<std::recursive_mutex> lockGuard(*this->mutexPtr);
+
+		//if too large, evict one
+		while (this->currentMemory > this->dynamicMaxMemory) {
 			ListElement * toEvict = this->root.popPrev();
 			if (toEvict != NULL) {
 				//get infos related to segment
@@ -141,29 +220,7 @@ void FifoPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool
 }
 
 /*******************  FUNCTION  *********************/
-void FifoPolicy::notifyEvict(Mapping * mapping, size_t index)
+size_t FifoPolicy::getCurrentMemory(void)
 {
-	//evict
-	//CRITICAL SECTION
-	{
-		//take lock
-		std::lock_guard<std::recursive_mutex> lockGuard(*this->mutexPtr);
-
-		//get storage infos
-		PolicyStorage storage = getStorageInfo(mapping);
-
-		//get element
-		ListElement * elements = static_cast<ListElement*>(storage.elements);
-		ListElement & cur = elements[index];
-
-		//check
-		assert(cur.isInList());
-
-		//decrease memory
-		this->currentMemory -= mapping->getSegmentSize();
-		assert(this->currentMemory >= 0);
-
-		//remove from list
-		cur.removeFromList();
-	}
+	return this->currentMemory;
 }

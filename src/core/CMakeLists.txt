@@ -8,6 +8,8 @@
 set(CORE_SRC Driver.cpp 
 			 Mapping.cpp
 			 Policy.cpp
+			 PolicyQuota.cpp
+			 PolicyQuotaLocal.cpp
 			 MappingRegistry.cpp
 			 GlobalHandler.cpp
 			 PolicyRegistry.cpp)
