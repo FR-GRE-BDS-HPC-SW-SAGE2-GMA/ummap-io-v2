@@ -12,6 +12,10 @@ add_executable(basic basic.cpp)
 target_link_libraries(basic ummap-io)
 
 ######################################################
+add_executable(quota quota.cpp)
+target_link_libraries(quota ummap-io)
+
+######################################################
 add_executable(slow slow.cpp)
 target_link_libraries(slow ummap-io)
 

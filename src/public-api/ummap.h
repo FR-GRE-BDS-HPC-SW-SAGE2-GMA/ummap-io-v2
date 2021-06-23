@@ -333,6 +333,10 @@ ummap_policy_t * ummap_policy_create_fifo_window(size_t max_size, size_t window_
 **/
 ummap_policy_t * ummap_policy_create_lifo(size_t max_size, bool local);
 /**
+ * Return the current memory consummed by the given policy.
+**/
+size_t ummap_policy_get_memory(ummap_policy_t * policy);
+/**
  * Destroy the given policy. In practice you do not have to do it by hand as it is
  * done by the umunmap() call.
  * @param policy Pointer to the policy to destroy.

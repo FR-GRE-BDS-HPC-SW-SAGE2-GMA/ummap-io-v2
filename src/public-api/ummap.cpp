@@ -283,6 +283,20 @@ ummap_policy_t * ummap_policy_create_lifo(size_t max_size, bool local)
 }
 
 /*******************  FUNCTION  *********************/
+size_t ummap_policy_get_memory(ummap_policy_t * policy)
+{
+	//nothing to do
+	if (policy == NULL)
+		return 0;
+	
+	//cast and call
+	Policy * castedPolicy = (Policy*)policy;
+
+	//ret
+	return castedPolicy->getCurrentMemory();
+}
+
+/*******************  FUNCTION  *********************/
 void umflush(void * ptr, size_t size, bool evict)
 {
 	getGlobalhandler()->flush(ptr, size, evict, false);
