@@ -58,13 +58,19 @@ void PolicyQuotaLocal::update(void)
 
 		//compute target
 		size_t cntPolicies = this->policies.size();
+
+		//nothing to do
+		if (cntPolicies == 0)
+			return;
+
+		//calc average limit
 		size_t averageMem = this->staticMaxMemory / cntPolicies;
 		
 		//get current memory
 		size_t totMem = this->getUsedMemory();
 
 		//apply reduction until we reach acceptale solution
-		while (totMem > averageMem) {
+		while (totMem > this->staticMaxMemory) {
 			//search max
 			Policy * polMax = *this->policies.begin();
 			for (auto & it : this->policies)
@@ -75,6 +81,9 @@ void PolicyQuotaLocal::update(void)
 			size_t limit = averageMem + (polMax->getCurrentMemory() - averageMem) / 2;
 			polMax->setDynamicMaxMemory(limit);
 			polMax->shrinkMemory();
+
+			//calc new tot mem
+			totMem = this->getUsedMemory();
 		}
 	}
 }

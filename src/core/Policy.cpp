@@ -40,7 +40,10 @@ Policy::Policy(size_t staticMaxMemory, bool local)
 **/
 Policy::~Policy(void)
 {
-
+	if (policyQuota != NULL) {
+		policyQuota->unregisterPolicy(this);
+		policyQuota = NULL;
+	}
 }
 
 /*******************  FUNCTION  *********************/
@@ -249,7 +252,6 @@ void Policy::setQuota(PolicyQuota * quota)
 void Policy::setDynamicMaxMemory(size_t dynamicMaxMemory)
 {
 	this->dynamicMaxMemory = dynamicMaxMemory;
-	this->shrinkMemory();
 }
 
 /*******************  FUNCTION  *********************/

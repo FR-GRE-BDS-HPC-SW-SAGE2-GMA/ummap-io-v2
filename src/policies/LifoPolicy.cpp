@@ -80,11 +80,15 @@ void LifoPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool
 	Mapping * mappings[maxIdsToEvict];
 	int cntIdsToEvict = 0;
 	bool isFirstAccess = false;
+	size_t memOrig;
 
 	//CRITICAL SECTION
 	{
 		//take lock
 		std::lock_guard<std::recursive_mutex> lockGuard(*this->mutexPtr);
+
+		//keep track of memory change
+		memOrig = this->getCurrentMemory();
 
 		//get storage
 		PolicyStorage storage = this->getStorageInfo(mapping);
@@ -138,7 +142,8 @@ void LifoPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool
 		mappings[i]->evict(this, idsToEvict[i]);
 
 	//notif quota to redistribute if needed
-	if (isFirstAccess && this->policyQuota != NULL && this->currentMemory < quotaAverageLimitForNotif)
+	ssize_t memDelta = this->getCurrentMemory() - memOrig;
+	if (isFirstAccess && this->policyQuota != NULL && memDelta > 0)
 		this->policyQuota->update();
 }
 

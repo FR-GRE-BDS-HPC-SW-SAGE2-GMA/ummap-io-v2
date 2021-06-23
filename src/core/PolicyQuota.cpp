@@ -85,9 +85,11 @@ void PolicyQuota::unregisterPolicy(Policy * policy)
 		//search
 		bool found = false;
 		for (auto it = policies.begin() ; it != policies.end() ; ++it) {
-			policies.erase(it);
-			found = true;
-			break;
+			if (*it == policy) {
+				policies.erase(it);
+				found = true;
+				break;
+			}
 		}
 
 		//check
@@ -113,9 +115,17 @@ void PolicyQuota::updateNotifyLimit(void)
 {
 	//compute target
 	size_t cntPolicies = this->policies.size();
+
+	//nothing to do
+	if (cntPolicies == 0)
+		return;
+
+	//calc average limit
 	size_t averageMem = this->staticMaxMemory / cntPolicies;
 
 	//dispatch
-	for (auto & it : this->policies)
+	for (auto & it : this->policies) {
+		it->setDynamicMaxMemory(this->staticMaxMemory);
 		it->setNotifyQuotaOnIncrease(averageMem);
+	}
 }
