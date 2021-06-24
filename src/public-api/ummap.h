@@ -51,6 +51,8 @@ typedef struct ummap_policy_s ummap_policy_t;
 typedef struct ummap_driver_s ummap_driver_t;
 /** Hidden struct used to point the ioc client when using ioc. **/
 typedef struct ioc_client_s ioc_client_t;
+/** Hidden struct used to point the quota handler. **/
+typedef struct ummap_quota_s ummap_quota_t;
 
 /****************  C DRIVER STRUCT  ******************/
 /**
@@ -331,11 +333,46 @@ ummap_policy_t * ummap_policy_create_fifo_window(size_t max_size, size_t window_
 **/
 ummap_policy_t * ummap_policy_create_lifo(size_t max_size, bool local);
 /**
+ * Return the current memory consummed by the given policy.
+**/
+size_t ummap_policy_get_memory(ummap_policy_t * policy);
+/**
  * Destroy the given policy. In practice you do not have to do it by hand as it is
  * done by the umunmap() call.
  * @param policy Pointer to the policy to destroy.
 **/
 void ummap_policy_destroy(ummap_policy_t * policy);
+
+/********************  QUOTAS  **********************/
+/**
+ * Create a quota structure to handle the fair balancing between
+ * policies. This implementation permit to share a global quota
+ * between several policies inside the local process.
+ * 
+ * The quota guaranty that each policies get at least the average
+ * memory distribution. If some policies do not use all this memory,
+ * the gaps will be distributed over the other policies.
+ * 
+ * This comes in addition to the policy group which does not provide
+ * such a balancing.
+ * @param maxMemory Define the maximal memory allowed for all the
+ * registered policies.
+**/
+ummap_quota_t * ummap_quota_create_local(size_t max_memory);
+/**
+ * Register the given policy to the given quota so we start
+ * to balanced the memory usage with the other policies already
+ * registered.
+ * @param quota Define the quota into which registering the policy.
+ * @param policy Pointer to the policy to register.
+**/
+void ummap_quota_register_policy(ummap_quota_t * quota, ummap_policy_t * policy);
+/**
+ * Force unregistration of the given policy from the quota.
+ * @param quota Define the quota into which unregistering the policy.
+ * @param policy Pointer to the policy to unregister.
+**/
+void ummap_quota_unregister_policy(ummap_quota_t * quota, ummap_policy_t * policy);
 
 /*****************  URI VARIABLES  ******************/
 /**

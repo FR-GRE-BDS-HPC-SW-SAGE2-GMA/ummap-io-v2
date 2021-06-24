@@ -13,6 +13,8 @@
 #include <list>
 #include <string>
 #include <mutex>
+//internal
+#include "PolicyQuota.hpp"
 
 /********************  NAMESPACE  *******************/
 namespace ummapio
@@ -59,7 +61,7 @@ struct PolicyStorage
 class Policy
 {
 	public:
-		Policy(size_t maxMemory, bool local);
+		Policy(size_t staticMaxMemory, bool local);
 		virtual ~Policy(void);
 		/**
 		 * Allocate the element storage to keep track of the pages for the given
@@ -89,10 +91,21 @@ class Policy
 		 * @param mapping The mapping we want to untrack.
 		**/
 		virtual void freeElementStorage(Mapping * mapping) = 0;
+		/**
+		 * Shrink the memory by evicting pages when the quota controller request it.
+		**/
+		virtual void shrinkMemory(void) = 0;
+		/** 
+		 * Return the current memory size.
+		**/
+		virtual size_t getCurrentMemory(void) = 0;
 		void setUri(const std::string & uri);
 		const std::string & getUri(void) const;
 		void forceUsingGroupMutex(std::recursive_mutex * mutex);
 		std::recursive_mutex * getLocalMutex(void);
+		void setQuota(PolicyQuota * quota);
+		void setDynamicMaxMemory(size_t dyanmicMaxMemory);
+		size_t getStaticMaxMemory(void);
 	protected:
 		void registerMapping(Mapping * mapping, void * storage, size_t elementCount, size_t elementSize, void * extraInfos = NULL);
 		void unregisterMapping(Mapping * mapping);
@@ -103,8 +116,13 @@ class Policy
 	protected:
 		/** Define if the policy is a local of global policy shared between multiple mappings. **/
 		bool local;
-		/** Keep track of the maximum memory allowed by the current policy. **/
-		size_t maxMemory;
+		/** Keep track of the maximum memory allowed by the current policy, this fix a hard max limit to the consumption. **/
+		size_t staticMaxMemory;
+		/** 
+		 * Keep track of the maximum memory allowed by the current policy, this 
+		 * value can be modified by the quota and be max to staticMaxMemory. 
+		**/
+		size_t dynamicMaxMemory;
 		/** Keep track of state storage attached to each handle mappings. **/
 		std::list<PolicyStorage> storageRegistry;
 		/** 
@@ -119,6 +137,8 @@ class Policy
 		std::recursive_mutex localMutex;
 		/** Keeo track of the URI for htopml. **/
 		std::string uri;
+		/** Keep track of eventual policy quota **/
+		PolicyQuota * policyQuota;
 };
 
 }

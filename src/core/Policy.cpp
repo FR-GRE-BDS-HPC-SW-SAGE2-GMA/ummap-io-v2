@@ -20,13 +20,16 @@ using namespace ummapio;
 /*******************  FUNCTION  *********************/
 /**
  * Policy constructor.
- * @param maxMemory Define the maximum memory to be allowed by this policy.
+ * @param staticMaxMemory Define the maximum memory to be allowed by this policy. It push a 
+ * hard limit when used in conjunction with quotas.
  * @param local Define if we are using a local of global policy to know how to use mutexes.
 **/
-Policy::Policy(size_t maxMemory, bool local)
+Policy::Policy(size_t staticMaxMemory, bool local)
 {
-	this->maxMemory = maxMemory;
+	this->staticMaxMemory = staticMaxMemory;
+	this->dynamicMaxMemory = staticMaxMemory;
 	this->local = local;
+	this->policyQuota = NULL;
 	this->mutexPtr = &this->localMutex;
 }
 
@@ -36,7 +39,10 @@ Policy::Policy(size_t maxMemory, bool local)
 **/
 Policy::~Policy(void)
 {
-
+	if (policyQuota != NULL) {
+		policyQuota->unregisterPolicy(this);
+		policyQuota = NULL;
+	}
 }
 
 /*******************  FUNCTION  *********************/
@@ -76,9 +82,9 @@ void Policy::registerMapping(Mapping * mapping, void * storage, size_t elementCo
 	};
 
 	//check
-	assumeArg(mapping->getSegmentSize() <= this->maxMemory, "Trying to register a mapping using segment size larger than the policy maximal size: %1 > %2")
+	assumeArg(mapping->getSegmentSize() <= this->staticMaxMemory, "Trying to register a mapping using segment size larger than the policy maximal size: %1 > %2")
 		.arg(mapping->getSegmentSize())
-		.arg(this->maxMemory)
+		.arg(this->staticMaxMemory)
 		.end();
 
 	//register, CRITICAL SECTION
@@ -104,7 +110,7 @@ bool Policy::checkHasEnoughMem(void)
 		sum += it.mapping->getSegmentSize();
 
 	//check
-	return (sum <= this->maxMemory);
+	return (sum <= this->dynamicMaxMemory);
 }
 
 /*******************  FUNCTION  *********************/
@@ -222,4 +228,37 @@ void Policy::setUri(const std::string & uri)
 const std::string & Policy::getUri(void) const
 {
 	return this->uri;
+}
+
+/*******************  FUNCTION  *********************/
+/**
+ * Set the quota to control to this policy.
+ * @param quota Pointer to the quota object. Can be NULL to rease previous quota.
+**/
+void Policy::setQuota(PolicyQuota * quota)
+{
+	//check
+	assume(quota == NULL || this->policyQuota == NULL, "Invalid quota state update cannot change !");
+
+	//set
+	this->policyQuota = quota;
+}
+
+/*******************  FUNCTION  *********************/
+/**
+ * Update the max memory. It might evict pages if necessary.
+**/
+void Policy::setDynamicMaxMemory(size_t dynamicMaxMemory)
+{
+	this->dynamicMaxMemory = dynamicMaxMemory;
+}
+
+/*******************  FUNCTION  *********************/
+/**
+ * Return the curretn static max memory to quota can compute the memory
+ * distribution.
+**/
+size_t Policy::getStaticMaxMemory(void)
+{
+	return this->staticMaxMemory;
 }

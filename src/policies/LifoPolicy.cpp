@@ -79,11 +79,16 @@ void LifoPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool
 	size_t idsToEvict[maxIdsToEvict];
 	Mapping * mappings[maxIdsToEvict];
 	int cntIdsToEvict = 0;
+	bool isFirstAccess = false;
+	size_t memOrig;
 
 	//CRITICAL SECTION
 	{
 		//take lock
 		std::lock_guard<std::recursive_mutex> lockGuard(*this->mutexPtr);
+
+		//keep track of memory change
+		memOrig = this->getCurrentMemory();
 
 		//get storage
 		PolicyStorage storage = this->getStorageInfo(mapping);
@@ -103,7 +108,7 @@ void LifoPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool
 			this->currentMemory += mapping->getSegmentSize();
 
 		//if too large, evict one
-		while (this->currentMemory > this->maxMemory) {
+		while (this->currentMemory > this->dynamicMaxMemory) {
 			ListElement * toEvict = this->root.popPrev();
 			if (toEvict != NULL) {
 				//get infos related to segment
@@ -135,6 +140,11 @@ void LifoPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool
 	//to write data
 	for (size_t i = 0 ; i < cntIdsToEvict; i++)
 		mappings[i]->evict(this, idsToEvict[i]);
+
+	//notif quota to redistribute if needed
+	ssize_t memDelta = this->getCurrentMemory() - memOrig;
+	if (isFirstAccess && this->policyQuota != NULL && memDelta > 0)
+		this->policyQuota->update();
 }
 
 /*******************  FUNCTION  *********************/
@@ -163,4 +173,56 @@ void LifoPolicy::notifyEvict(Mapping * mapping, size_t index)
 		//remove from list
 		cur.removeFromList();
 	}
+}
+
+/*******************  FUNCTION  *********************/
+void LifoPolicy::shrinkMemory(void)
+{
+	//vars
+	const int maxIdsToEvict = 128;
+	size_t idsToEvict[maxIdsToEvict];
+	Mapping * mappings[maxIdsToEvict];
+	int cntIdsToEvict = 0;
+
+	//CRITICAL SECTION
+	{
+		//take lock
+		std::lock_guard<std::recursive_mutex> lockGuard(*this->mutexPtr);
+
+		//if too large, evict one
+		while (this->currentMemory > this->dynamicMaxMemory) {
+			ListElement * toEvict = this->root.popPrev();
+			if (toEvict != NULL) {
+				//get infos related to segment
+				PolicyStorage evictInfos = getStorageInfo(toEvict);
+
+				//calc id
+				idsToEvict[cntIdsToEvict] = toEvict - (ListElement*)evictInfos.elements;
+
+				//keep track of the mapping
+				mappings[cntIdsToEvict] = evictInfos.mapping;
+
+				//inc counter
+				cntIdsToEvict++;
+
+				//this can append only if sharing policy over segments with different
+				//segment size.
+				assume(cntIdsToEvict < maxIdsToEvict, "Reach maximum pages to evict due to optimization, cannot continue !");
+
+				//update status
+				this->currentMemory -= evictInfos.mapping->getSegmentSize();
+			}
+		}
+	}
+
+	//really do the evict out of the critical section to keep multi-threading
+	//to write data
+	for (size_t i = 0 ; i < cntIdsToEvict; i++)
+		mappings[i]->evict(this, idsToEvict[i]);
+}
+
+/*******************  FUNCTION  *********************/
+size_t LifoPolicy::getCurrentMemory(void)
+{
+	return this->currentMemory;
 }

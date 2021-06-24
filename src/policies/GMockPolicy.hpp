@@ -30,6 +30,8 @@ class GMockPolicy : public Policy
 		MOCK_METHOD(void, notifyTouch,(Mapping * mapping, size_t index, bool isWrite, bool mapped, bool dirty), (override));
 		MOCK_METHOD(void, notifyEvict,(Mapping * mapping, size_t index), (override));
 		MOCK_METHOD(void, freeElementStorage,(Mapping * mapping), (override));
+		MOCK_METHOD(size_t, getCurrentMemory,(), (override));
+		MOCK_METHOD(void, shrinkMemory,(), (override));
 };
 
 }

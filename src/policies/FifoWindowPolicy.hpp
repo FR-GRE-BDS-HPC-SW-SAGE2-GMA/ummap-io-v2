@@ -37,6 +37,8 @@ class FifoWindowPolicy : public Policy
 		virtual void notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool mapped, bool dirty) override;
 		virtual void notifyEvict(Mapping * mapping, size_t index) override;
 		virtual void freeElementStorage(Mapping * mapping) override;
+		virtual size_t getCurrentMemory(void) override;
+		virtual void shrinkMemory(void) override;
 	protected:
 		/** Root element of the fixed window **/
 		ListElement rootFixedWindow;
