@@ -361,7 +361,7 @@ TEST(TestMapping, copyToDriver_aligned)
 	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 3*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
 	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 4*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
 	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 5*UMMAP_PAGE_SIZE)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
-	for (int i = 0 ; i < segments ; i++)
+	for (size_t i = 0 ; i < segments ; i++)
 		mapping.onSegmentationFault(ptr + i * UMMAP_PAGE_SIZE, false);
 
 	//touch in write one of the page
@@ -405,7 +405,7 @@ TEST(TestMapping, copyToDriver_not_aligned)
 	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 4*UMMAP_PAGE_SIZE-512)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
 	EXPECT_CALL(driver, pread(_, UMMAP_PAGE_SIZE, 5*UMMAP_PAGE_SIZE-512)).Times(1).WillOnce(Return(UMMAP_PAGE_SIZE));
 	EXPECT_CALL(driver, pread(_, 1024, 6*UMMAP_PAGE_SIZE-512)).Times(1).WillOnce(Return(1024));
-	for (int i = 0 ; i < segments ; i++)
+	for (size_t i = 0 ; i < segments ; i++)
 		mapping.onSegmentationFault(ptr + i * UMMAP_PAGE_SIZE, false);
 	mapping.onSegmentationFault(ptr + segments * UMMAP_PAGE_SIZE + 512, false);
 

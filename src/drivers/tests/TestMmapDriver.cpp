@@ -147,7 +147,7 @@ TEST(TestMmapDriver, sync)
 	const size_t size = 8*4096;
 	FILE * fp = fopen(fname, "w+");
 	ASSERT_NE(nullptr, fp);
-	ftruncate(fileno(fp), size);
+	ASSERT_EQ(0, ftruncate(fileno(fp), size));
 
 	//map
 	MmapDriver driver(fileno(fp), true);

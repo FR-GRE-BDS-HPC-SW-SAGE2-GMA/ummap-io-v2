@@ -141,7 +141,7 @@ void FifoPolicy::notifyTouch(Mapping * mapping, size_t index, bool isWrite, bool
 
 	//really do the evict out of the critical section to keep multi-threading
 	//to write data
-	for (size_t i = 0 ; i < cntIdsToEvict; i++)
+	for (int i = 0 ; i < cntIdsToEvict; i++)
 		mappings[i]->evict(this, idsToEvict[i]);
 
 	//notif quota to redistribute if needed
@@ -220,7 +220,7 @@ void FifoPolicy::shrinkMemory(void)
 
 	//really do the evict out of the critical section to keep multi-threading
 	//to write data
-	for (size_t i = 0 ; i < cntIdsToEvict; i++)
+	for (int i = 0 ; i < cntIdsToEvict; i++)
 		mappings[i]->evict(this, idsToEvict[i]);
 }
 
