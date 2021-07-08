@@ -25,7 +25,7 @@ set(IOCCLIENT_INCLUDE_DIRS ${IOCCLIENT_INCLUDE_DIR} )
 include(FindPackageHandleStandardArgs)
 # handle the QUIETLY and REQUIRED arguments and set IOCCLIENT_FOUND to TRUE
 # if all listed variables are TRUE
-find_package_handle_standard_args(iocclient  DEFAULT_MSG
+find_package_handle_standard_args(IocClient  DEFAULT_MSG
 	IOCCLIENT_LIBRARY IOCCLIENT_INCLUDE_DIR)
 
 ######################################################

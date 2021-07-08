@@ -25,7 +25,7 @@ set(HTOPML_INCLUDE_DIRS ${HTOPML_INCLUDE_DIR} )
 include(FindPackageHandleStandardArgs)
 # handle the QUIETLY and REQUIRED arguments and set HTOPML_FOUND to TRUE
 # if all listed variables are TRUE
-find_package_handle_standard_args(htopml  DEFAULT_MSG
+find_package_handle_standard_args(Htopml  DEFAULT_MSG
 	HTOPML_LIBRARY HTOPML_INCLUDE_DIR)
 
 ######################################################
