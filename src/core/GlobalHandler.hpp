@@ -54,6 +54,8 @@ class GlobalHandler
 		void registerPolicy(const std::string & name, Policy * policy);
 		void unregisterPolicy(const std::string & name);
 		Policy * getPolicy(const std::string & name);
+		Driver * getDriver(void * ptr);
+		void makeDirty(void * ptr);
 		void registerMapping(Mapping * mapping);
 		void unregisterMapping(Mapping * mapping);
 		bool onSegFault(void * addr, bool isWrite);

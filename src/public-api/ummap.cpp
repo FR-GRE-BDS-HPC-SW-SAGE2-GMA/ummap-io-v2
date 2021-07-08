@@ -309,6 +309,18 @@ void umsync(void * ptr, size_t size, bool evict)
 }
 
 /*******************  FUNCTION  *********************/
+ummap_driver_t * ummap_get_driver(void * ptr)
+{
+	return (ummap_driver_t *)getGlobalhandler()->getDriver(ptr);
+}
+
+/*******************  FUNCTION  *********************/
+void ummap_make_dirty(void * ptr, size_t size)
+{
+	getGlobalhandler()->makeDirty(ptr);
+}
+
+/*******************  FUNCTION  *********************/
 ummap_driver_t * ummap_driver_create_uri(const char * uri)
 {
 	Driver * driver = getGlobalhandler()->getUriHandler().buildDriver(uri);
