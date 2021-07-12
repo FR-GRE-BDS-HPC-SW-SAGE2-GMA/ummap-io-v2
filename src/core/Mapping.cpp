@@ -387,7 +387,7 @@ const bool * Mapping::getMutexRange(size_t offset, size_t size, bool * buffer, s
 
 	//allocate
 	bool * list = buffer;
-	if (list == NULL || bufferSize < this->segmentMutexesCnt)
+	if (list == NULL || bufferSize < static_cast<size_t>(this->segmentMutexesCnt))
 		list = new bool[this->segmentMutexesCnt];
 
 	//init
@@ -703,9 +703,9 @@ void Mapping::copyExtraNotMappedPart(char * buffer, Driver * newDriver, size_t o
 			copySize = size - i;
 		//copy
 		status = this->driver->pread(buffer, copySize, offset+i);
-		assume(status == copySize, "Failed to read data from the original driver !");
+		assume(status == static_cast<ssize_t>(copySize), "Failed to read data from the original driver !");
 		status = newDriver->pwrite(buffer, copySize, offset+i);
-		assume(status == copySize, "Failed to write data from the target driver !");
+		assume(status == static_cast<ssize_t>(copySize), "Failed to write data from the target driver !");
 	}
 }
 
@@ -739,12 +739,12 @@ void Mapping::copyMappedPart(char * buffer, Driver * newDriver, size_t storageSi
 		if (curStatus.mapped == true && curStatus.dirty == false) {
 			char * addr = this->baseAddress + offset;
 			status = newDriver->pwrite(addr, copySize, offset);
-			assume(status == copySize, "Failed to write data from the target driver !");
+			assume(status == static_cast<ssize_t>(copySize), "Failed to write data from the target driver !");
 		} else {
 			status = this->driver->pread(buffer, copySize, offset);
-			assume(status == copySize, "Failed to read data from the original driver !");
+			assume(status == static_cast<ssize_t>(copySize), "Failed to read data from the original driver !");
 			status = newDriver->pwrite(buffer, copySize, offset);
-			assume(status == copySize, "Failed to write data from the target driver !");
+			assume(status == static_cast<ssize_t>(copySize), "Failed to write data from the target driver !");
 		}
 	}
 }

@@ -107,8 +107,8 @@ TEST_F(TestPublicAPI, map_driver_dax_fopen)
 {
 	//def
 	const char * fname = "/tmp/test-ummap-fopen-driver.txt";
-	system("touch /tmp/test-ummap-fopen-driver.txt");
-	truncate(fname, 8*4096);
+	ASSERT_EQ(0, system("touch /tmp/test-ummap-fopen-driver.txt"));
+	ASSERT_EQ(0, truncate(fname, 8*4096));
 
 	//map 2
 	void * ptr1 = ummap(NULL, 8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dax_fopen(fname, "rw+", false), NULL, "none");
@@ -146,7 +146,7 @@ TEST_F(TestPublicAPI, map_driver_fd)
 	FILE * fp = fopen(fname, "w+");
 	ASSERT_NE(nullptr, fp);
 	int fd = fileno(fp);
-	ftruncate(fd, 8*4096);
+	ASSERT_EQ(0, truncate(fname, 8*4096));
 
 	//map 2
 	void * ptr1 = ummap(NULL, 8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_fd(fd), NULL, "none");
@@ -185,7 +185,7 @@ TEST_F(TestPublicAPI, map_driver_fd_flush)
 	FILE * fp = fopen(fname, "w+");
 	ASSERT_NE(nullptr, fp);
 	int fd = fileno(fp);
-	ftruncate(fd, 8*4096);
+	ASSERT_EQ(0, truncate(fname, 8*4096));
 
 	//map 2
 	void * ptr1 = ummap(NULL, 8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_fd(fd), NULL, "none");
@@ -224,7 +224,7 @@ TEST_F(TestPublicAPI, map_driver_dax_fd)
 	FILE * fp = fopen(fname, "w+");
 	ASSERT_NE(nullptr, fp);
 	int fd = fileno(fp);
-	ftruncate(fd, 8*4096);
+	ASSERT_EQ(0, truncate(fname, 8*4096));
 
 	//map 2
 	void * ptr1 = ummap(NULL, 8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dax_fd(fd, false), NULL, "none");
@@ -263,7 +263,7 @@ TEST_F(TestPublicAPI, map_driver_dax_fd_umflush)
 	FILE * fp = fopen(fname, "w+");
 	ASSERT_NE(nullptr, fp);
 	int fd = fileno(fp);
-	ftruncate(fd, 8*4096);
+	ASSERT_EQ(0, truncate(fname, 8*4096));
 
 	//map 2
 	void * ptr1 = ummap(NULL, 8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dax_fd(fd, false), NULL, "none");
@@ -302,7 +302,7 @@ TEST_F(TestPublicAPI, map_driver_dax_fd_offset)
 	FILE * fp = fopen(fname, "w+");
 	ASSERT_NE(nullptr, fp);
 	int fd = fileno(fp);
-	ftruncate(fd, 8*4096);
+	ASSERT_EQ(0, truncate(fname, 8*4096));
 
 	//map 2
 	const size_t offset = 256;
@@ -325,9 +325,9 @@ TEST_F(TestPublicAPI, map_driver_dax_fd_offset)
 	char buffer[8*4096];
 	ssize_t res = fread(buffer, 1, 8*4096, fp);
 	ASSERT_EQ(8*4096, res);
-	for (int i = 0 ; i < offset ; i++)
+	for (size_t i = 0 ; i < offset ; i++)
 		ASSERT_EQ(0, buffer[i]) << "Index: " << i;
-	for (int i = offset ; i < 8*4096 ; i++)
+	for (size_t i = offset ; i < 8*4096 ; i++)
 		ASSERT_EQ(10, buffer[i]) << "Index: " << i;
 	
 	//clear

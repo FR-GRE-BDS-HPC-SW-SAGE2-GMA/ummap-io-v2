@@ -7,7 +7,13 @@
 ######################################################
 # Basic
 cmake_minimum_required(VERSION 2.8)
-project(ummap-io-v2 CXX C)
+# TODO we can remove this when we do not use anymore centos7
+if (CMAKE_VERSION VERSION_LESS 3.0)
+	project(ummap-io-v2 CXX C)
+else (CMAKE_VERSION VERSION_LESS 3.0)
+	cmake_policy(SET CMP0048 NEW)
+	project(ummap-io-v2 VERSION 0.0.0 LANGUAGES CXX C)
+endif (CMAKE_VERSION VERSION_LESS 3.0)
 
 ######################################################
 # Tests

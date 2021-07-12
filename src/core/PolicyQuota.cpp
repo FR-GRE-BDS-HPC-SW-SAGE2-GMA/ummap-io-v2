@@ -121,7 +121,7 @@ void PolicyQuota::updateNotifyLimit(void)
 		return;
 
 	//calc average limit
-	size_t averageMem = this->staticMaxMemory / cntPolicies;
+	//size_t averageMem = this->staticMaxMemory / cntPolicies;
 
 	//dispatch
 	for (auto & it : this->policies) {

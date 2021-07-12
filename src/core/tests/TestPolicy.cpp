@@ -53,10 +53,11 @@ TEST(TestPolicy, contains)
 
 	//fill
 	PolicyStorage storage = {
-		.mapping = &mapping,
-		.elements = buffer,
-		.elementCount= size,
-		.elementSize = 1,
+		&mapping,
+		buffer,
+		size,
+		1,
+		NULL,
 	};
 
 	//policy

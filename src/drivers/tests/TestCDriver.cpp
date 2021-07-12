@@ -64,13 +64,13 @@ void c_dummy_finalize(void * driver_data)
 
 /********************  STRUCT  **********************/
 ummap_c_driver_t gblCDummyDriver = {
-	.pwrite = c_dummy_pwrite,
-	.pread = c_dummy_pread,
-	.sync = c_dummy_sync,
-	.direct_mmap = c_dummy_direct_mmap,
-	.direct_munmap = c_dummy_direct_munmap,
-	.direct_msync = c_dummy_direct_msync,
-	.finalize = c_dummy_finalize,
+	c_dummy_pwrite,
+	c_dummy_pread,
+	c_dummy_sync,
+	c_dummy_direct_mmap,
+	c_dummy_direct_munmap,
+	c_dummy_direct_msync,
+	c_dummy_finalize,
 };
 
 /*******************  FUNCTION  *********************/

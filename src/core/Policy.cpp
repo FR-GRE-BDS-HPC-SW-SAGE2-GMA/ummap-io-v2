@@ -74,11 +74,11 @@ void Policy::registerMapping(Mapping * mapping, void * storage, size_t elementCo
 {
 	//setup
 	PolicyStorage entry = {
-		.mapping = mapping,
-		.elements = storage,
-		.elementCount = elementCount,
-		.elementSize = elementSize,
-		.extraInfos = extraInfos,
+		mapping,
+		storage,
+		elementCount,
+		elementSize,
+		extraInfos,
 	};
 
 	//check

@@ -55,9 +55,9 @@ void MappingRegistry::registerMapping(Mapping * mapping)
 
 		//build
 		MappingRegistryEntry entry = {
-			.mapping = mapping,
-			.base = base,
-			.end = base + size,
+			mapping,
+			base,
+			base + size,
 		};
 
 		//register
