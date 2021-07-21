@@ -5,8 +5,15 @@
 *****************************************************/
 
 /********************  HEADERS  *********************/
+//std
 #include <cstdio>
 #include <cassert>
+//unix
+ #include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+//internal
 #include "config.h"
 #include "../common/Debug.hpp"
 #include "../common/HumanUnits.hpp"
@@ -110,9 +117,9 @@ int UriHandler::applyCow(void * addr, const std::string & uri, bool allowExist)
 		//we do nothing
 		return 0;
 	} else if (type == "file") {
-		return ummap_cow_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "a+").c_str(), allowExist);
+		return ummap_cow_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "").c_str(), allowExist);
 	} else if (type == "mmap" || type == "dax") {
-		return ummap_cow_dax_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "a+").c_str(), allowExist);
+		return ummap_cow_dax_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "").c_str(), allowExist);
 	} else {
 		UMMAP_FATAL_ARG("Invalid ressource type to run COW operation : %1").arg(uri).end();
 		return -1;
@@ -151,9 +158,9 @@ int UriHandler::applySwitch(void * addr, const std::string & uri, ummap_switch_c
 		//we do nothing
 		return 0;
 	} else if (type == "file") {
-		return ummap_switch_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "a+").c_str(), cleanAction);
+		return ummap_switch_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "").c_str(), cleanAction);
 	} else if (type == "mmap" || type == "dax") {
-		return ummap_switch_dax_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "a+").c_str(), cleanAction);
+		return ummap_switch_dax_fopen(addr, parser.getPath().c_str(), parser.getParam("mode", "").c_str(), cleanAction);
 	} else {
 		UMMAP_FATAL_ARG("Invalid ressource type to run switch operation : %1").arg(uri).end();
 		return -1;
@@ -176,7 +183,7 @@ Driver * UriHandler::buildDriver(const std::string & uri)
 	std::string type = parser.getType();
 	Driver * driver = NULL;
 	if (type == "file") {
-		driver = this->buildDriverFOpen(parser.getPath(), parser.getParam("mode", "a+"));
+		driver = this->buildDriverFOpen(parser.getPath(), parser.getParam("mode", ""));
 	} else if (type == "mem") {
 		size_t memsize = fromHumanMemSize(parser.getPath());
 		driver = new MemoryDriver(memsize);
@@ -188,7 +195,7 @@ Driver * UriHandler::buildDriver(const std::string & uri)
 	} else if (type == "meroioc" || type == "clovisioc" || type == "ioc" || type == "iocfile" ) {
 		driver = buildDriverIoc(parser);
 	} else if (type == "mmap" || type == "dax" ) {
-		driver = this->buildDriverFOpenMmap(parser.getPath(), parser.getParam("mode", "a+"));
+		driver = this->buildDriverFOpenMmap(parser.getPath(), parser.getParam("mode", ""));
 	} else if (type == "mmapanon") {
 		driver = new MmapDriver(0, true);
 	} else {
@@ -270,18 +277,35 @@ std::string UriHandler::replaceVariables(std::string value)
 /*******************  FUNCTION  *********************/
 Driver * UriHandler::buildDriverFOpen(const std::string & fname, const std::string & mode)
 {
-	//open
-	FILE * fp = fopen(fname.c_str(), mode.c_str());
-	assumeArg(fp != NULL, "Fail to open file '%1': %2")
-		.arg(fname)
-		.argStrErrno()
-		.end();
+	//vars
+	FILE * fp = NULL;
+	int fd = -1;
+
+	//if default value we use direct open and o_create
+	if (mode == "") {
+		fd = open(fname.c_str(), O_RDWR | O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+		assumeArg(fd > 0, "Fail to open file '%1': %2")
+			.arg(fname)
+			.argStrErrno()
+			.end();
+	} else {
+		//open
+		fp = fopen(fname.c_str(), mode.c_str());
+		assumeArg(fp != NULL, "Fail to open file '%1': %2")
+			.arg(fname)
+			.argStrErrno()
+			.end();
+		fd = fileno(fp);
+	}
 	
 	//create driver
-	Driver * res = new FDDriver(fileno(fp));
+	Driver * res = new FDDriver(fd);
 
 	//close
-	fclose(fp);
+	if (fp != NULL)
+		fclose(fp);
+	else
+		close(fd);
 
 	//return
 	return res;
@@ -290,18 +314,35 @@ Driver * UriHandler::buildDriverFOpen(const std::string & fname, const std::stri
 /*******************  FUNCTION  *********************/
 Driver * UriHandler::buildDriverFOpenMmap(const std::string & fname, const std::string & mode)
 {
-	//open
-	FILE * fp = fopen(fname.c_str(), mode.c_str());
-	assumeArg(fp != NULL, "Fail to open file '%1': %2")
-		.arg(fname)
-		.argStrErrno()
-		.end();
+	//vars
+	FILE * fp = NULL;
+	int fd = -1;
+
+	//if default value we use direct open and o_create
+	if (mode == "") {
+		fd = open(fname.c_str(), O_RDWR | O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+		assumeArg(fd > 0, "Fail to open file '%1': %2")
+			.arg(fname)
+			.argStrErrno()
+			.end();
+	} else {
+		//open
+		fp = fopen(fname.c_str(), mode.c_str());
+		assumeArg(fp != NULL, "Fail to open file '%1': %2")
+			.arg(fname)
+			.argStrErrno()
+			.end();
+		fd = fileno(fp);
+	}
 	
 	//create driver
-	Driver * res = new MmapDriver(fileno(fp));
+	Driver * res = new MmapDriver(fd);
 
 	//close
-	fclose(fp);
+	if (fp != NULL)
+		fclose(fp);
+	else
+		close(fd);
 
 	//return
 	return res;
@@ -346,7 +387,7 @@ Driver * UriHandler::buildDriverMero(const Uri & uri)
 			//replacement
 			char fname[1024];
 			sprintf(fname, "%lx:%lx", id.high, id.low);
-			return buildDriverFOpen(fname, "a+");
+			return buildDriverFOpen(fname, "");
 		} else {
 			UMMAP_FATAL_ARG("Mero is not available, cannot use uri : %1").arg(uri.getURI()).end();
 			return NULL;
@@ -405,7 +446,7 @@ Driver * UriHandler::buildDriverIoc(const Uri & uri)
 			//replacement
 			char fname[1024];
 			sprintf(fname, "%lx:%lx", id.high, id.low);
-			return buildDriverFOpen(fname, "a+");
+			return buildDriverFOpen(fname, "");
 		} else {
 			UMMAP_FATAL_ARG("Mero is not available, cannot use uri : %1").arg(uri.getURI()).end();
 			return NULL;
