@@ -416,17 +416,24 @@ int ummap_cow_fd(void * addr, int fd, bool allow_exist)
 		assumeArg(status == 0, "Fail to fstat the original file: %1").argStrErrno().end();
 		size_t origSize = st.st_size;
 
-		//create driver
-		FDDriver * newDriver = new FDDriver(fd);
+		//try clone
+		FDDriver * typedDriver = dynamic_cast<FDDriver*>(driver);
+		bool tryClone = typedDriver->cloneRange(fd, mapping->getStorageOffset(), mapping->getSize());
 
-		//copy to new driver
-		mapping->copyToDriver(newDriver,origSize);
+		//if not clone
+		if (!tryClone) {
+			//create driver
+			FDDriver * newDriver = new FDDriver(fd);
+
+			//copy to new driver
+			mapping->copyToDriver(newDriver,mapping->getStorageOffset() + mapping->getSize());
+
+			//clean
+			delete newDriver;
+		}
 
 		//set fd
 		driver->setFd(fd);
-
-		//clear
-		delete newDriver;
 
 		//ok
 		return 0;
