@@ -28,6 +28,7 @@ class FDDriver : public Driver
 		virtual void sync(void * ptr, size_t offset, size_t size) override;
 		void setFd(int fd);
 		int getFd(void) {return fd;};
+		bool cloneRange(int targetFd, size_t offset, size_t size);
 	private:
 		/** File descriptor to be used for data transfers **/
 		int fd;

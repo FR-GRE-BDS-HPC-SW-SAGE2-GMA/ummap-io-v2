@@ -11,6 +11,12 @@
 #include <cerrno>
 //unix
 #include <unistd.h>
+//OS dependent for clone
+#include <linux/fs.h>        /* Definition of FICLONE* constants */
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 //local
 #include "../common/Debug.hpp"
 #include "FDDriver.hpp"
@@ -79,4 +85,22 @@ ssize_t FDDriver::pread(void * buffer, size_t size, size_t offset)
 void FDDriver::sync(void * ptr, size_t offset, size_t size)
 {
 	::fdatasync(fd);
+}
+
+/*******************  FUNCTION  *********************/
+bool FDDriver::cloneRange(int targetFd, size_t offset, size_t size)
+{
+	//build info
+	struct file_clone_range range = {
+		this->fd,
+		size,
+		offset,
+		offset
+	};
+
+	//call
+	int status = ioctl(targetFd, FICLONERANGE, &range);
+
+	//check ok
+	return status == 0;
 }
