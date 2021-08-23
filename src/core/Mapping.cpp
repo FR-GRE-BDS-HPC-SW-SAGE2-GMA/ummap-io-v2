@@ -728,23 +728,26 @@ void Mapping::copyMappedPart(char * buffer, Driver * newDriver, size_t storageSi
 	for (size_t i = 0 ; i < sizeToDump ; i += this->segmentSize) {
 		//compute copy size
 		size_t copySize = this->segmentSize;
+		size_t mappingEnd = this->getStorageOffset() + this->getSize();
 		if (i + this->segmentSize > sizeToDump)
 			copySize = sizeToDump - i;
-		
+		if (this->getStorageOffset() + i + copySize > mappingEnd)
+			copySize = mappingEnd - this->getStorageOffset() - i;
+
 		//get segment info
 		SegmentStatus & curStatus = this->segmentStatus[i/this->segmentSize];
 		
 		//apply copy mode if already have synced data in memory
 		const size_t offset = this->storageOffset + i;
 		if (curStatus.mapped == true && curStatus.dirty == false) {
-			char * addr = this->baseAddress + offset;
+			char * addr = this->baseAddress + i;
 			status = newDriver->pwrite(addr, copySize, offset);
-			assume(status == static_cast<ssize_t>(copySize), "Failed to write data from the target driver !");
+			assumeArg(status == static_cast<ssize_t>(copySize), "Failed to write data from the target driver ! [%1]+%2 (%3 != %4) i=%5").arg(storageOffset).arg(size).arg(status).arg(copySize).arg(i).end();
 		} else {
 			status = this->driver->pread(buffer, copySize, offset);
-			assume(status == static_cast<ssize_t>(copySize), "Failed to read data from the original driver !");
+			assumeArg(status == static_cast<ssize_t>(copySize), "Failed to read data from the original driver ! [%1]+%2 (%3 != %4) i=%5").arg(storageOffset).arg(size).arg(status).arg(copySize).arg(i).end();
 			status = newDriver->pwrite(buffer, copySize, offset);
-			assume(status == static_cast<ssize_t>(copySize), "Failed to write data from the target driver !");
+			assumeArg(status == static_cast<ssize_t>(copySize), "Failed to write data from the target driver ! [%1]+%2 (%3 != %4) i=%5").arg(storageOffset).arg(size).arg(status).arg(copySize).arg(i).end();
 		}
 	}
 }

@@ -14,6 +14,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 //local
 #include <config.h>
 #include "../common/Debug.hpp"
@@ -411,10 +413,10 @@ int ummap_cow_fd(void * addr, int fd, bool allow_exist)
 	//apply cow
 	return getGlobalhandler()->applyCow<FDDriver>("FD", addr, [fd](Mapping * mapping, FDDriver * driver){
 		//get file size
-		struct stat st;
-		int status = fstat(driver->getFd(), &st);
-		assumeArg(status == 0, "Fail to fstat the original file: %1").argStrErrno().end();
-		size_t origSize = st.st_size;
+		//struct stat st;
+		//int status = fstat(driver->getFd(), &st);
+		//assumeArg(status == 0, "Fail to fstat the original file: %1").argStrErrno().end();
+		//size_t origSize = st.st_size;
 
 		//try clone
 		FDDriver * typedDriver = dynamic_cast<FDDriver*>(driver);
@@ -450,19 +452,35 @@ int ummap_cow_fopen(void * addr, const char * file_path, const char * mode, bool
 			.end();
 	}
 
-	//open
-	FILE * fp = fopen(file_path, mode);
-	assumeArg(fp != NULL, "Fail to open file '%1': %2")
-		.arg(file_path)
-		.argStrErrno()
-		.end();
+	//vars
+	FILE * fp = NULL;
+	int fd = -1;
+
+	//if default value we use direct open and o_create
+	if (*mode == '\0') {
+		fd = open(file_path, O_RDWR | O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+		assumeArg(fd > 0, "Fail to open file '%1': %2")
+			.arg(file_path)
+			.argStrErrno()
+			.end();
+	} else {
+		//open
+		fp = fopen(file_path, mode);
+		assumeArg(fp != NULL, "Fail to open file '%1': %2")
+			.arg(file_path)
+			.argStrErrno()
+			.end();
+		fd = fileno(fp);
+	}
 
 	//cow
-	int fd = fileno(fp);
 	int status = ummap_cow_fd(addr, fd, allow_exist);
 
 	//close
-	fclose(fp);
+	if (*mode == '\0')
+		close(fd);
+	else
+		fclose(fp);
 
 	//ret
 	return status;
