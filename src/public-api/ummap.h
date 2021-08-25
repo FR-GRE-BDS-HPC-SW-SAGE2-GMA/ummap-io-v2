@@ -285,6 +285,14 @@ void ummap_driver_destroy(ummap_driver_t * driver);
  * @param autoclean Boolean to enable or disable the autoclean feature.
 **/
 void ummap_driver_set_autoclean(ummap_driver_t * driver, bool autoclean);
+/**
+ * Return the pointer to the driver used by the given mapping.
+**/
+ummap_driver_t * ummap_get_driver(void * ptr);
+/**
+ * make dirty.
+**/
+void ummap_make_dirty(void * ptr, size_t size);
 
 /****************  POLICY GROUPS  *******************/
 /**

@@ -281,6 +281,35 @@ int GlobalHandler::uunmap(void * ptr, bool sync)
 }
 
 /*******************  FUNCTION  *********************/
+void GlobalHandler::makeDirty(void * ptr)
+{
+	//get mapping
+	Mapping * mapping = this->mappingRegistry.getMapping(ptr);
+
+	//error
+	assumeArg(mapping != NULL, "Fail to find ummap mapping to unmap : %1").arg(ptr).end();
+
+	//make dirty
+	mapping->markCleanAsDirty();
+}
+
+/*******************  FUNCTION  *********************/
+/**
+ * Return the driver used by the given mapping.
+**/
+Driver * GlobalHandler::getDriver(void * ptr)
+{
+	//get mapping
+	Mapping * mapping = this->mappingRegistry.getMapping(ptr);
+
+	//error
+	assumeArg(mapping != NULL, "Fail to find ummap mapping to unmap : %1").arg(ptr).end();
+
+	//return driver
+	return mapping->getDriver();
+}
+
+/*******************  FUNCTION  *********************/
 /**
  * Notify the given segment to not read the storage data on the first memory access but init
  * the memory with zeroes.
