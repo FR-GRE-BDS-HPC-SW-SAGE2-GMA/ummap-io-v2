@@ -238,10 +238,7 @@ void * GlobalHandler::ummap(void * addr, size_t size, size_t segmentSize, size_t
 	//get policy
 	Policy * globalPolicy = NULL;
 	if (policyGroup != "none")
-	{
 		globalPolicy = this->policyRegistry.get(policyGroup);
-		assumeArg(globalPolicy != NULL, "Fail to find requested policy group : %1").arg(policyGroup).end();
-	}
 
 	//create mapping
 	Mapping * mapping = new Mapping(NULL, size, segmentSize, storageOffset, protection, flags, driver, localPolicy, globalPolicy);

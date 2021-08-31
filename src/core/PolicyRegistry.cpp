@@ -105,7 +105,7 @@ Policy * PolicyRegistry::get(const std::string &name)
 		if (it != this->entries.end())
 			return it->second;
 		else
-			return NULL;
+			UMMAP_FATAL_ARG("Failed to find policy in global registry with name '%1'").arg(name).end();
 	}
 }
 
