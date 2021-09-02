@@ -34,7 +34,7 @@ sfPipeline('gce-pool', sfEnvironment) {
 			sfBuilder.build('cip/workflow.yml')
 		}
 
-		stage("Publish tests") {
+		stage("Publish") {
 			echo '[INFO] Publish coverage results...'
 			publishHTML(target: [
 			            allowMissing: false,
