@@ -47,7 +47,7 @@ TEST(TestGlobalHandler, handler_stacking)
 	setGlobalHandler(handler);
 
 	//set preexisting handler
-	struct sigaction sa; 
+	struct sigaction sa;
 	sa.sa_flags = SA_SIGINFO;
 	sa.sa_sigaction = failure_handler;
 	sigfillset(&sa.sa_mask);
@@ -110,7 +110,7 @@ TEST(TestGlobalHandler, basic_write_workflow)
 	char * ptr = (char*)mapping.getAddress();
 	for (int i = 0 ; i < 8 * UMMAP_PAGE_SIZE ; i++)
 		ptr[i] = 48;
-	
+
 	//read access
 	for (int i = 0 ; i < 8 * UMMAP_PAGE_SIZE ; i++)
 		ASSERT_EQ(48, ptr[i]);
@@ -175,7 +175,7 @@ TEST(TestGlobalHandler, basic_write_workflow_parallel)
 		for (int i = 0 ; i < 8 * UMMAP_PAGE_SIZE ; i++)
 			ptr[i] = 48;
 	}
-	
+
 	//read access
 	for (int i = 0 ; i < 8 * UMMAP_PAGE_SIZE ; i++)
 		ASSERT_EQ(48, ptr[i]);
@@ -191,13 +191,13 @@ TEST(TestGlobalHandler, policy)
 {
 	FifoPolicy * policy = new FifoPolicy(4096, false);
 	GlobalHandler handler;
-	
+
 	handler.registerPolicy("test", policy);
-	ASSERT_EQ(policy, handler.getPolicy("test"));
-	ASSERT_EQ(NULL, handler.getPolicy("test2"));
+	ASSERT_EQ(policy, handler.getPolicy("test", true));
+	ASSERT_EQ(NULL, handler.getPolicy("test2", true));
 
 	handler.unregisterPolicy("test");
-	ASSERT_EQ(NULL, handler.getPolicy("test"));
+	ASSERT_EQ(NULL, handler.getPolicy("test", true));
 }
 
 
@@ -238,7 +238,7 @@ TEST(TestGlobalHandler, deleteAllMappings)
 {
 	//setup global
 	GlobalHandler handler;
-	
+
 	//mapping
 	DummyDriver * driver = new DummyDriver(32);
 	Mapping * mapping = new Mapping(NULL, 8 * UMMAP_PAGE_SIZE, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, UMMAP_DEFAULT, driver);

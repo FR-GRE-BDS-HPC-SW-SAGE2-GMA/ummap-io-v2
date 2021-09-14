@@ -87,9 +87,10 @@ void PolicyRegistry::unregisterPolicy(const std::string & name)
 /**
  * Search the requested policy by its name.
  * @param name Name of the wanted policy.
+ * @param nullNotFound If true return NULL on not found (for unit tests).
  * @return Return the requested policy by pointer or NULL if not found.
 **/
-Policy * PolicyRegistry::get(const std::string &name)
+Policy * PolicyRegistry::get(const std::string &name, bool nullNotFound)
 {
 	//check
 	assert(name.empty() == false);
@@ -102,10 +103,13 @@ Policy * PolicyRegistry::get(const std::string &name)
 		auto it = this->entries.find(name);
 
 		//return
-		if (it != this->entries.end())
+		if (it != this->entries.end()) {
 			return it->second;
-		else
-			UMMAP_FATAL_ARG("Failed to find policy in global registry with name '%1'").arg(name).end();
+		} else {
+			if (nullNotFound == false)
+				UMMAP_FATAL_ARG("Failed to find policy in global registry with name '%1'").arg(name).end();
+			return NULL;
+		}
 	}
 }
 
