@@ -53,7 +53,7 @@ class GlobalHandler
 		void skipFirstRead(void * ptr);
 		void registerPolicy(const std::string & name, Policy * policy);
 		void unregisterPolicy(const std::string & name);
-		Policy * getPolicy(const std::string & name);
+		Policy * getPolicy(const std::string & name, bool nullNotFound = false);
 		Driver * getDriver(void * ptr);
 		void makeDirty(void * ptr);
 		void registerMapping(Mapping * mapping);

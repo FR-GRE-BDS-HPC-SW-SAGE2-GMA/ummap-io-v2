@@ -31,7 +31,7 @@ TEST(TestPolicyRegistry, register_get)
 TEST(TestPolicyRegistry, get_null)
 {
 	PolicyRegistry registry;
-	ASSERT_EQ(nullptr, registry.get("test"));
+	ASSERT_EQ(nullptr, registry.get("test", true));
 }
 
 /*******************  FUNCTION  *********************/
@@ -42,7 +42,7 @@ TEST(TestPolicyRegistry, unregister)
 	registry.registerPolicy("test", policy);
 	ASSERT_EQ(policy, registry.get("test"));
 	registry.unregisterPolicy("test");
-	ASSERT_EQ(nullptr, registry.get("test"));
+	ASSERT_EQ(nullptr, registry.get("test", true));
 }
 
 /*******************  FUNCTION  *********************/

@@ -177,11 +177,12 @@ void GlobalHandler::unregisterPolicy(const std::string & name)
 /**
  * Ask the policy registry to get the given policy identifed by its name.
  * @param name Name of the policy to extract.
+ * @param nullNotFound Return NULL on not found of raise crash error
  * @return Return a pointer to the given policy of NULL if not found.
 **/
-Policy * GlobalHandler::getPolicy(const std::string & name)
+Policy * GlobalHandler::getPolicy(const std::string & name, bool nullNotFound)
 {
-	return this->policyRegistry.get(name);
+	return this->policyRegistry.get(name, nullNotFound);
 }
 
 /*******************  FUNCTION  *********************/

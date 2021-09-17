@@ -34,7 +34,7 @@ class PolicyRegistry
 		void unregisterPolicy(const std::string & name);
 		void deleteAll(void);
 		bool isEmpty(void);
-		Policy * get(const std::string & name);
+		Policy * get(const std::string & name, bool nullNotFound = false);
 	private:
 		/** Spinlock to protect the access to the map **/
 		Spinlock lock;
