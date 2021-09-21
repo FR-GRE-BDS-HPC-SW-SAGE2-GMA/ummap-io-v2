@@ -17,6 +17,8 @@ workflow:
           - name: "python3"
           # to generate doc
           - name: "doxygen"
+          # to check code
+          - name: "cppcheck"
       stop_if_error: true
       disabled: false
 
@@ -51,5 +53,7 @@ workflow:
           - label: "Doxygen"
             cmd: "cd ${SRCDIR} && mkdir -p ${SRCDIR}/${EXPORT_DIR}/doc && doxygen Doxyfile && mv ./doxygen ${SRCDIR}/${EXPORT_DIR}/doc"
             user: "sf-user"
+          - label: "CppCheck"
+            cmd: "cd ${SRCDIR} && mkdir -p ${SRCDIR}/${EXPORT_DIR}/check && cppcheck --error-exitcode=0 --quiet -I./src -I./extern-deps/from-cern-lhcb-daqpipe-v2/ -I./extern-deps/from-clovis-sample-apps/ -I./extern-deps/from-motr-sample-apps/ -I./extern-deps/googletest-release-1.10.0/googletest/include/ -I./extern-deps/googletest-release-1.10.0/googlemock/include/ -j8 --std=c11 --platform=unix64 --relative-paths --template=\"{file}:{line} [{severity}] ({id}) {message}\" --template-location=\"\t-> {file}:{line} {info}\" --report-progress --xml --xml-version=2 ./src 2> ${SRCDIR}/${EXPORT_DIR}/check/cppcheck.xml"
       stop_if_error : true
       disabled : false
