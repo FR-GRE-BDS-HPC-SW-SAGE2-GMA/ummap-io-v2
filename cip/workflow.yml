@@ -43,7 +43,7 @@ workflow:
             cmd: "pip3 install gcovr"
             user: "root"
           - label: "Generate coverage xml report"
-            cmd: "cd ${BUILDDIR} && mkdir -p ${SRCDIR}/${EXPORT_DIR}/coverage && gcovr ${BUILDDIR} -r ${SRCDIR} --filter ${SRCDIR}/src --exclude '.*tests/.+' --xml --xml-pretty > ${SRCDIR}/${EXPORT_DIR}/coverage/gcovr.xml"
+            cmd: "cd ${BUILDDIR} && mkdir -p ${SRCDIR}/${EXPORT_DIR}/coverage && gcovr ${BUILDDIR} -r ${SRCDIR} --filter ${SRCDIR}/src --exclude '.*tests/.+' --xml --xml-pretty | sed -e \"s#<source>/src</source>#</source>.</source>#g\" > ${SRCDIR}/${EXPORT_DIR}/coverage/gcovr.xml"
             user: "sf-user"
           - label: "Generate coverage html report"
             cmd: "cd ${BUILDDIR} && gcovr ${BUILDDIR} -r ${SRCDIR} --filter ${SRCDIR}/src --exclude '.*tests/.+' --html > ${SRCDIR}/${EXPORT_DIR}/coverage/gcovr.html"
