@@ -27,6 +27,9 @@ workflow:
       info: "Configure & Build & Run tests"
       context:
         cmdline:
+          - label: "cleanup"
+            cmd: "rm -rfd ${SRCDIR}/${EXPORT_DIR}"
+            user: "root"
           - label: "Configure"
             cmd: "cd ${BUILDDIR} && ${SRCDIR}/configure --enable-jenkins"
             user: "sf-user"
