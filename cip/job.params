@@ -13,16 +13,6 @@ jobParams = [
         type: 'booleanParam',
         descr: "Publish rpms and wheels",
         val:  false
-    ],
-    ARTIFACTORY_USERNAME: [
-        type: 'string',
-        descr: 'Artifactory username',
-        val: "brdm-user"
-    ],
-    ARTIFACTORY_PASSWORD: [
-        type: 'string',
-        descr: 'Artifactory password',
-        val: "brdm-password"
     ]
 ]
 
