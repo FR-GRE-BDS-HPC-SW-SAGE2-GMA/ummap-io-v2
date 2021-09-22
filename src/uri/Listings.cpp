@@ -64,6 +64,7 @@ ObjectId Listings::createListingAndObjectId(const std::string & listing, const s
 {
 	FILE * fp = fopen(listing.c_str(), "r");
 	if (fp != NULL) {
+		fclose(fp);
 		ObjectMap & lst = this->loadListing(listing);
 		auto it = lst.find(name);
 		if (it != lst.end()) {

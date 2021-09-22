@@ -13,8 +13,6 @@ def sfEnvironment = [
     "SF_BUILDER_BUILDDIR=/home/sf-user",
     "SF_BUILDER_EXPORT_DIR=sf-builder-export",
     "SF_BUILDER_ARTIFACTORY_HOST=${env.ARTIFACTORY_HOST}",
-    "SF_BUILDER_ARTIFACTORY_USERNAME=${env.ARTIFACTORY_USERNAME}",
-    "SF_BUILDER_ARTIFACTORY_PASSWORD=${env.ARTIFACTORY_PASSWORD}"
 ]
 
 //build pipeline
@@ -27,7 +25,7 @@ sfPipeline('gce-pool', sfEnvironment) {
 		}
 
 		stage("Retrieve sources") {
-			checkout(scm)
+			sfScm.checkOutFrom(scm)
 		}
 
 		stage("Build") {
@@ -41,7 +39,7 @@ sfPipeline('gce-pool', sfEnvironment) {
 			            alwaysLinkToLastBuild: true,
 			            keepAll: false,
 			            reportDir: "${SF_BUILDER_EXPORT_DIR}",
-			            reportFiles: "coverage/gcovr.html,doc/doxygen/html/index.html",
+			            reportFiles: "coverage/gcovr/index.html,doc/doxygen/html/index.html",
 			            reportName: "Reports",
 			            reportTitles: "Coverage,Doxygen"
 			])
@@ -51,5 +49,14 @@ sfPipeline('gce-pool', sfEnvironment) {
 			      keepLongStdio : true,
 			      testResults: "${SF_BUILDER_EXPORT_DIR}/junit/*.gtest.xml")
 		}
+
+		// Do make test/coverage reports on any branches
+		stage("Sonarqube analysis") {
+			withCredentials( [usernamePassword(credentialsId: "sonarqube-${env.TEAM}-user", usernameVariable: 'SONARUSER', passwordVariable: 'SONARPWD')] ) {
+				def customSonarProperties = [ login: env.SONARUSER, password: env.SONARPWD ]
+				sfScanner.scan('cip/sonar-project.properties')
+			}
+		}
+
 	}
 }

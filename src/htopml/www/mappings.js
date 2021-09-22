@@ -5,7 +5,7 @@ function draw_blocks(data)
 		var mapping = data[i];
 
 		//select div
-		div = d3.select("#mapping-"+i);
+		var div = d3.select("#mapping-"+i);
 
 		//select blocks
 		var blocks = div.selectAll("span").data(mapping.status);
@@ -62,13 +62,13 @@ function draw_sections(mappings)
 		infos += "</table>"
 
 		//appned
-		html += "<div class='section'>\
-				<h1>Mapping "+ i +"</h1>\
-				<div>" + infos + "</div>\
-				<br/>\
-				<div class='blocks' id='mapping-"+i+"'></div>\
-				<div style='clear:both'></div>\
-			</div>";
+		html += "<div class='section'>\n";
+		html += "	<h1>Mapping "+ i +"</h1>\n";
+		html += "	<div>" + infos + "</div>\n";
+		html += "	<br/>\n";
+		html += "	<div class='blocks' id='mapping-"+i+"'></div>\n";
+		html += "	<div style='clear:both'></div>\n";
+		html += "</div>\n";
 	}
 
 	//apply
