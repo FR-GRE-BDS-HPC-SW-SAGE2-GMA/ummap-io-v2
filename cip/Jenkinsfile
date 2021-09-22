@@ -27,7 +27,7 @@ sfPipeline('gce-pool', sfEnvironment) {
 		}
 
 		stage("Retrieve sources") {
-			sfScm.checkoutFrom(scm)
+			sfScm.checkOutFrom(scm)
 		}
 
 		stage("Build") {
@@ -54,7 +54,10 @@ sfPipeline('gce-pool', sfEnvironment) {
 
 		// Do make test/coverage reports on any branches
 		stage("Sonarqube analysis") {
-			sfScanner.scan('cip/sonar-project.properties')
+			withCredentials( [usernamePassword(credentialsId: "sonarqube-${env.TEAM}-user", usernameVariable: 'SONARUSER', passwordVariable: 'SONARPWD')] ) {
+				def customSonarProperties = [ login: env.SONARUSER, password: env.SONARPWD ]
+				sfScanner.scan('cip/sonar-project.properties')
+			}
 		}
 
 	}
