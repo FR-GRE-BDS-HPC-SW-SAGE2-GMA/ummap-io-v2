@@ -27,7 +27,7 @@ sfPipeline('gce-pool', sfEnvironment) {
 		}
 
 		stage("Retrieve sources") {
-			checkout(scm)
+			sfScm.checkoutFrom(scm)
 		}
 
 		stage("Build") {
@@ -54,7 +54,6 @@ sfPipeline('gce-pool', sfEnvironment) {
 
 		// Do make test/coverage reports on any branches
 		stage("Sonarqube analysis") {
-			sh "sed -i 's,__BRANCH_NAME__,${env.BRANCH_NAME},g' cip/sonar-project.properties"
 			sfScanner.scan('cip/sonar-project.properties')
 		}
 

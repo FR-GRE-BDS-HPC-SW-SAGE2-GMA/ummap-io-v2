@@ -1,14 +1,4 @@
 jobParams = [
-    TEAM: [
-        type: 'string',
-        descr: 'Team name',
-        val: 'brdm'
-    ],
-    COMPNAME: [
-        type: 'string',
-        descr: 'Component name',
-        val: 'ummap-io-v2'
-    ],
     COMPVERS: [
         type: 'string',
         descr: 'Component version',
