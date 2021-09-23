@@ -29,7 +29,11 @@ sfPipeline('gce-pool', sfEnvironment) {
 		}
 
 		stage("Build") {
-			sfBuilder.build('cip/workflow.yml')
+			sfBuilder.build(
+				buildDistrib: "${env.DISTRIB}",
+				buildArch: "${env.ARCH}",
+				workflowFile: "cip/workflow.yml",
+				rmContainer: true)
 		}
 
 		stage("Publish") {
