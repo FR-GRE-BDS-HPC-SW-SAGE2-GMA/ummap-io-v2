@@ -25,7 +25,7 @@ static const char * cstHumanMemSizeRegex = "([0-9]+)([KMGT]?B)?";
  * @param value Define the size to parse as a string. Eg. 8MB.
  * @return Return the parsed size in bytes.
 **/
-static size_t fromHumanMemSizeNoRegexp(const std::string & value)
+size_t ummapio::fromHumanMemSizeNoRegexp(const std::string & value)
 {
 	//vars
 	std::string number;
@@ -45,7 +45,7 @@ static size_t fromHumanMemSizeNoRegexp(const std::string & value)
 	//apply
 	size_t res = atol(number.c_str());
 	assumeArg(res > 0, "Invalid null size : %1\n").arg(value).end();
-	if (unit == "") {
+	if (unit == "" || unit == "B") {
 		//nothing to do
 	} else if (unit == "KB") {
 		res *= 1024ul;
@@ -68,7 +68,7 @@ static size_t fromHumanMemSizeNoRegexp(const std::string & value)
  * @param value Define the size to parse as a string. Eg. 8MB.
  * @return Return the parsed size in bytes.
 **/
-static size_t fromHumanMemSizeRegexp(const std::string & value)
+size_t ummapio::fromHumanMemSizeRegexp(const std::string & value)
 {
 	//var
 	size_t res = 0;

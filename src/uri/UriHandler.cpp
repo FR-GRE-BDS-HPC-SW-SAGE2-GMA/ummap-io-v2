@@ -284,17 +284,11 @@ Driver * UriHandler::buildDriverFOpen(const std::string & fname, const std::stri
 	//if default value we use direct open and o_create
 	if (mode == "") {
 		fd = open(fname.c_str(), O_RDWR | O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-		assumeArg(fd > 0, "Fail to open file '%1': %2")
-			.arg(fname)
-			.argStrErrno()
-			.end();
+		assumeArg(fd > 0, "Fail to open file '%1': %2").arg(fname).argStrErrno().end();
 	} else {
 		//open
 		fp = fopen(fname.c_str(), mode.c_str());
-		assumeArg(fp != NULL, "Fail to open file '%1': %2")
-			.arg(fname)
-			.argStrErrno()
-			.end();
+		assumeArg(fp != NULL, "Fail to open file '%1': %2").arg(fname).argStrErrno().end();
 		fd = fileno(fp);
 	}
 	
@@ -321,17 +315,11 @@ Driver * UriHandler::buildDriverFOpenMmap(const std::string & fname, const std::
 	//if default value we use direct open and o_create
 	if (mode == "") {
 		fd = open(fname.c_str(), O_RDWR | O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-		assumeArg(fd > 0, "Fail to open file '%1': %2")
-			.arg(fname)
-			.argStrErrno()
-			.end();
+		assumeArg(fd > 0, "Fail to open file '%1': %2").arg(fname).argStrErrno().end();
 	} else {
 		//open
 		fp = fopen(fname.c_str(), mode.c_str());
-		assumeArg(fp != NULL, "Fail to open file '%1': %2")
-			.arg(fname)
-			.argStrErrno()
-			.end();
+		assumeArg(fp != NULL, "Fail to open file '%1': %2").arg(fname).argStrErrno().end();
 		fd = fileno(fp);
 	}
 	

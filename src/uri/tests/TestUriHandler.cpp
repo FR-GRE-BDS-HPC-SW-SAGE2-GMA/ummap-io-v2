@@ -26,9 +26,11 @@ TEST(TestUriHandler, replaceVariables)
 	UriHandler handler;
 	handler.registerVariable("fname", "resultat.raw");
 	handler.registerVariable("rank", 20);
+	handler.registerVariable("rank_long", (size_t)40);
 
 	ASSERT_EQ("file://resultat.raw", handler.replaceVariables("file://{fname}"));
 	ASSERT_EQ("file://resultat-20.raw", handler.replaceVariables("file://resultat-{rank}.raw"));
+	ASSERT_EQ("file://resultat-40.raw", handler.replaceVariables("file://resultat-{rank_long}.raw"));
 }
 
 /*******************  FUNCTION  *********************/
@@ -52,6 +54,10 @@ TEST(TestUriHandler, buildDriver)
 
 	//mmap
 	driver = handler.buildDriver("mmap://test.raw");
+	delete driver;
+
+	//mmap
+	driver = handler.buildDriver("mmap://test.raw?mode=w+");
 	delete driver;
 
 	//mmap
