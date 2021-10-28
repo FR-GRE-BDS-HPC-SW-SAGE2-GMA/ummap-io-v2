@@ -45,6 +45,7 @@ class PolicyQuotaInterProc : public PolicyQuotaLocal
 {
 	public:
 		PolicyQuotaInterProc(const std::string & name,size_t staticMaxMemory);
+		~PolicyQuotaInterProc(void);
 		virtual void update(void) override;
 	private:
 		void * openShm(const std::string &name, size_t size);

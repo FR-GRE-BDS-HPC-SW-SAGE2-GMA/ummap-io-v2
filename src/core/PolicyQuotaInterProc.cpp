@@ -28,6 +28,16 @@ using namespace ummapio;
 #define SHM_FFLAGS  (O_CREAT | O_RDWR)
 #define SHM_FPERM   (S_IRUSR | S_IWUSR)
 
+/********************  GLOBAL ***********************/
+static PolicyQuotaInterProc * gblPolicyQuotaInterProc = NULL;
+
+/*******************  FUNCTION  *********************/
+static void sigHandler(int signum){
+	if (gblPolicyQuotaInterProc != NULL)
+		gblPolicyQuotaInterProc->update();
+}
+
+
 /*******************  FUNCTION  *********************/
 PolicyQuotaInterProc::PolicyQuotaInterProc(const std::string & name,size_t staticMaxMemory)
                      :PolicyQuotaLocal(staticMaxMemory)
@@ -35,6 +45,13 @@ PolicyQuotaInterProc::PolicyQuotaInterProc(const std::string & name,size_t stati
 	//keep track
 	this->name = std::string("/") + name;
 	this->totalAllowed = staticMaxMemory;
+
+	//set
+	assume(gblPolicyQuotaInterProc == NULL, "Cannot instantiate mulitple inter-proc policy quota for now !");
+	gblPolicyQuotaInterProc = this;
+
+	//setup signal handler
+	signal(SIGEVICT,sigHandler);
 
 	//open
 	this->shared = static_cast<PolicyQuotaInterProcShared*>(this->openShm(this->name, sizeof(*this->shared)));
@@ -70,6 +87,38 @@ PolicyQuotaInterProc::PolicyQuotaInterProc(const std::string & name,size_t stati
 
 	//update
 	this->update();
+}
+
+/*******************  FUNCTION  *********************/
+PolicyQuotaInterProc::~PolicyQuotaInterProc(void)
+{
+	//CRITICAL SECTION
+	{
+		//take lock
+		this->lock();
+
+		//increment process number
+		this->shared->processes--;
+
+		//search a position in the list
+		bool found = false;
+		for (int i = 0 ; i < this->shared->indexMax ; ++i) {
+			if (this->shared->pids[i] == getpid()) {
+				this->shared->pids[i] = 0;
+				found = true;
+				break;
+			}
+		}
+
+		//if not found add
+		assume(found, "Fail to found the local PID in the shared->pid[] vector !");
+
+		//end of critical section
+		this->unlock();
+	}
+
+	//remove global registration
+	gblPolicyQuotaInterProc = NULL;
 }
 
 /*******************  FUNCTION  *********************/
@@ -128,7 +177,7 @@ void PolicyQuotaInterProc::update(void)
 	this->staticMaxMemory = perProcQuota;
 
 	//debug
-	IOC_DEBUG_ARG("quota:interproc", "Change quota for %1 computed from %2 processes").argUnit1024(perProcQuota).arg(this->shared->processes).end();
+	UMMAP_DEBUG_ARG("quota:interproc", "Change quota for %1 computed from %2 processes").argUnit1024(perProcQuota).arg(this->shared->processes).end();
 
 	//call local update
 	PolicyQuotaLocal::update();
