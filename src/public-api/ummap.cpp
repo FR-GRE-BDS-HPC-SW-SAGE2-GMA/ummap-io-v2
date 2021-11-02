@@ -127,10 +127,7 @@ ummap_driver_t * ummap_driver_create_fopen(const char * file_path, const char * 
 {
 	//open
 	FILE * fp = fopen(file_path, mode);
-	assumeArg(fp != NULL, "Fail to open file '%1': %2")
-		.arg(file_path)
-		.argStrErrno()
-		.end();
+	assumeArg(fp != NULL, "Fail to open file '%1': %2").arg(file_path).argStrErrno().end();
 	
 	//create driver
 	ummap_driver_t * driver = ummap_driver_create_fd(fileno(fp));
@@ -148,10 +145,7 @@ ummap_driver_t * ummap_driver_create_dax_fopen(const char * file_path, const cha
 {
 	//open
 	FILE * fp = fopen(file_path, mode);
-	assumeArg(fp != NULL, "Fail to open file '%1': %2")
-		.arg(file_path)
-		.argStrErrno()
-		.end();
+	assumeArg(fp != NULL, "Fail to open file '%1': %2").arg(file_path).argStrErrno().end();
 	
 	//create driver
 	ummap_driver_t * driver = ummap_driver_create_dax_fd(fileno(fp), allowNotAligned);
@@ -471,17 +465,11 @@ int ummap_cow_fopen(void * addr, const char * file_path, const char * mode, bool
 	//if default value we use direct open and o_create
 	if (*mode == '\0') {
 		fd = open(file_path, O_RDWR | O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-		assumeArg(fd > 0, "Fail to open file '%1': %2")
-			.arg(file_path)
-			.argStrErrno()
-			.end();
+		assumeArg(fd > 0, "Fail to open file '%1': %2").arg(file_path).argStrErrno().end();
 	} else {
 		//open
 		fp = fopen(file_path, mode);
-		assumeArg(fp != NULL, "Fail to open file '%1': %2")
-			.arg(file_path)
-			.argStrErrno()
-			.end();
+		assumeArg(fp != NULL, "Fail to open file '%1': %2").arg(file_path).argStrErrno().end();
 		fd = fileno(fp);
 	}
 
@@ -567,10 +555,7 @@ int ummap_switch_fopen(void * addr, const char * file_path, const char * mode, u
 {
 	//open
 	FILE * fp = fopen(file_path, mode);
-	assumeArg(fp != NULL, "Fail to open file '%1': %2")
-		.arg(file_path)
-		.argStrErrno()
-		.end();
+	assumeArg(fp != NULL, "Fail to open file '%1': %2").arg(file_path).argStrErrno().end();
 
 	//call
 	int fd = fileno(fp);

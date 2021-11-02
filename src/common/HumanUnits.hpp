@@ -17,6 +17,8 @@ namespace ummapio
 
 /*******************  FUNCTION  *********************/
 size_t fromHumanMemSize(const std::string & value);
+size_t fromHumanMemSizeRegexp(const std::string & value);
+size_t fromHumanMemSizeNoRegexp(const std::string & value);
 
 }
 

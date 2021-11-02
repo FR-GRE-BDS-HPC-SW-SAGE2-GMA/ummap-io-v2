@@ -8,6 +8,10 @@
 #include <gtest/gtest.h>
 #include <sys/mman.h>
 #include "../ummap.h"
+#include "../../policies/FifoPolicy.hpp"
+#include "../../policies/LifoPolicy.hpp"
+#include "../../policies/FifoWindowPolicy.hpp"
+#include "../../core/GlobalHandler.hpp"
 
 /*********************  CLASS  **********************/
 class TestPublicAPI : public testing::Test
@@ -399,6 +403,9 @@ TEST_F(TestPublicAPI, policy_group)
 
 	//unmap
 	umunmap(ptr1, 0);
+
+	//destroy
+	ummap_policy_group_destroy("global");
 }
 
 /*******************  FUNCTION  *********************/
@@ -446,12 +453,44 @@ TEST_F(TestPublicAPI, create_driver_uri)
 }
 
 /*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, create_policy)
+{
+	ummap_policy_t * policy;
+	
+	//fifo
+	policy = ummap_policy_create_fifo(4096, true);
+	ASSERT_NE(nullptr, dynamic_cast<ummapio::FifoPolicy*>((ummapio::Policy*)policy));
+	ummap_policy_destroy(policy);
+
+	//lifo
+	policy = ummap_policy_create_lifo(4096, true);
+	ASSERT_NE(nullptr, dynamic_cast<ummapio::LifoPolicy*>((ummapio::Policy*)policy));
+	ummap_policy_destroy(policy);
+
+	//fifo + window
+	policy = ummap_policy_create_fifo_window(2*4096,4096, true);
+	ASSERT_NE(nullptr, dynamic_cast<ummapio::FifoWindowPolicy*>((ummapio::Policy*)policy));
+	ummap_policy_destroy(policy);
+}
+
+/*******************  FUNCTION  *********************/
 TEST_F(TestPublicAPI, create_policy_uri)
 {
 	ummap_policy_t * policy;
 	
 	//fifo
 	policy = ummap_policy_create_uri("fifo://4096", true);
+	ASSERT_NE(nullptr, dynamic_cast<ummapio::FifoPolicy*>((ummapio::Policy*)policy));
+	ummap_policy_destroy(policy);
+
+	//lifo
+	policy = ummap_policy_create_uri("lifo://4096", true);
+	ASSERT_NE(nullptr, dynamic_cast<ummapio::LifoPolicy*>((ummapio::Policy*)policy));
+	ummap_policy_destroy(policy);
+
+	//fifo + window
+	policy = ummap_policy_create_uri("fifo-window://8KB?window=4KB", true);
+	ASSERT_NE(nullptr, dynamic_cast<ummapio::FifoWindowPolicy*>((ummapio::Policy*)policy));
 	ummap_policy_destroy(policy);
 }
 
@@ -489,6 +528,144 @@ TEST_F(TestPublicAPI, cow_fopen)
 		ASSERT_EQ(2, ptr3[i]);
 	for (size_t i = size / 2 ; i < size ; i++)
 		ASSERT_EQ(1, ptr3[i]);
+	
+	//unmap
+	umunmap(ptr2, size);
+	umunmap(ptr3, size);
+
+	//clean
+	unlink("/tmp/ummap-io-api-test-cow-fopen-1.raw");
+	unlink("/tmp/ummap-io-api-test-cow-fopen-2.raw");
+}
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, switch_fopen_mark_clean_dirty)
+{
+	//driver
+	const size_t segmentSize = 4096;
+	const size_t size = 8*segmentSize;
+
+	//create & memset
+	ummap_driver_t * driver = ummap_driver_create_fopen("/tmp/ummap-io-api-test-switch-fopen-1.raw", "w+");
+	void * ptr = ummap(NULL, size, segmentSize, 0, PROT_READ|PROT_WRITE, 0, driver, NULL, "none");
+	memset(ptr, 1, size);
+	umsync(ptr, size, false);
+
+	//cow
+	int status = ummap_switch_fopen(ptr, "/tmp/ummap-io-api-test-switch-fopen-2.raw", "w+", UMMAP_MARK_CLEAN_DIRTY);
+	ASSERT_EQ(0, status);
+
+	//write again & flush
+	memset(ptr, 2, size/2);
+	umunmap(ptr, true);
+
+	//map again orign & check
+	ummap_driver_t * driver2 = ummap_driver_create_fopen("/tmp/ummap-io-api-test-switch-fopen-1.raw", "r");
+	char* ptr2 = (char*)ummap(NULL, size, segmentSize, 0, PROT_READ, 0, driver2, NULL, "none");
+	for (size_t i = 0 ; i < size ; i++)
+		ASSERT_EQ(1, ptr2[i]);
+	
+	//map again orign & check
+	ummap_driver_t * driver3 = ummap_driver_create_fopen("/tmp/ummap-io-api-test-switch-fopen-2.raw", "r");
+	char * ptr3 = (char*)ummap(NULL, size, segmentSize, 0, PROT_READ, 0, driver3, NULL, "none");
+	for (size_t i = 0 ; i < size / 2 ; i++)
+		ASSERT_EQ(2, ptr3[i]);
+	for (size_t i = size / 2 ; i < size ; i++)
+		ASSERT_EQ(1, ptr3[i]);
+	
+	//unmap
+	umunmap(ptr2, size);
+	umunmap(ptr3, size);
+
+	//clean
+	unlink("/tmp/ummap-io-api-test-cow-fopen-1.raw");
+	unlink("/tmp/ummap-io-api-test-cow-fopen-2.raw");
+}
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, switch_fopen_no_action)
+{
+	//driver
+	const size_t segmentSize = 4096;
+	const size_t size = 8*segmentSize;
+
+	//create & memset
+	ummap_driver_t * driver = ummap_driver_create_fopen("/tmp/ummap-io-api-test-switch-fopen-1.raw", "w+");
+	void * ptr = ummap(NULL, size, segmentSize, 0, PROT_READ|PROT_WRITE, 0, driver, NULL, "none");
+	memset(ptr, 1, size);
+	umsync(ptr, size, false);
+	memset(ptr, 3, size/2);
+
+	//cow
+	int status = ummap_switch_fopen(ptr, "/tmp/ummap-io-api-test-switch-fopen-2.raw", "w+", UMMAP_NO_ACTION);
+	ASSERT_EQ(0, status);
+
+	//write again & flush
+	memset((char*)ptr + (size / 4), 2, size/4);
+	umunmap(ptr, true);
+
+	//map again orign & check
+	ummap_driver_t * driver2 = ummap_driver_create_fopen("/tmp/ummap-io-api-test-switch-fopen-1.raw", "r");
+	char* ptr2 = (char*)ummap(NULL, size, segmentSize, 0, PROT_READ, 0, driver2, NULL, "none");
+	for (size_t i = 0 ; i < size ; i++)
+		ASSERT_EQ(1, ptr2[i]);
+	
+	//map again orign & check
+	ummap_driver_t * driver3 = ummap_driver_create_fopen("/tmp/ummap-io-api-test-switch-fopen-2.raw", "r");
+	char * ptr3 = (char*)ummap(NULL, size, segmentSize, 0, PROT_READ, 0, driver3, NULL, "none");
+	for (size_t i = 0 ; i < size / 4 ; i++)
+		ASSERT_EQ(3, ptr3[i]) << i;
+	for (size_t i = size / 4 ; i < size / 2 ; i++)
+		ASSERT_EQ(2, ptr3[i]) << i;
+	for (size_t i = size / 2 ; i < size ; i++)
+		ASSERT_EQ(0, ptr3[i]) << i;
+	
+	//unmap
+	umunmap(ptr2, size);
+	umunmap(ptr3, size);
+
+	//clean
+	unlink("/tmp/ummap-io-api-test-cow-fopen-1.raw");
+	unlink("/tmp/ummap-io-api-test-cow-fopen-2.raw");
+}
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, switch_fopen_drop_clean)
+{
+	//driver
+	const size_t segmentSize = 4096;
+	const size_t size = 8*segmentSize;
+
+	//create & memset
+	ummap_driver_t * driver = ummap_driver_create_fopen("/tmp/ummap-io-api-test-switch-fopen-1.raw", "w+");
+	void * ptr = ummap(NULL, size, segmentSize, 0, PROT_READ|PROT_WRITE, 0, driver, NULL, "none");
+	memset(ptr, 1, size);
+	umsync(ptr, size, false);
+	memset(ptr, 3, size/2);
+
+	//cow
+	int status = ummap_switch_fopen(ptr, "/tmp/ummap-io-api-test-switch-fopen-2.raw", "w+", UMMAP_DROP_CLEAN);
+	ASSERT_EQ(0, status);
+
+	//write again & flush
+	memset((char*)ptr + (size / 4), 2, size/4);
+	umunmap(ptr, true);
+
+	//map again orign & check
+	ummap_driver_t * driver2 = ummap_driver_create_fopen("/tmp/ummap-io-api-test-switch-fopen-1.raw", "r");
+	char* ptr2 = (char*)ummap(NULL, size, segmentSize, 0, PROT_READ, 0, driver2, NULL, "none");
+	for (size_t i = 0 ; i < size ; i++)
+		ASSERT_EQ(1, ptr2[i]);
+	
+	//map again orign & check
+	ummap_driver_t * driver3 = ummap_driver_create_fopen("/tmp/ummap-io-api-test-switch-fopen-2.raw", "r");
+	char * ptr3 = (char*)ummap(NULL, size, segmentSize, 0, PROT_READ, 0, driver3, NULL, "none");
+	for (size_t i = 0 ; i < size / 4 ; i++)
+		ASSERT_EQ(3, ptr3[i]) << i;
+	for (size_t i = size / 4 ; i < size / 2 ; i++)
+		ASSERT_EQ(2, ptr3[i]) << i;
+	for (size_t i = size / 2 ; i < size ; i++)
+		ASSERT_EQ(0, ptr3[i]) << i;
 	
 	//unmap
 	umunmap(ptr2, size);
@@ -577,4 +754,35 @@ TEST_F(TestPublicAPI, switch_uri)
 	ptr = ummap(NULL, size, segmentSize, 0, PROT_READ|PROT_WRITE, 0, driver, NULL, "none");
 	ummap_switch_uri(ptr, "mem://32MB", UMMAP_NO_ACTION);
 	umunmap(ptr, false);
+}
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, get_driver)
+{
+	//map 2
+	ummap_driver_t * driver = ummap_driver_create_dummy(16);
+	void * ptr1 = ummap(NULL, 8*4096, 4096, 0, PROT_READ|PROT_WRITE, 0, driver, NULL, "none");
+	memset(ptr1, 10, 8*4096);
+	ASSERT_EQ(driver, ummap_get_driver(ptr1));
+
+	//unmap 1 and let the other for cleaup
+	umunmap(ptr1, 0);
+}
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, config_options)
+{
+	ummap_config_clovis_init_options("ressource.rc", 0);
+	ummap_config_ioc_init_options("localhost", "5665");
+}
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, uri_set_variable)
+{
+	ummap_uri_set_variable("stringvar", "value");
+	ummap_uri_set_variable_int("intvar", 10);
+	ummap_uri_set_variable_size_t("sizetvar", 20);
+	ummapio::UriHandler & uri = ummapio::getGlobalhandler()->getUriHandler();
+	std::string res = uri.replaceVariables("string={stringvar}:int={intvar}:size={sizetvar}");
+	ASSERT_EQ("string=value:int=10:size=20", res);
 }
