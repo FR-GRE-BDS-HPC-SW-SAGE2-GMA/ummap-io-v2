@@ -38,6 +38,7 @@
 #include "../policies/FifoWindowPolicy.hpp"
 #include "../policies/LifoPolicy.hpp"
 #include "../core/PolicyQuotaLocal.hpp"
+#include "../core/PolicyQuotaInterProc.hpp"
 #include "ummap.h"
 
 /***************** USING NAMESPACE ******************/
@@ -630,6 +631,19 @@ ummap_quota_t * ummap_quota_create_local(size_t max_memory)
 {
 	ummap_quota_t * res = (ummap_quota_t *)new PolicyQuotaLocal(max_memory);
 	return res;
+}
+
+/*******************  FUNCTION  *********************/
+ummap_quota_t * ummap_quota_create_inter_proc(const char * group_name, size_t max_memory)
+{
+	ummap_quota_t * res = (ummap_quota_t *)new PolicyQuotaInterProc(group_name, max_memory);
+	return res;
+}
+
+/*******************  FUNCTION  *********************/
+void ummap_quota_destroy(ummap_quota_t * quota)
+{
+	delete (PolicyQuotaInterProc*)quota;
 }
 
 /*******************  FUNCTION  *********************/

@@ -56,7 +56,6 @@ PolicyQuotaInterProc::PolicyQuotaInterProc(const std::string & name,size_t stati
 
 	//open
 	this->shared = static_cast<PolicyQuotaInterProcShared*>(this->openShm(this->name, sizeof(*this->shared)));
-	//this->shared->spinlock.store(0);
 
 	//CRITICAL SECTION
 	{
@@ -131,15 +130,20 @@ void PolicyQuotaInterProc::signalAll(void)
 		//take lock
 		this->lock();
 
-		//loop on all to send signal
+		//check all present
 		for (int i = 0 ; i < this->shared->indexMax ; i++) {
-			//check if still alive
 			if (this->shared->pids[i] != 0 && kill(this->shared->pids[i],0) != 0) {
 				this->shared->processes--;
 				this->shared->pids[i] = 0;
-			} else if (this->shared->pids[i] == getpid()) {
+			}
+		}
+
+		//loop on all to send signal
+		for (int i = 0 ; i < this->shared->indexMax ; i++) {
+			//Check if current not to self send signal
+			if (this->shared->pids[i] == getpid()) {
 				//nothing to do, not want to send to self
-			} else {
+			} else if (this->shared->pids[i] != 0) {
 				//send signal
 				sigval_t sigval = { .sival_ptr = NULL };
 				sigqueue(this->shared->pids[i], SIGEVICT, sigval);
@@ -180,6 +184,7 @@ void PolicyQuotaInterProc::update(void)
 
 	//calc quota
 	size_t perProcQuota = this->totalAllowed / this->shared->processes.load();
+	printf("%d -- %zu\n", this->shared->processes.load(), perProcQuota);
 
 	//if not updated
 	if (this->staticMaxMemory == perProcQuota)

@@ -60,6 +60,7 @@ void PolicyQuotaLocal::update(void)
 		size_t cntPolicies = this->policies.size();
 
 		//nothing to do
+		printf("cnt %d %zu\n", cntPolicies, this->staticMaxMemory);
 		if (cntPolicies == 0)
 			return;
 
@@ -68,6 +69,7 @@ void PolicyQuotaLocal::update(void)
 		
 		//get current memory
 		size_t totMem = this->getUsedMemory();
+		printf("ok %zu %zu\n", totMem, staticMaxMemory);
 
 		//apply reduction until we reach acceptale solution
 		while (totMem > this->staticMaxMemory) {
@@ -80,6 +82,7 @@ void PolicyQuotaLocal::update(void)
 			//calc new limit
 			size_t limit = averageMem + (polMax->getCurrentMemory() - averageMem) / 2;
 			polMax->setDynamicMaxMemory(limit);
+			printf("set limit : %zu\n", limit);
 			polMax->shrinkMemory();
 
 			//calc new tot mem

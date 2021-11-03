@@ -368,6 +368,27 @@ void ummap_policy_destroy(ummap_policy_t * policy);
 **/
 ummap_quota_t * ummap_quota_create_local(size_t max_memory);
 /**
+ * Create a quota structure to handle the fair balancing between
+ * policies. This implementation permit to share a global quota
+ * between several policies inside the local process.
+ * 
+ * The quota guaranty that each policies get at least the average
+ * memory distribution. If some policies do not use all this memory,
+ * the gaps will be distributed over the other policies.
+ * 
+ * This comes in addition to the policy group which does not provide
+ * such a balancing.
+ * 
+ * This one permits to handle the sharing between multiple processes
+ * and automatically shink the memory of all the processes when
+ * a new one is added to the list. It increases when one exit.
+ * @param groupName Name to be used to find the shared memory segment.
+ * It permits to group the processes around a common name.
+ * @param maxMemory Define the maximal memory allowed for all the
+ * registered policies.
+**/
+ummap_quota_t * ummap_quota_create_inter_proc(const char * group_name, size_t max_memory);
+/**
  * Register the given policy to the given quota so we start
  * to balanced the memory usage with the other policies already
  * registered.
@@ -381,6 +402,10 @@ void ummap_quota_register_policy(ummap_quota_t * quota, ummap_policy_t * policy)
  * @param policy Pointer to the policy to unregister.
 **/
 void ummap_quota_unregister_policy(ummap_quota_t * quota, ummap_policy_t * policy);
+/**
+ * Destroy the given quota.
+**/
+void ummap_quota_destroy(ummap_quota_t * quota);
 
 /*****************  URI VARIABLES  ******************/
 /**

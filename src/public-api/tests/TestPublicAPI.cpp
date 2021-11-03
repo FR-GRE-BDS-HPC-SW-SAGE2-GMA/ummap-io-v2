@@ -786,3 +786,55 @@ TEST_F(TestPublicAPI, uri_set_variable)
 	std::string res = uri.replaceVariables("string={stringvar}:int={intvar}:size={sizetvar}");
 	ASSERT_EQ("string=value:int=10:size=20", res);
 }
+
+TEST_F(TestPublicAPI, quota_inter_proc)
+{
+	//vars
+	const size_t size = 1024*1024;
+
+	//fork
+	int pid = fork();
+
+	//setup policies
+	ummap_quota_t * quota = ummap_quota_create_inter_proc("test-public-quota", 4*4096);
+
+	//TODO see how we can make it running while removing this sleep()
+	sleep(1);
+
+	ummap_policy_t * policy = ummap_policy_create_fifo(4*4096, true);
+	ummap_quota_register_policy(quota, policy);
+
+	//create mapping
+	void * ptr1 = ummap(NULL, size, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dummy(64), policy, NULL);
+	memset(ptr1, 0 , size);
+
+	//wait a bit
+	sleep(1);
+
+	//check
+	EXPECT_EQ(2*4096, ummap_policy_get_memory(policy)) << pid;
+
+	//access in loop
+	for (int i = 0 ; i < 64 ; i++)
+		memset(ptr1, 0 , size);
+
+	//check
+	EXPECT_EQ(2*4096, ummap_policy_get_memory(policy)) << pid;
+
+	//wait a bit
+	sleep(1);
+
+	//ummap
+	umunmap(ptr1, 0);
+
+	//finalize
+	ummap_quota_destroy(quota);
+
+	//exit
+	int status = 0;
+	if (pid == 0)
+		exit(0);
+	else
+		waitpid(pid, &status, 0);
+	EXPECT_EQ(0, status);
+}
