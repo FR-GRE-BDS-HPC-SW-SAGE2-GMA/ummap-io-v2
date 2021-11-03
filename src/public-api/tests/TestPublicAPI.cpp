@@ -797,10 +797,6 @@ TEST_F(TestPublicAPI, quota_inter_proc)
 
 	//setup policies
 	ummap_quota_t * quota = ummap_quota_create_inter_proc("test-public-quota", 4*4096);
-
-	//TODO see how we can make it running while removing this sleep()
-	//sleep(1);
-
 	ummap_policy_t * policy = ummap_policy_create_fifo(4*4096, true);
 	ummap_quota_register_policy(quota, policy);
 
