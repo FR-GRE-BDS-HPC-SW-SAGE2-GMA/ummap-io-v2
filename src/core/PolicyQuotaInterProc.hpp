@@ -47,6 +47,8 @@ class PolicyQuotaInterProc : public PolicyQuotaLocal
 		PolicyQuotaInterProc(const std::string & name,size_t staticMaxMemory);
 		~PolicyQuotaInterProc(void);
 		virtual void update(void) override;
+		static void deferSignal(void);
+		static void runDeferedSignal(void);
 	private:
 		void * openShm(const std::string &name, size_t size);
 		void signalAll(void);

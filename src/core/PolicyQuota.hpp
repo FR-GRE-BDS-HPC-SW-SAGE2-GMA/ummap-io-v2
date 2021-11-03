@@ -35,6 +35,7 @@ class PolicyQuota
 		virtual void update(void) = 0;
 		void registerPolicy(Policy * policy);
 		void unregisterPolicy(Policy * policy);
+		size_t getStaticMaxMemory(void) const {return this->staticMaxMemory;};
 	private:
 		void updateNotifyLimit(void);
 	protected:

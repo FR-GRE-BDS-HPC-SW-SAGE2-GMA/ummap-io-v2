@@ -30,13 +30,14 @@ using namespace ummapio;
 
 /********************  GLOBAL ***********************/
 static PolicyQuotaInterProc * gblPolicyQuotaInterProc = NULL;
+static __thread bool gblPolicyQuotaInterProcAllowSignal = true;
+static __thread bool gblPolicyQuotaInterProcHasPendingSignal = false;
 
 /*******************  FUNCTION  *********************/
 static void sigHandler(int signum){
 	if (gblPolicyQuotaInterProc != NULL)
 		gblPolicyQuotaInterProc->update();
 }
-
 
 /*******************  FUNCTION  *********************/
 PolicyQuotaInterProc::PolicyQuotaInterProc(const std::string & name,size_t staticMaxMemory)
@@ -47,7 +48,7 @@ PolicyQuotaInterProc::PolicyQuotaInterProc(const std::string & name,size_t stati
 	this->totalAllowed = staticMaxMemory;
 
 	//set
-	assume(gblPolicyQuotaInterProc == NULL, "Cannot instantiate mulitple inter-proc policy quota for now !");
+	assume(gblPolicyQuotaInterProc == NULL, "Current basic implementation does not allow to instantiate mulitple inter-proc policy quota !");
 	gblPolicyQuotaInterProc = this;
 
 	//setup signal handler
@@ -55,6 +56,7 @@ PolicyQuotaInterProc::PolicyQuotaInterProc(const std::string & name,size_t stati
 
 	//open
 	this->shared = static_cast<PolicyQuotaInterProcShared*>(this->openShm(this->name, sizeof(*this->shared)));
+	//this->shared->spinlock.store(0);
 
 	//CRITICAL SECTION
 	{
@@ -67,7 +69,7 @@ PolicyQuotaInterProc::PolicyQuotaInterProc(const std::string & name,size_t stati
 		//search a position in the list
 		bool found = false;
 		for (int i = 0 ; i < this->shared->indexMax ; ++i) {
-			if (this->shared->pids[i] == 0 || kill(this->shared->pids[i],0) == 0) {
+			if (this->shared->pids[i] == 0 || kill(this->shared->pids[i],0) == -1) {
 				this->shared->pids[i] = getpid();
 				found = true;
 				break;
@@ -76,7 +78,7 @@ PolicyQuotaInterProc::PolicyQuotaInterProc(const std::string & name,size_t stati
 
 		//if not found add
 		if (found == false)
-			this->shared->pids[++(this->shared->indexMax)] = getpid();
+			this->shared->pids[(this->shared->indexMax)++] = getpid();
 
 		//end of critical section
 		this->unlock();
@@ -110,11 +112,11 @@ PolicyQuotaInterProc::~PolicyQuotaInterProc(void)
 			}
 		}
 
-		//if not found add
-		assume(found, "Fail to found the local PID in the shared->pid[] vector !");
-
 		//end of critical section
 		this->unlock();
+
+		//if not found add
+		assume(found, "Fail to found the local PID in the shared->pid[] vector !");
 	}
 
 	//remove global registration
@@ -132,7 +134,7 @@ void PolicyQuotaInterProc::signalAll(void)
 		//loop on all to send signal
 		for (int i = 0 ; i < this->shared->indexMax ; i++) {
 			//check if still alive
-			if (this->shared->pids[i] != 0 && kill(this->shared->pids[i],0) == 0) {
+			if (this->shared->pids[i] != 0 && kill(this->shared->pids[i],0) != 0) {
 				this->shared->processes--;
 				this->shared->pids[i] = 0;
 			} else if (this->shared->pids[i] == getpid()) {
@@ -154,8 +156,9 @@ void PolicyQuotaInterProc::signalAll(void)
 void PolicyQuotaInterProc::lock(void)
 {
 	int expected = 0;
-	while(!this->shared->spinlock.compare_exchange_strong(expected,1)) {
+	while(!this->shared->spinlock.compare_exchange_weak(expected,1)) {
 		//spin until can take the lock
+		usleep(5);
 		expected = 0;
 	}
 }
@@ -165,15 +168,24 @@ void PolicyQuotaInterProc::lock(void)
 void PolicyQuotaInterProc::unlock()
 {
 	int expected = 1;
-	bool status = this->shared->spinlock.compare_exchange_strong(expected,0);
+	bool status = this->shared->spinlock.compare_exchange_weak(expected,0);
 	assume(status, "Fail to unlock, got invalid value on the spinlock !");
 }
 
 /*******************  FUNCTION  *********************/
 void PolicyQuotaInterProc::update(void)
 {
+	//check
+	assert(this->shared->processes > 0);
+
 	//calc quota
-	size_t perProcQuota = this->totalAllowed / this->shared->processes;
+	size_t perProcQuota = this->totalAllowed / this->shared->processes.load();
+
+	//if not updated
+	if (this->staticMaxMemory == perProcQuota)
+		return;
+
+	//update
 	this->staticMaxMemory = perProcQuota;
 
 	//debug
@@ -218,4 +230,32 @@ void * PolicyQuotaInterProc::openShm(const std::string &name, size_t size)
 
 	//ret
 	return ptr;
+}
+
+/*******************  FUNCTION  *********************/
+void PolicyQuotaInterProc::deferSignal(void)
+{
+	//check if has one
+	if (gblPolicyQuotaInterProc == NULL)
+		return;
+
+	//close signal
+	gblPolicyQuotaInterProcAllowSignal = false;
+}
+
+/*******************  FUNCTION  *********************/
+void PolicyQuotaInterProc::runDeferedSignal(void)
+{
+	//check if has one
+	if (gblPolicyQuotaInterProc == NULL)
+		return;
+
+	//call update
+	while (gblPolicyQuotaInterProcHasPendingSignal) {
+		gblPolicyQuotaInterProcHasPendingSignal = false;
+		gblPolicyQuotaInterProc->update();
+	}
+
+	//mark open
+	gblPolicyQuotaInterProcAllowSignal = true;
 }

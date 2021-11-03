@@ -24,7 +24,7 @@
 using namespace ummapio;
 
 /*******************  FUNCTION  *********************/
-TEST(TestPolicy, register)
+TEST(TestPolicyQuotaLocal, register)
 {
 	PolicyQuotaLocal quota(4*UMMAP_PAGE_SIZE);
 	FifoPolicy * policy = new FifoPolicy(4*UMMAP_PAGE_SIZE, true);
@@ -39,7 +39,7 @@ TEST(TestPolicy, register)
 }
 
 /*******************  FUNCTION  *********************/
-TEST(TestPolicy, quota_not_reached)
+TEST(TestPolicyQuotaLocal, quota_not_reached)
 {
 	PolicyQuotaLocal quota(2*UMMAP_PAGE_SIZE);
 	FifoPolicy * policy = new FifoPolicy(2*UMMAP_PAGE_SIZE, true);
@@ -66,7 +66,7 @@ TEST(TestPolicy, quota_not_reached)
 }
 
 /*******************  FUNCTION  *********************/
-TEST(TestPolicy, quota_reach_one)
+TEST(TestPolicyQuotaLocal, quota_reach_one)
 {
 	PolicyQuotaLocal quota(2*UMMAP_PAGE_SIZE);
 	FifoPolicy * policy = new FifoPolicy(4*UMMAP_PAGE_SIZE, true);
@@ -94,7 +94,7 @@ TEST(TestPolicy, quota_reach_one)
 
 
 /*******************  FUNCTION  *********************/
-TEST(TestPolicy, quota_reach_two)
+TEST(TestPolicyQuotaLocal, quota_reach_two)
 {
 	size_t size = 8*UMMAP_PAGE_SIZE;
 	PolicyQuotaLocal quota(2*UMMAP_PAGE_SIZE);
@@ -131,7 +131,7 @@ TEST(TestPolicy, quota_reach_two)
 }
 
 /*******************  FUNCTION  *********************/
-TEST(TestPolicy, quota_reach_two_unbalanced)
+TEST(TestPolicyQuotaLocal, quota_reach_two_unbalanced)
 {
 	size_t size = 8*UMMAP_PAGE_SIZE;
 	PolicyQuotaLocal quota(4*UMMAP_PAGE_SIZE);
@@ -166,7 +166,7 @@ TEST(TestPolicy, quota_reach_two_unbalanced)
 }
 
 /*******************  FUNCTION  *********************/
-TEST(TestPolicy, quota_reach_two_unbalanced_lifo)
+TEST(TestPolicyQuotaLocal, quota_reach_two_unbalanced_lifo)
 {
 	size_t size = 8*UMMAP_PAGE_SIZE;
 	PolicyQuotaLocal quota(4*UMMAP_PAGE_SIZE);
@@ -201,7 +201,7 @@ TEST(TestPolicy, quota_reach_two_unbalanced_lifo)
 }
 
 /*******************  FUNCTION  *********************/
-TEST(TestPolicy, quota_reach_two_unbalanced_fifo_window)
+TEST(TestPolicyQuotaLocal, quota_reach_two_unbalanced_fifo_window)
 {
 	size_t size = 8*UMMAP_PAGE_SIZE;
 	PolicyQuotaLocal quota(4*UMMAP_PAGE_SIZE);
