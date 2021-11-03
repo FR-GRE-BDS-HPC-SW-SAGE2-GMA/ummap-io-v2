@@ -799,7 +799,7 @@ TEST_F(TestPublicAPI, quota_inter_proc)
 	ummap_quota_t * quota = ummap_quota_create_inter_proc("test-public-quota", 4*4096);
 
 	//TODO see how we can make it running while removing this sleep()
-	sleep(1);
+	//sleep(1);
 
 	ummap_policy_t * policy = ummap_policy_create_fifo(4*4096, true);
 	ummap_quota_register_policy(quota, policy);
@@ -837,4 +837,50 @@ TEST_F(TestPublicAPI, quota_inter_proc)
 	else
 		waitpid(pid, &status, 0);
 	EXPECT_EQ(0, status);
+}
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, quota_inter_proc_env_set)
+{
+	//setup policies
+	setenv("TEST_QUOTA_VAR", "16KB", 1);
+	ummap_quota_t * quota = ummap_quota_create_inter_proc_env("test-public-quota", "TEST_QUOTA_VAR", 2*4096);
+	ummap_policy_t * policy = ummap_policy_create_fifo(4*4096, true);
+	ummap_quota_register_policy(quota, policy);
+
+	//create mapping & source
+	void * ptr1 = ummap(NULL, 1024*1024, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dummy(64), policy, NULL);
+	memset(ptr1, 0 , 1024*1024);
+
+	//check
+	EXPECT_EQ(4*4096, ummap_policy_get_memory(policy));
+
+	//destroy
+	umunmap(ptr1, false);
+
+	//finalize
+	ummap_quota_destroy(quota);
+}
+
+/*******************  FUNCTION  *********************/
+TEST_F(TestPublicAPI, quota_inter_proc_env_default)
+{
+	//setup policies
+	unsetenv("TEST_QUOTA_VAR");
+	ummap_quota_t * quota = ummap_quota_create_inter_proc_env("test-public-quota", "TEST_QUOTA_VAR", 2*4096);
+	ummap_policy_t * policy = ummap_policy_create_fifo(4*4096, true);
+	ummap_quota_register_policy(quota, policy);
+
+	//create mapping & source
+	void * ptr1 = ummap(NULL, 1024*1024, 4096, 0, PROT_READ|PROT_WRITE, 0, ummap_driver_create_dummy(64), policy, NULL);
+	memset(ptr1, 0 , 1024*1024);
+
+	//check
+	EXPECT_EQ(2*4096, ummap_policy_get_memory(policy));
+
+	//destroy
+	umunmap(ptr1, false);
+
+	//finalize
+	ummap_quota_destroy(quota);
 }

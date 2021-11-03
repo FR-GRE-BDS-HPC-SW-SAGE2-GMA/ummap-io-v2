@@ -184,11 +184,6 @@ void PolicyQuotaInterProc::update(void)
 
 	//calc quota
 	size_t perProcQuota = this->totalAllowed / this->shared->processes.load();
-	printf("%d -- %zu\n", this->shared->processes.load(), perProcQuota);
-
-	//if not updated
-	if (this->staticMaxMemory == perProcQuota)
-		return;
 
 	//update
 	this->staticMaxMemory = perProcQuota;
