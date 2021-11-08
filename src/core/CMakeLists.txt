@@ -10,6 +10,7 @@ set(CORE_SRC Driver.cpp
 			 Policy.cpp
 			 PolicyQuota.cpp
 			 PolicyQuotaLocal.cpp
+			 PolicyQuotaInterProc.cpp
 			 MappingRegistry.cpp
 			 GlobalHandler.cpp
 			 PolicyRegistry.cpp)

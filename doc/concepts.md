@@ -45,6 +45,17 @@ The mapping can have two policies:
  - A local which manage only the local memory mapping.
  - A global which can track the memory of a group of memory mappings.
 
+Quota
+-----
+
+A quota is a way to control the memory dispatch in a balanced way between several policies.
+There is two implementations:
+
+ - The local quota balances the memory over the registered policies.
+ - The inter process quota implementation control the memory used by several processes
+   communicating via a shared memory segment and signals. The group of processes
+   is identified by a group name.
+
 Mapping registry
 ----------------
 

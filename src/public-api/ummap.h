@@ -363,10 +363,57 @@ void ummap_policy_destroy(ummap_policy_t * policy);
  * 
  * This comes in addition to the policy group which does not provide
  * such a balancing.
- * @param maxMemory Define the maximal memory allowed for all the
+ * @param max_memory Define the maximal memory allowed for all the
  * registered policies.
 **/
 ummap_quota_t * ummap_quota_create_local(size_t max_memory);
+/**
+ * Create a quota structure to handle the fair balancing between
+ * policies. This implementation permit to share a global quota
+ * between several policies inside the local process.
+ * 
+ * The quota guaranty that each policies get at least the average
+ * memory distribution. If some policies do not use all this memory,
+ * the gaps will be distributed over the other policies.
+ * 
+ * This comes in addition to the policy group which does not provide
+ * such a balancing.
+ * 
+ * This one permits to handle the sharing between multiple processes
+ * and automatically shink the memory of all the processes when
+ * a new one is added to the list. It increases when one exit.
+ * @param group_name Name to be used to find the shared memory segment.
+ * It permits to group the processes around a common name.
+ * @param max_memory Define the maximal memory allowed for all the
+ * registered policies.
+**/
+ummap_quota_t * ummap_quota_create_inter_proc(const char * group_name, size_t max_memory);
+/**
+ * Create a quota structure to handle the fair balancing between
+ * policies. This implementation permit to share a global quota
+ * between several policies inside the local process.
+ * 
+ * The quota guaranty that each policies get at least the average
+ * memory distribution. If some policies do not use all this memory,
+ * the gaps will be distributed over the other policies.
+ * 
+ * This comes in addition to the policy group which does not provide
+ * such a balancing.
+ * 
+ * This one permits to handle the sharing between multiple processes
+ * and automatically shink the memory of all the processes when
+ * a new one is added to the list. It increases when one exit.
+ * 
+ * This variant permit to directly take the quota to be used from
+ * the given environnement variable
+ * @param group_name Name to be used to find the shared memory segment.
+ * It permits to group the processes around a common name.
+ * @param env_name The name of the environnement variable to be used
+ * to set the maximal memory. It can use KB, MB, GB notations.
+ * @param default_max_mem The default value to apply if the environnement
+ * variable is undefined. You can use 0 to disable.
+**/
+ummap_quota_t * ummap_quota_create_inter_proc_env(const char * group_name, const char * env_name, size_t default_max_mem);
 /**
  * Register the given policy to the given quota so we start
  * to balanced the memory usage with the other policies already
@@ -381,6 +428,10 @@ void ummap_quota_register_policy(ummap_quota_t * quota, ummap_policy_t * policy)
  * @param policy Pointer to the policy to unregister.
 **/
 void ummap_quota_unregister_policy(ummap_quota_t * quota, ummap_policy_t * policy);
+/**
+ * Destroy the given quota.
+**/
+void ummap_quota_destroy(ummap_quota_t * quota);
 
 /*****************  URI VARIABLES  ******************/
 /**

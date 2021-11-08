@@ -106,7 +106,7 @@ void PolicyQuota::unregisterPolicy(Policy * policy)
 
 /*******************  FUNCTION  *********************/
 /**
- * We want to be notify it the policy use less memory than the notify limit
+ * We want to be notify if the policy use less memory than the notify limit
  * and it increase. This is because in this case we need to possibly redistribute
  * the memory used by each other policies if some use more memory than the allowed
  * average.

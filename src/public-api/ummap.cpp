@@ -19,6 +19,7 @@
 //local
 #include <config.h>
 #include "../common/Debug.hpp"
+#include "../common/HumanUnits.hpp"
 #include "../core/GlobalHandler.hpp"
 #include "../uri/MeroRessource.hpp"
 #include "../uri/IocRessource.hpp"
@@ -38,6 +39,7 @@
 #include "../policies/FifoWindowPolicy.hpp"
 #include "../policies/LifoPolicy.hpp"
 #include "../core/PolicyQuotaLocal.hpp"
+#include "../core/PolicyQuotaInterProc.hpp"
 #include "ummap.h"
 
 /***************** USING NAMESPACE ******************/
@@ -630,6 +632,42 @@ ummap_quota_t * ummap_quota_create_local(size_t max_memory)
 {
 	ummap_quota_t * res = (ummap_quota_t *)new PolicyQuotaLocal(max_memory);
 	return res;
+}
+
+/*******************  FUNCTION  *********************/
+ummap_quota_t * ummap_quota_create_inter_proc(const char * group_name, size_t max_memory)
+{
+	ummap_quota_t * res = (ummap_quota_t *)new PolicyQuotaInterProc(group_name, max_memory);
+	return res;
+}
+
+/*******************  FUNCTION  *********************/
+ummap_quota_t * ummap_quota_create_inter_proc_env(const char * group_name, const char * env_name, size_t default_max_mem)
+{
+	//check
+	assume(env_name != NULL && env_name[0] != '\0', "Invalid NULL or empty env name !");
+
+	//set to default first
+	size_t value = default_max_mem;
+
+	//get env
+	char * var = getenv(env_name);
+	if (var != NULL) {
+		value = fromHumanMemSize(var);
+	}
+
+	//build
+	if (value == 0)
+		return NULL;
+	else
+		return ummap_quota_create_inter_proc(group_name, value);
+}
+
+/*******************  FUNCTION  *********************/
+void ummap_quota_destroy(ummap_quota_t * quota)
+{
+	if (quota != NULL)
+		delete (PolicyQuotaInterProc*)quota;
 }
 
 /*******************  FUNCTION  *********************/

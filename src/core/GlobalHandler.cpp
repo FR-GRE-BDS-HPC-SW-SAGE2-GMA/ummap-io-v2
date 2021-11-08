@@ -16,6 +16,7 @@
 #include "../htopml/HtopmlMappings.hpp"
 #endif //HAVE_HTOPML
 #include "../common/Debug.hpp"
+#include "PolicyQuotaInterProc.hpp"
 #include "GlobalHandler.hpp"
 
 /***************** USING NAMESPACE ******************/
@@ -207,8 +208,16 @@ bool GlobalHandler::onSegFault(void * addr, bool isWrite)
 			.end();
 		return false;
 	} else {
+		//disable signal handling for inter process quota signals
+		PolicyQuotaInterProc::deferSignal();
+
 		//fault handling
 		mapping->onSegmentationFault(addr, isWrite);
+
+		//now can post-run the defered inter process quota signals
+		PolicyQuotaInterProc::runDeferedSignal();
+
+		//ok
 		return true;
 	}
 }
