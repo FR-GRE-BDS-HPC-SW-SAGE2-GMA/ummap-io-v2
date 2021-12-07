@@ -1,3 +1,9 @@
+/*****************************************************
+*  PROJECT  : ummap-io-v2                            *
+*  LICENSE  : Apache 2.0                             *
+*  COPYRIGHT: 2020-2021 Bull SAS All rights reserved *
+*****************************************************/
+
 //mpicc -O0 main-policy-vs-swap.c -I${HOME}/test-rdma/usr2/include -lummap-io -L${HOME}/test-rdma/usr2/lib -o main-policy-vs-swap -fopenmp
 //OMP_NUM_THREADS=8 ./main-policy-vs-swap 15 172 4
 

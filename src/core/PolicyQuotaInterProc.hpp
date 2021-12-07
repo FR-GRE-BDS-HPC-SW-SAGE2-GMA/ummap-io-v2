@@ -1,8 +1,7 @@
 /*****************************************************
-			 PROJECT  : ummap-io-v2
-			 VERSION  : 0.0.0-dev
-			 DATE     : 02/2020
-			 LICENSE  : ????????
+*  PROJECT  : ummap-io-v2                            *
+*  LICENSE  : Apache 2.0                             *
+*  COPYRIGHT: 2020-2021 Bull SAS All rights reserved *
 *****************************************************/
 
 #ifndef UMMAP_POLICY_QUOTA_INTER_PROCESS_HPP
