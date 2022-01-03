@@ -103,6 +103,7 @@ add_subdirectory(portability)
 add_subdirectory(policies)
 add_subdirectory(uri)
 add_subdirectory(public-api)
+add_subdirectory(rw-wrapper)
 
 ######################################################
 if (HTOPML_FOUND)

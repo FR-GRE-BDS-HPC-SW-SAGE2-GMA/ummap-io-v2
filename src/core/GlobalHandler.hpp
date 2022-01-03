@@ -61,7 +61,7 @@ class GlobalHandler
 		bool onSegFault(void * addr, bool isWrite);
 		void deleteAllMappings(void);
 		UriHandler & getUriHandler(void);
-		Mapping * getMapping(void * addr);
+		Mapping * getMapping(void * addr, bool crashOnNotFound = true);
 		template <class T> int applyCow(const char * driverName, void * addr, std::function<int(Mapping * mapping, T * driver)> action);
 		template <class T> int applySwitch(const char * driverName, void * addr, ummap_switch_clean_t cleanAction, std::function<void(T * driver)> action);
 		void initMero(const std::string & ressourceFile, int ressourceIndex);

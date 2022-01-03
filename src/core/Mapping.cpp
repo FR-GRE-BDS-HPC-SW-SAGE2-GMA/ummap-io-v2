@@ -784,6 +784,30 @@ void Mapping::copyToDriver(Driver * newDriver, size_t storageSize)
 }
 
 /*******************  FUNCTION  *********************/
+size_t Mapping::getPolicyMaxMemory(void)
+{
+	//vars
+	size_t max = SIZE_MAX;
+
+	//get policy
+	if (this->localPolicy != NULL) {
+		size_t policyMax = this->localPolicy->getStaticMaxMemory();
+		if (policyMax < max)
+			max = policyMax;
+	}
+
+	//get policy
+	if (this->globalPolicy != NULL) {
+		size_t policyMax = this->globalPolicy->getStaticMaxMemory();
+		if (policyMax < max)
+			max = policyMax;
+	}
+
+	//ok
+	return max;
+}
+
+/*******************  FUNCTION  *********************/
 #ifdef HAVE_HTOPML
 /**
  * When htopml is enabled this function is used to dump the mapping state in a json format.
