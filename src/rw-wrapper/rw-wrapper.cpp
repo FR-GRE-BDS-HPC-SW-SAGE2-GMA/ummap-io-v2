@@ -5,6 +5,11 @@
 			 LICENSE  : ????????
 *****************************************************/
 
+/**
+ * @todo Make a better implementation by taking lock, mapping the required memory, makeing 
+ * rw then unlocking. This might be safer than the current implementation.
+**/
+
 /********************  HEADERS  *********************/
 //#define _GNU_SOURCE
 #include <dlfcn.h>

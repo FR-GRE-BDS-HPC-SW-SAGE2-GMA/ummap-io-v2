@@ -9,11 +9,10 @@
 set(RW_WRAPPER_API_SRC rw-wrapper.cpp)
 
 ######################################################
-add_library(ummap-rw-wrapper OBJECT ${RW_WRAPPER_API_SRC})
-SET_TARGET_PROPERTIES(ummap-rw-wrapper PROPERTIES POSITION_INDEPENDENT_CODE ON)
+add_library(ummap-io-rw-wrapper SHARED ${RW_WRAPPER_API_SRC})
 
 ######################################################
-target_link_libraries(ummap-rw-wrapper ummap-io dl)
+target_link_libraries(ummap-io-rw-wrapper ummap-io dl)
 
 ######################################################
-install(TARGETS ummap-rw-wrapper DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS ummap-io-rw-wrapper DESTINATION ${CMAKE_INSTALL_LIBDIR})
