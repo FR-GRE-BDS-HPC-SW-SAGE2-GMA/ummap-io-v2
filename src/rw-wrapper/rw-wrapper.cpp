@@ -92,30 +92,17 @@ ssize_t write(int fd, const void *buf, size_t count)
 
 		//calc what to prefetch
 		size_t fetch = std::min(count, policy_max);
+		printf("%zu\n", fetch);
 
 		//prefetch by reading one element per page
 		ummap_touch(*mapping, buffer, fetch, false);
 
 		//call again write
-		do {
-			res = libc_write(fd, buffer, count);
-		} while (res == -1 && errno == EAGAIN);
+		res = libc_write(fd, buffer, count);
 
 		//debug
 		UMMAP_DEBUG_ARG("rw-wrapper", "Capture write %1 => %2 < %3 => %4")
 			.arg(buf).arg(count).arg(fetch).arg(res).end();
-
-		//recall
-		if (res > 0 && res < count) {
-			//recall
-			ssize_t res2 = write(fd, buffer + res, count - res);
-			assumeArg(res2 >= 0, "Invalid status %1").arg(res2).end();
-			res += res2;
-
-			//debug
-			UMMAP_DEBUG_ARG("rw-wrapper", "Capture write recall %1 => %2 < %3 => %4")
-				.arg(buf).arg(count).arg(fetch).arg(res).end();
-		}
 	}
 	return res;
 }
@@ -156,9 +143,7 @@ ssize_t read(int fd, void *buf, size_t count)
 		ummap_touch(*mapping, buffer, fetch, true);
 
 		//call again read
-		do {
-			res = libc_read(fd, buffer, count);
-		} while (res == -1 && errno == EAGAIN);
+		res = libc_read(fd, buffer, count);
 
 		//debug
 		UMMAP_DEBUG_ARG("rw-wrapper", "Capture read %1 => %2 < %3 => %4")
@@ -185,13 +170,13 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
 	ssize_t res = libc_fread(ptr, size, nmemb, stream);
 
 	//not ok => need to prefetch
-	if (res == -1 && errno == EFAULT) {
+	if (res == 0 || (res == -1 && errno == EFAULT)) {
 		//get mapping and check it is backed to ummap-io
 		ummapio::Mapping * mapping = ummapio::getGlobalhandler()->getMapping(buffer, false);
 
 		//if not, it is not our problem, forward the error to the caller
 		if (mapping == NULL)
-			return -1;
+			return res;
 
 		//get the max memory from the mapping policies
 		size_t policy_max = mapping->getPolicyMaxMemory();
@@ -222,7 +207,7 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
 			//call again
 			ssize_t res2;
 			do {
-				res = fread(buffer + res*size, size, nmemb - res, stream);
+				res2 = fread(buffer + res*size, size, nmemb - res, stream);
 			} while (res2 == -1 && errno == EAGAIN);
 			assumeArg(res2 >= 0, "Invalid status %1").arg(res2).end();
 			res += res2;
