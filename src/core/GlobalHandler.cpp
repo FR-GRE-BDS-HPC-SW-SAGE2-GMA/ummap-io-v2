@@ -406,7 +406,7 @@ Mapping * GlobalHandler::getMapping(void * addr, bool crashOnNotFound)
 
 	//check
 	if (crashOnNotFound)
-		assumeArg(mapping != NULL, "Fail to find the requested mapping for address %p !").arg(addr).end();
+		assumeArg(mapping != NULL, "Fail to find the requested mapping for address %1 !").arg(addr).end();
 
 	//ret
 	return mapping;
