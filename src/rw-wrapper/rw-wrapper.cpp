@@ -20,20 +20,6 @@
 #include <algorithm>
 #include "core/GlobalHandler.hpp"
 
-/********************  FLAGS  **********************/
-/**
- * Keep 1MB under our hands to force the compiler to read the data
- * and push it to this dummy segment.
-**/
-#define UMMAP_STORE_SIZE (1024*1024)
-
-/*******************  GLOBALS  *********************/
-/**
- * Keep 1MB under our hands to force the compiler to read the data
- * and push it to this dummy segment.
-**/
-char libWriteGblStore[UMMAP_STORE_SIZE];
-
 /********************  TYPES  **********************/
 /**
  * Signature of the system write operation to be able to use the
@@ -71,11 +57,8 @@ static void ummap_touch(ummapio::Mapping & mapping, const void * buf, size_t siz
 	for (i = size - 1 ; i >= 0 ; i -= 4096)
 		mapping.onSegmentationFault(cast_buffer+i, isWrite);
 
-	//touch first to be sure to succed
+	//touch first to be sure to succes
 	mapping.onSegmentationFault(cast_buffer, isWrite);
-
-	//touch last
-	//mapping.onSegmentationFault(cast_buffer + size - 1, isWrite);
 }
 
 /*******************  FUNCTION  *********************/
@@ -88,7 +71,8 @@ ssize_t write(int fd, const void *buf, size_t count)
 	static ummap_libc_write_t libc_write = NULL;
 	if (libc_write == NULL) {
 		libc_write = (ummap_libc_write_t)dlsym(RTLD_NEXT, "write");
-		assert(libc_write != NULL);
+		assumeArg(libc_write != NULL, "Fail to find the write symbol via dlsym() : %1")
+			.argStrErrno().end();
 	}
 
 	//make a first try
@@ -125,7 +109,8 @@ ssize_t write(int fd, const void *buf, size_t count)
 		}
 
 		//debug
-		//fprintf(stderr, "============> CAPTURED write %p => %zu < %zu => %zd <============\n", buf, count, fetch, res);
+		UMMAP_DEBUG_ARG("rw-wrapper", "Capture write %1 => %2 < %3 => %4")
+			.arg(buf).arg(count).arg(fetch).arg(res).end();
 	}
 	return res;
 }
@@ -140,7 +125,8 @@ ssize_t read(int fd, void *buf, size_t count)
 	static ummap_libc_read_t libc_read = NULL;
 	if (libc_read == NULL) {
 		libc_read = (ummap_libc_read_t)dlsym(RTLD_NEXT, "read");
-		assert(libc_read != NULL);
+		assumeArg(libc_read != NULL, "Fail to find the read symbol via dlsym() : %1")
+			.argStrErrno().end();
 	}
 
 	//make a first try
@@ -168,7 +154,8 @@ ssize_t read(int fd, void *buf, size_t count)
 		res = libc_read(fd, buffer, count);
 
 		//debug
-		//fprintf(stderr, "============> CAPTURED READ %p => %zu => %zd <============\n", buffer, count, res);
+		UMMAP_DEBUG_ARG("rw-wrapper", "Capture read %1 => %2 < %3 => %4")
+			.arg(buf).arg(count).arg(fetch).arg(res).end();
 	}
 	return res;
 }
@@ -179,11 +166,12 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
 	//cast for easer user
 	char * buffer = (char*)ptr;
 
-	//extract the original read symbol
+	//extract the original fread symbol
 	static ummap_libc_fread_t libc_fread = NULL;
 	if (libc_fread == NULL) {
 		libc_fread = (ummap_libc_fread_t)dlsym(RTLD_NEXT, "fread");
-		assert(libc_fread != NULL);
+		assumeArg(libc_fread != NULL, "Fail to find the fread symbol via dlsym() : %1")
+			.argStrErrno().end();
 	}
 
 	//make a first try
@@ -216,12 +204,21 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
 		size_t fetch_nmemb = fetch / size;
 		res = libc_fread(ptr, size, fetch_nmemb, stream);
 
-		//recall
-		if (res > 0 && res < nmemb)
-			res += fread(buffer + res * size, size, nmemb - res, stream);
-
 		//debug
-		//fprintf(stderr, "============> CAPTURED FREAD %p => %zu => %zd <============\n", buffer, nmemb, res);
+		UMMAP_DEBUG_ARG("rw-wrapper", "Capture fread %1 => %2 => %3")
+			.arg(buffer).arg(nmemb).arg(res).end();
+
+		//recall
+		if (res > 0 && res < nmemb) {
+			//call again
+			ssize_t res2 = fread(buffer + res*size, size, nmemb - res, stream);
+			assumeArg(res2 >= 0, "Invalid status %1").arg(res2).end();
+			res += res2;
+
+			//debug
+			UMMAP_DEBUG_ARG("rw-wrapper", "Capture fread recall %1 => %2 => %3")
+				.arg(buffer).arg(nmemb).arg(res).end();
+		}
 	}
 	return res;
 }
@@ -236,7 +233,8 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 	static ummap_libc_fwrite_t libc_fwrite = NULL;
 	if (libc_fwrite == NULL) {
 		libc_fwrite = (ummap_libc_fwrite_t)dlsym(RTLD_NEXT, "fwrite");
-		assert(libc_fwrite != NULL);
+		assumeArg(libc_fwrite != NULL, "Fail to find the fwrite symbol via dlsym() : %1")
+			.argStrErrno().end();
 	}
 
 	//make a first try
@@ -270,16 +268,20 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 		res = libc_fwrite(ptr, size, fetch_nmemb, stream);
 
 		//debug
-		//fprintf(stderr, "============> REPLAYED %p => %zu => %zd <============\n", ptr, nmemb, res);
+		UMMAP_DEBUG_ARG("rw-wrapper", "Capture fwrite %1 => %2 => %3")
+			.arg(buffer).arg(nmemb).arg(res).end();
 
 		//recall
 		if (res > 0 && res < nmemb) {
+			//call again
 			ssize_t res2 = fwrite(buffer + res*size, size, nmemb - res, stream);
 			assumeArg(res2 >= 0, "Invalid status %1").arg(res2).end();
 			res += res2;
+
+			//debug
+			UMMAP_DEBUG_ARG("rw-wrapper", "Capture fwrite recall %1 => %2 => %3")
+				.arg(buffer).arg(nmemb).arg(res).end();
 		}
 	}
-	//fprintf(stderr, "============> CAPTURED RES = %p => %zu => %zd <============\n", ptr, nmemb, res);
 	return res;
 }
-
