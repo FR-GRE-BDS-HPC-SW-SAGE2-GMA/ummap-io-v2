@@ -101,16 +101,21 @@ ssize_t write(int fd, const void *buf, size_t count)
 			res = libc_write(fd, buffer, count);
 		} while (res == -1 && errno == EAGAIN);
 
-		//recall
-		if (res > 0 && res < count) {
-			ssize_t res2 = write(fd, buffer + res, count - res);
-			assumeArg(res2 >= 0, "Invalid status %1").arg(res2).end();
-			res += res2;
-		}
-
 		//debug
 		UMMAP_DEBUG_ARG("rw-wrapper", "Capture write %1 => %2 < %3 => %4")
 			.arg(buf).arg(count).arg(fetch).arg(res).end();
+
+		//recall
+		if (res > 0 && res < count) {
+			//recall
+			ssize_t res2 = write(fd, buffer + res, count - res);
+			assumeArg(res2 >= 0, "Invalid status %1").arg(res2).end();
+			res += res2;
+
+			//debug
+			UMMAP_DEBUG_ARG("rw-wrapper", "Capture write recall %1 => %2 < %3 => %4")
+				.arg(buf).arg(count).arg(fetch).arg(res).end();
+		}
 	}
 	return res;
 }
@@ -151,7 +156,9 @@ ssize_t read(int fd, void *buf, size_t count)
 		ummap_touch(*mapping, buffer, fetch, true);
 
 		//call again read
-		res = libc_read(fd, buffer, count);
+		do {
+			res = libc_read(fd, buffer, count);
+		} while (res == -1 && errno == EAGAIN);
 
 		//debug
 		UMMAP_DEBUG_ARG("rw-wrapper", "Capture read %1 => %2 < %3 => %4")
@@ -202,7 +209,9 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
 
 		//call again read
 		size_t fetch_nmemb = fetch / size;
-		res = libc_fread(ptr, size, fetch_nmemb, stream);
+		do {
+			res = libc_fread(ptr, size, fetch_nmemb, stream);
+		} while (res == -1 && errno == EAGAIN);
 
 		//debug
 		UMMAP_DEBUG_ARG("rw-wrapper", "Capture fread %1 => %2 => %3")
@@ -211,7 +220,10 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
 		//recall
 		if (res > 0 && res < nmemb) {
 			//call again
-			ssize_t res2 = fread(buffer + res*size, size, nmemb - res, stream);
+			ssize_t res2;
+			do {
+				res = fread(buffer + res*size, size, nmemb - res, stream);
+			} while (res2 == -1 && errno == EAGAIN);
 			assumeArg(res2 >= 0, "Invalid status %1").arg(res2).end();
 			res += res2;
 
@@ -265,7 +277,9 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 
 		//call again read
 		size_t fetch_nmemb = fetch / size;
-		res = libc_fwrite(ptr, size, fetch_nmemb, stream);
+		do {
+			res = fwrite(buffer + res*size, size, nmemb - res, stream);
+		} while (res == -1 && errno == EAGAIN);
 
 		//debug
 		UMMAP_DEBUG_ARG("rw-wrapper", "Capture fwrite %1 => %2 => %3")
@@ -274,7 +288,10 @@ size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 		//recall
 		if (res > 0 && res < nmemb) {
 			//call again
-			ssize_t res2 = fwrite(buffer + res*size, size, nmemb - res, stream);
+			ssize_t res2;
+			do {
+				res2 = fwrite(buffer + res*size, size, nmemb - res, stream);
+			} while (res == -1 && errno == EAGAIN);
 			assumeArg(res2 >= 0, "Invalid status %1").arg(res2).end();
 			res += res2;
 
