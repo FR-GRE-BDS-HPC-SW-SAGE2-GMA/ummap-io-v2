@@ -96,6 +96,13 @@ target_link_libraries(ummap-io ${UMMAP_EXTERN_LIBS})
 install(TARGETS ummap-io DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 ######################################################
+add_library(ummap-io-rw-wrapper SHARED $<TARGET_OBJECTS:ummap-io-rw-wrapper-code>)
+set_target_properties(ummap-io-rw-wrapper PROPERTIES VERSION 0.0.0 SOVERSION 0)
+target_link_libraries(ummap-io-rw-wrapper ummap-io)
+target_link_libraries(ummap-io-rw-wrapper dl)
+install(TARGETS ummap-io-rw-wrapper DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+######################################################
 add_subdirectory(common)
 add_subdirectory(core)
 add_subdirectory(drivers)
