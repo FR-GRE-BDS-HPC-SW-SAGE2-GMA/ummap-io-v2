@@ -1,7 +1,7 @@
 Authors
 =======
 
- * Sébastien Valat (ATOS) -- Original author of the ummap-io-v2
+ * Sébastien Valat (Bull SAS) -- Original author of the ummap-io-v2
  * Sergio Rivas-Gomez (KTH) -- Original C based implementation (ummap-io)
 
 Original project
