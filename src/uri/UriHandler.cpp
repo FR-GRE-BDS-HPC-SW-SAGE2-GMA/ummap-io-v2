@@ -104,7 +104,7 @@ int UriHandler::applyCow(void * addr, const std::string & uri, bool allowExist)
 	if (type == "meroioc" || type == "clovisioc" || type == "ioc" || type == "iocfile" ) {
 		ObjectId id = getIocObjectId(parser);
 		return ummap_cow_ioc(addr, id.high, id.low, allowExist);
-	} else if (type == "mero" || type == "clovis" || type == "merofile" ) {
+	} else if (type == "mero" || type == "clovis" || type == "merofile" || type == "motr") {
 		ObjectId id = getIocObjectId(parser);
 		return ummap_cow_clovis(addr, id.high, id.low, allowExist);
 	} else if (type == "dummy") {
@@ -145,7 +145,7 @@ int UriHandler::applySwitch(void * addr, const std::string & uri, ummap_switch_c
 	if (type == "meroioc" || type == "clovisioc" || type == "ioc" || type == "iocfile" ) {
 		ObjectId id = getIocObjectId(parser);
 		return ummap_switch_ioc(addr, id.high, id.low, cleanAction);
-	} else if (type == "mero" || type == "clovis" || type == "merofile" ) {
+	} else if (type == "mero" || type == "clovis" || type == "merofile" || type == "motr") {
 		ObjectId id = getIocObjectId(parser);
 		return ummap_switch_clovis(addr, id.high, id.low, cleanAction);
 	} else if (type == "dummy") {
@@ -190,7 +190,7 @@ Driver * UriHandler::buildDriver(const std::string & uri)
 	} else if (type == "dummy") {
 		size_t value = atol(parser.getPath().c_str());
 		driver = new DummyDriver(value);
-	} else if (type == "mero" || type == "clovis" || type == "merofile" ) {
+	} else if (type == "mero" || type == "clovis" || type == "merofile" || type == "motr" ) {
 		driver = buildDriverMero(parser);
 	} else if (type == "meroioc" || type == "clovisioc" || type == "ioc" || type == "iocfile" ) {
 		driver = buildDriverIoc(parser);
@@ -341,7 +341,7 @@ Driver * UriHandler::buildDriverFOpenMmap(const std::string & fname, const std::
 Driver * UriHandler::buildDriverMero(const Uri & uri)
 {
 	//check
-	assert(uri.getType() == "mero" || uri.getType() == "clovis" || uri.getType() == "merofile");
+	assert(uri.getType() == "mero" || uri.getType() == "clovis" || uri.getType() == "merofile" || uri.getType() == "motr");
 
 	//id
 	ObjectId id;

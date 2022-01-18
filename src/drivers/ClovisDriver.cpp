@@ -166,8 +166,8 @@ ssize_t ClovisDriver::pwrite(const void * buffer, size_t size, size_t offset)
 	assert(buffer != NULL);
 
 	#if defined(HAVE_MOTR)
-		assume(size % 4096 == 0, "Motr driver work only with size multiple of the page size !");
-		assume(offset % 4096 == 0, "Motr driver work only with offset multiple of the page size !");
+		assumeArg(size % 4096 == 0, "Motr driver work only with size multiple of the page size, got %1 !").arg(size).end();
+		assumeArg(offset % 4096 == 0, "Motr driver work only with offset multiple of the page size, got %1 !").arg(offset).end();
 
 		//check mero block size
 		int pool = 0;

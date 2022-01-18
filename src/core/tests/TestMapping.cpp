@@ -435,3 +435,45 @@ TEST(TestMapping, copyToDriver_not_aligned)
 	//mapping.copyToDriver(&newDriver, 2*UMMAP_PAGE_SIZE-512 + size);
 	mapping.copyToDriver(&newDriver, 8*UMMAP_PAGE_SIZE);
 }
+
+TEST(TestMapping, getMaxMemory_no_policy)
+{
+	//setup
+	size_t size = 10*1024*1024;
+	DummyDriver * driver = new DummyDriver(32);
+	
+	//create
+	Mapping mapping(NULL, size, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, UMMAP_DEFAULT, driver, NULL, NULL);
+
+	//check
+	EXPECT_EQ(SIZE_MAX, mapping.getPolicyMaxMemory());
+}
+
+TEST(TestMapping, getMaxMemory_local_policy)
+{
+	//setup
+	size_t size = 10*1024*1024;
+	DummyDriver * driver = new DummyDriver(32);
+	FifoPolicy * localPolicy = new FifoPolicy(4*UMMAP_PAGE_SIZE, true);
+	
+	//create
+	Mapping mapping(NULL, size, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, UMMAP_DEFAULT, driver, localPolicy, NULL);
+
+	//check
+	EXPECT_EQ(4*UMMAP_PAGE_SIZE, mapping.getPolicyMaxMemory());
+}
+
+TEST(TestMapping, getMaxMemory_global_policy)
+{
+	//setup
+	size_t size = 10*1024*1024;
+	DummyDriver * driver = new DummyDriver(32);
+	FifoPolicy * localPolicy = new FifoPolicy(4*UMMAP_PAGE_SIZE, true);
+	FifoPolicy * globalPolicy = new FifoPolicy(2*UMMAP_PAGE_SIZE, false);
+	
+	//create
+	Mapping mapping(NULL, size, UMMAP_PAGE_SIZE, 0, PROT_READ|PROT_WRITE, UMMAP_DEFAULT, driver, localPolicy, globalPolicy);
+
+	//check
+	EXPECT_EQ(2*UMMAP_PAGE_SIZE, mapping.getPolicyMaxMemory());
+}
