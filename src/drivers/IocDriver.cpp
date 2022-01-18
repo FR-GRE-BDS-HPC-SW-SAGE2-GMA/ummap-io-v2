@@ -82,6 +82,9 @@ int IocDriver::cow(int64_t high, int64_t low, bool allowExist, size_t offset, si
 	//trivial
 	if (this->high == high && this->low == low)
 		return 0;
+
+	//create object
+	ioc_client_obj_create(this->client, high, low);
 	
 	//aooly cow
 	int status = ioc_client_obj_cow(this->client, this->high, this->low, high, low, allowExist, offset, size);
@@ -107,7 +110,7 @@ int IocDriver::cow(int64_t high, int64_t low, bool allowExist, size_t offset, si
 **/
 void IocDriver::switchDestination(int64_t high, int64_t low)
 {
-	ioc_client_obj_create(this->client, this->high, this->low);
+	ioc_client_obj_create(this->client, high, low);
 	this->high = high;
 	this->low = low;
 }

@@ -394,7 +394,7 @@ int ummap_cow_clovis(void * addr, int64_t high, int64_t low, bool allow_exist)
 	#if defined(HAVE_MERO) || defined(HAVE_MOTR)
 		return getGlobalhandler()->applyCow<ClovisDriver>("Clovis", addr, [high, low, allow_exist](Mapping * mapping, ClovisDriver * driver){
 			//create new driver
-			ummap_driver_t * new_driver = ummap_driver_create_clovis(high, low, allow_exist);
+			ummap_driver_t * new_driver = ummap_driver_create_clovis(high, low, true);
 
 			//copy data
 			const size_t size = mapping->getStorageOffset() + mapping->getSize();
